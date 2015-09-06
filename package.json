@@ -1,0 +1,14 @@
+{
+  "name": "erfa",
+  "version": "0.0.1",
+  "description": "Emscripten port/wrapper of the erfa/sofa astronomical library",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "John Lennard <john@yakmoo.se> (https://yakmoose.nz)",
+  "devDependencies": {
+    "chai": "~3.2.0",
+    "mocha": "~2.3.0"
+  }
+}
