@@ -130,6 +130,42 @@ describe('Rotation and Time', function () {
         });
     });
 
+    describe("#eraGst94()", function (){
+        it("Should return a sideral time", function (){
+            //theta = eraGst94(2400000.5, 53736.0);
+            //vvd(theta, 1.754166136020645203, 1e-12, "eraGst94", "", status);
+            var gst94 = erfa.gst94(2400000.5, 53736.0, 2400000.5, 53736.0);
+            (gst94).should.be.closeTo(1.754166136020645203, 1e-12);
+        });
+    });
 
+    describe("#gst06a()", function (){
+        it("Should return a sideral time", function (){
+
+            //theta = eraGst06a(2400000.5, 53736.0, 2400000.5, 53736.0);
+            //vvd(theta, 1.754166137675019159, 1e-12, "eraGst06a", "", status);
+
+            var gst06a = erfa.gst06a(2400000.5, 53736.0, 2400000.5, 53736.0);
+            (gst06a).should.be.closeTo( 1.754166137675019159, 1e-12);
+        });
+    });
+
+    describe("#eqeq94()", function (){
+        it("Should return a sideral time", function (){
+            //eqeq = eraEqeq94(2400000.5, 41234.0);
+            //vvd(eqeq, 0.5357758254609256894e-4, 1e-17, "eraEqeq94", "", status);
+            var eqeq94 = erfa.eqeq94(2400000.5, 41234.0);
+            (eqeq94).should.be.closeTo(0.5357758254609256894e-4, 1e-17);
+        });
+    });
+
+    describe("#ee06a()", function (){
+        it("Should return an angle in radians for equation of equinoxes", function (){
+            //ee = eraEe06a(2400000.5, 53736.0);
+            //vvd(ee, -0.8834195072043790156e-5, 1e-15, "eraEe06a", "", status);
+            var ee06a = erfa.ee06a(2400000.5, 53736.0);
+            (ee06a).should.be.closeTo(-0.8834195072043790156e-5, 1e-15);
+        });
+    });
 
 });

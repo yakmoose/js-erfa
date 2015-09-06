@@ -93,7 +93,7 @@ describe('Angle Ops', function () {
     });
 
     describe("#d2tf()", function () {
-        it('Should return days decomposed into degrees, minutes, seconds etc', function () {
+        it('Should return days decomposed into hours, minutes, seconds etc', function () {
 
             //eraD2tf(4, -0.987654321, &s, ihmsf);
             //viv((int)s, '-', "eraD2tf", "s", status);
@@ -104,7 +104,7 @@ describe('Angle Ops', function () {
 
             var d2tf = erfa.d2tf(4, -0.987654321);
             (d2tf.sign).should.equal('-');
-            (d2tf.degrees).should.equal(23);
+            (d2tf.hours).should.equal(23);
             (d2tf.minutes).should.equal(42);
             (d2tf.seconds).should.equal(13);
             (d2tf.fraction).should.equal(3333);
@@ -113,5 +113,30 @@ describe('Angle Ops', function () {
     });
 
 
+    describe("#tf2d()", function () {
+        it('Should return an angle in radians', function () {
+
+            //j = eraTf2d(' ', 23, 55, 10.9, &d);
+            //vvd(d, 0.9966539351851851852, 1e-12, "eraTf2d", "d", status);
+            //viv(j, 0, "eraTf2d", "j", status);
+
+            var tf2d = erfa.tf2d(' ', 23, 55, 10.9);
+            (tf2d).should.be.closeTo(0.9966539351851851852, 1e-12);
+
+        });
+    });
+
+    describe("#tf2a()", function () {
+        it('Should return an angle in radians', function () {
+
+            //j = eraTf2a('+', 4, 58, 20.2, &a);
+            //vvd(a, 1.301739278189537429, 1e-12, "eraTf2a", "a", status);
+            //viv(j, 0, "eraTf2a", "j", status);
+
+            var tf2a = erfa.tf2a('+', 4, 58, 20.2);
+            (tf2a).should.be.closeTo(1.301739278189537429, 1e-12);
+
+        });
+    });
 
 });
