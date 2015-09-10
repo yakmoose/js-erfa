@@ -100,6 +100,17 @@
 
     module.exports = {
 
+        // Astronomy/Calendars
+        /** int eraCal2jd(int iy, int im, int id, double *djm0, double *djm); */
+        /** double eraEpb(double dj1, double dj2); */
+        /** void eraEpb2jd(double epb, double *djm0, double *djm); */
+        /** double eraEpj(double dj1, double dj2); */
+        /** void eraEpj2jd(double epj, double *djm0, double *djm); */
+        /** int eraJd2cal(double dj1, double dj2, */
+        /** int *iy, int *im, int *id, double *fd); */
+        /** int eraJdcalf(int ndp, double dj1, double dj2, int iymdf[4]); */
+
+
         //Angle ops
         /** void eraA2af(int ndp, double angle, char *sign, int idmsf[4]); */
         a2af: function (ndp, angle) {
@@ -132,6 +143,7 @@
         tf2d: function (s, ihour, imin, sec) {
             return dmsToAngle('_eraTf2d', s, ihour, imin, sec);
         },
+
 
 
 
