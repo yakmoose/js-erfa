@@ -1,14 +1,3 @@
-/* VectorMatrix/AngleOps */
-/*void eraA2af(int ndp, double angle, char *sign, int idmsf[4]);
-void eraA2tf(int ndp, double angle, char *sign, int ihmsf[4]);
-int eraAf2a(char s, int ideg, int iamin, double asec, double *rad);
-double eraAnp(double a);
-double eraAnpm(double a);
-void eraD2tf(int ndp, double days, char *sign, int ihmsf[4]);
-int eraTf2a(char s, int ihour, int imin, double sec, double *rad);
-int eraTf2d(char s, int ihour, int imin, double sec, double *days);
-*/
-
 "use strict";
 
 var chai = require('chai'),
