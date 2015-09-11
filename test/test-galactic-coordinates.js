@@ -6,7 +6,6 @@ var chai = require('chai'),
 
 describe('Galactic Coordinates', function () {
 
-    //eraG2icrs
     describe("#g2icrs()", function () {
         it('Should return ICRS from Galactic coordinates', function () {
             //dl =  5.5850536063818546461558105;
@@ -22,7 +21,6 @@ describe('Galactic Coordinates', function () {
         });
     });
 
-    //eraIcrs2g
     describe("#icrs2g()", function () {
         it('Should Galactic coordinates from ICRS', function () {
             //dr =  5.9338074302227188048671087;

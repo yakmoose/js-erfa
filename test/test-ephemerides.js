@@ -31,21 +31,21 @@ describe('Ephemerides', function () {
 
             var epv00 = erfa.epv00(2400000.5, 53411.52501161);
 
-            (epv00.phx).should.be.closeTo(-0.7757238809297706813, 1e-14);
-            (epv00.phy).should.be.closeTo(0.5598052241363340596, 1e-14);
-            (epv00.phz).should.be.closeTo(0.2426998466481686993, 1e-14);
+            (epv00.pvh[0][0]).should.be.closeTo(-0.7757238809297706813, 1e-14);
+            (epv00.pvh[0][1]).should.be.closeTo(0.5598052241363340596, 1e-14);
+            (epv00.pvh[0][2]).should.be.closeTo(0.2426998466481686993, 1e-14);
 
-            (epv00.vhx).should.be.closeTo(-0.1091891824147313846e-1, 1e-15);
-            (epv00.vhy).should.be.closeTo(-0.1247187268440845008e-1, 1e-15);
-            (epv00.vhz).should.be.closeTo(-0.5407569418065039061e-2, 1e-15);
+            (epv00.pvh[1][0]).should.be.closeTo(-0.1091891824147313846e-1, 1e-15);
+            (epv00.pvh[1][1]).should.be.closeTo(-0.1247187268440845008e-1, 1e-15);
+            (epv00.pvh[1][2]).should.be.closeTo(-0.5407569418065039061e-2, 1e-15);
 
-            (epv00.pbx).should.be.closeTo(-0.7714104440491111971, 1e-14);
-            (epv00.pby).should.be.closeTo(0.5598412061824171323, 1e-14);
-            (epv00.pbz).should.be.closeTo(0.2425996277722452400, 1e-14);
+            (epv00.pvb[0][0]).should.be.closeTo(-0.7714104440491111971, 1e-14);
+            (epv00.pvb[0][1]).should.be.closeTo(0.5598412061824171323, 1e-14);
+            (epv00.pvb[0][2]).should.be.closeTo(0.2425996277722452400, 1e-14);
 
-            (epv00.vbx).should.be.closeTo(-0.1091874268116823295e-1, 1e-15);
-            (epv00.vby).should.be.closeTo(-0.1246525461732861538e-1, 1e-15);
-            (epv00.vbz).should.be.closeTo(-0.5404773180966231279e-2, 1e-15);
+            (epv00.pvb[1][0]).should.be.closeTo(-0.1091874268116823295e-1, 1e-15);
+            (epv00.pvb[1][1]).should.be.closeTo(-0.1246525461732861538e-1, 1e-15);
+            (epv00.pvb[1][2]).should.be.closeTo(-0.5404773180966231279e-2, 1e-15);
 
             (epv00.status).should.equal(0);
 

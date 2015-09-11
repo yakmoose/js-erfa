@@ -9,12 +9,11 @@
             var signBuffer = Module._malloc(1 * Uint8Array.BYTES_PER_ELEMENT),// one byte for the sign char
                 idmsBuffer = Module._malloc(4 * Int32Array.BYTES_PER_ELEMENT),
                 ofs = idmsBuffer>> 2,
-                ret;
-
-            Module[fn](ndp, angle, signBuffer, idmsBuffer);
+                status = Module[fn](ndp, angle, signBuffer, idmsBuffer),
 
             //we want to return a sensible structure not just a chunk of memory
             ret =  {
+                status: status,
                 sign: String.fromCharCode( Module.HEAP8[signBuffer]),
                 degrees: Module.HEAP32[ ofs + 0 ],
                 minutes: Module.HEAP32[ ofs + 1 ],
@@ -209,27 +208,38 @@
         /** int eraEpv00(double date1, double date2, double pvh[2][3], double pvb[2][3]); */
         epv00: function(date1, date2) {
 
-            var pvhBuffer = Module._malloc( 6 * Float64Array.BYTES_PER_ELEMENT),
-                pvbBuffer = Module._malloc( 6 * Float64Array.BYTES_PER_ELEMENT);
+            var pvhBuffer = Module._malloc( 2 * 3 * Float64Array.BYTES_PER_ELEMENT),
+                pvbBuffer = Module._malloc( 2 * 3 * Float64Array.BYTES_PER_ELEMENT);
 
             var status = Module._eraEpv00(date1, date2, pvhBuffer, pvbBuffer),
                 ret = {
                     status: status,
-                    phx: Module.HEAPF64[(pvhBuffer>>3) +0],
-                    phy: Module.HEAPF64[(pvhBuffer>>3) +1],
-                    phz: Module.HEAPF64[(pvhBuffer>>3) +2],
+                    //we leave these as arrays, as that is how the comeout/go in
+                    pvh: [
+                        [
+                            Module.HEAPF64[(pvhBuffer>>3) +0],
+                            Module.HEAPF64[(pvhBuffer>>3) +1],
+                            Module.HEAPF64[(pvhBuffer>>3) +2]
+                        ],
+                        [
+                            Module.HEAPF64[(pvhBuffer>>3) +3],
+                            Module.HEAPF64[(pvhBuffer>>3) +4],
+                            Module.HEAPF64[(pvhBuffer>>3) +5]
+                        ]
+                    ],
+                    pvb: [
+                        [
+                            Module.HEAPF64[(pvbBuffer>>3) +0],
+                            Module.HEAPF64[(pvbBuffer>>3) +1],
+                            Module.HEAPF64[(pvbBuffer>>3) +2]
+                        ],
+                        [
+                            Module.HEAPF64[(pvbBuffer>>3) +3],
+                            Module.HEAPF64[(pvbBuffer>>3) +4],
+                            Module.HEAPF64[(pvbBuffer>>3) +5]
+                        ]
+                    ]
 
-                    vhx: Module.HEAPF64[(pvhBuffer>>3) +3],
-                    vhy: Module.HEAPF64[(pvhBuffer>>3) +4],
-                    vhz: Module.HEAPF64[(pvhBuffer>>3) +5],
-
-                    pbx: Module.HEAPF64[(pvbBuffer>>3) +0],
-                    pby: Module.HEAPF64[(pvbBuffer>>3) +1],
-                    pbz: Module.HEAPF64[(pvbBuffer>>3) +2],
-
-                    vbx: Module.HEAPF64[(pvbBuffer>>3) +3],
-                    vby: Module.HEAPF64[(pvbBuffer>>3) +4],
-                    vbz: Module.HEAPF64[(pvbBuffer>>3) +5]
                 };
 
             Module._free(pvhBuffer);
@@ -239,7 +249,7 @@
         },
         /** int eraPlan94(double date1, double date2, int np, double pv[2][3]); */
         plan94: function(date1, date2, np) {
-            var pvBuffer = Module._malloc( 6 * Float64Array.BYTES_PER_ELEMENT);
+            var pvBuffer = Module._malloc( 2  * 3 * Float64Array.BYTES_PER_ELEMENT);
             var status = Module._eraPlan94(date1, date2, np, pvBuffer),
                 ret = {
                     status: status,
@@ -335,6 +345,69 @@
         gst94: Module.cwrap('eraGst94', 'number', ['number', 'number']),
 
         //SpaceMotion
+        /** int eraPvstar(double pv[2][3], double *ra, double *dec, double *pmr, double *pmd, double *px, double *rv); */
+        pvstar: function (pv) {
+            var data = SH.flattenVector(pv),
+                pvBuffer = Module._malloc( data.length * Float64Array.BYTES_PER_ELEMENT),
+                raBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                decBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                pmrBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                pmdBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                pxBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                rvBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(pvBuffer, data);
+
+            var status = Module._eraPvstar(pvBuffer, raBuffer, decBuffer, pmrBuffer, pmdBuffer, pxBuffer, rvBuffer),
+                ret = {
+                    status: status,
+                    ra: Module.HEAPF64[raBuffer >> 3],
+                    dec: Module.HEAPF64[decBuffer >> 3],
+                    pmr: Module.HEAPF64[pmrBuffer >> 3],
+                    pmd: Module.HEAPF64[pmdBuffer >> 3],
+                    px: Module.HEAPF64[pxBuffer >> 3],
+                    rv: Module.HEAPF64[rvBuffer >> 3]
+                };
+
+
+            Module._free(pvBuffer);
+            Module._free(raBuffer);
+            Module._free(decBuffer);
+            Module._free(pmrBuffer);
+            Module._free(pmdBuffer);
+            Module._free(pxBuffer);
+            Module._free(rvBuffer);
+
+            return ret;
+        },
+        /** int eraStarpv(double ra, double dec, double pmr, double pmd, double px, double rv, double pv[2][3]); */
+        starpv: function(ra, dec, pmr, pmd, px, rv) {
+
+            var pvBuffer = Module._malloc(2 * 3 * Float64Array.BYTES_PER_ELEMENT ),
+                status = Module._eraStarpv(ra, dec, pmr, pmd, px, rv, pvBuffer),
+                ret = {
+                    status: status,
+
+                    //going to put this back into an array, as that is how these functions roll.
+                    pv: [
+                        [
+                            Module.HEAPF64[(pvBuffer >> 3)],
+                            Module.HEAPF64[(pvBuffer >> 3) + 1],
+                            Module.HEAPF64[(pvBuffer >> 3) + 2]
+                        ],
+                        [
+                            Module.HEAPF64[(pvBuffer >> 3) + 3],
+                            Module.HEAPF64[(pvBuffer >> 3) + 4],
+                            Module.HEAPF64[(pvBuffer >> 3) + 5]
+                        ]
+                    ]
+                };
+
+            Module._free(pvBuffer);
+
+            return ret;
+        },
+
         //StarCatalogs
 
         //GalacticCoordinates
