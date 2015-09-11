@@ -204,6 +204,7 @@
         },
 
         //astrometry
+
         //ephemerides
         /** int eraEpv00(double date1, double date2, double pvh[2][3], double pvb[2][3]); */
         epv00: function(date1, date2) {
@@ -335,6 +336,7 @@
 
         //SpaceMotion
         //StarCatalogs
+
         //GalacticCoordinates
         /** void eraG2icrs ( double dl, double db, double *dr, double *dd ); */
         g2icrs: function (dl, db) {
@@ -372,6 +374,7 @@
 
             return ret;
         },
+
         //GeodeticGeocentric
 
         //Timescales
