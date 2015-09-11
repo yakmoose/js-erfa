@@ -203,44 +203,90 @@
             return ret;
         },
 
-        //Angle ops
-        /** void eraA2af(int ndp, double angle, char *sign, int idmsf[4]); */
-        a2af: function (ndp, angle) {
-            return angleToDMSF('_eraA2af', ndp, angle);
+        //astrometry
+        //ephemerides
+        /** int eraEpv00(double date1, double date2, double pvh[2][3], double pvb[2][3]); */
+        epv00: function(date1, date2) {
+
+            var pvhBuffer = Module._malloc( 6 * Float64Array.BYTES_PER_ELEMENT),
+                pvbBuffer = Module._malloc( 6 * Float64Array.BYTES_PER_ELEMENT);
+
+            var status = Module._eraEpv00(date1, date2, pvhBuffer, pvbBuffer),
+                ret = {
+                    status: status,
+                    phx: Module.HEAPF64[(pvhBuffer>>3) +0],
+                    phy: Module.HEAPF64[(pvhBuffer>>3) +1],
+                    phz: Module.HEAPF64[(pvhBuffer>>3) +2],
+
+                    vhx: Module.HEAPF64[(pvhBuffer>>3) +3],
+                    vhy: Module.HEAPF64[(pvhBuffer>>3) +4],
+                    vhz: Module.HEAPF64[(pvhBuffer>>3) +5],
+
+                    pbx: Module.HEAPF64[(pvbBuffer>>3) +0],
+                    pby: Module.HEAPF64[(pvbBuffer>>3) +1],
+                    pbz: Module.HEAPF64[(pvbBuffer>>3) +2],
+
+                    vbx: Module.HEAPF64[(pvbBuffer>>3) +3],
+                    vby: Module.HEAPF64[(pvbBuffer>>3) +4],
+                    vbz: Module.HEAPF64[(pvbBuffer>>3) +5]
+                };
+
+            Module._free(pvhBuffer);
+            Module._free(pvbBuffer);
+
+            return ret;
         },
-        /** void eraA2tf(int ndp, double angle, char *sign, int ihmsf[4]); */
-        a2tf: function (ndp, angle) {
-            return angleToDMSF('_eraA2tf', ndp, angle);
-        },
-        /** int eraAf2a(char s, int ideg, int iamin, double asec, double *rad); */
-        af2a : function (s, ideg, iamin, iasec) {
-            return dmsToAngle('_eraAf2a', s,ideg, iamin, iasec);
-        },
-        /** double eraAnp(double a); */
-        anp: Module.cwrap('eraAnp','number',['number']),
-        /** double eraAnpm(double a); */
-        anpm: Module.cwrap('eraAnpm','number',['number']),
-        /** void eraD2tf(int ndp, double days, char *sign, int ihmsf[4]); */
-        d2tf: function (ndp, days) {
-            var r = angleToDMSF('_eraD2tf', ndp, days);
-            r.hours = r.degrees;
-            delete r.degrees;
-            return r;
-        },
-        /** int eraTf2a(char s, int ihour, int imin, double sec, double *rad); */
-        tf2a: function (s, ihour, imin, sec) {
-            return dmsToAngle('_eraTf2a', s, ihour, imin, sec);
-        },
-        /** int eraTf2d(char s, int ihour, int imin, double sec, double *days); */
-        tf2d: function (s, ihour, imin, sec) {
-            return dmsToAngle('_eraTf2d', s, ihour, imin, sec);
+        /** int eraPlan94(double date1, double date2, int np, double pv[2][3]); */
+        plan94: function(date1, date2, np) {
+            var pvBuffer = Module._malloc( 6 * Float64Array.BYTES_PER_ELEMENT);
+            var status = Module._eraPlan94(date1, date2, np, pvBuffer),
+                ret = {
+                    status: status,
+                    x: Module.HEAPF64[(pvBuffer>>3) +0],
+                    y: Module.HEAPF64[(pvBuffer>>3) +1],
+                    z: Module.HEAPF64[(pvBuffer>>3) +2],
+
+                    vx: Module.HEAPF64[(pvBuffer>>3) +3],
+                    vy: Module.HEAPF64[(pvBuffer>>3) +4],
+                    vz: Module.HEAPF64[(pvBuffer>>3) +5]
+                };
+
+            Module._free(pvBuffer);
+
+            return ret;
         },
 
+        //Fundamental arguments
+        /** double eraFal03(double t); */
+        fal03: Module.cwrap('eraFal03', 'number', ['number']),
+        /** double eraFalp03(double t); */
+        falp03: Module.cwrap('eraFalp03', 'number', ['number']),
+        /** double eraFaf03(double t); */
+        faf03: Module.cwrap('eraFaf03', 'number', ['number']),
+        /** double eraFad03(double t); */
+        fad03: Module.cwrap('eraFad03', 'number', ['number']),
+        /** double eraFaom03(double t); */
+        faom03: Module.cwrap('eraFaom03', 'number', ['number']),
+        /** double eraFave03(double t); */
+        fave03: Module.cwrap('eraFave03', 'number', ['number']),
+        /** double eraFae03(double t); */
+        fae03: Module.cwrap('eraFae03', 'number', ['number']),
+        /** double eraFapa03(double t); */
+        fapa03: Module.cwrap('eraFapa03', 'number', ['number']),
+        /** double eraFame03(double t); */
+        fame03: Module.cwrap('eraFame03', 'number', ['number']),
+        /** double eraFama03(double t); */
+        fama03: Module.cwrap('eraFama03', 'number', ['number']),
+        /** double eraFaju03(double t); */
+        faju03: Module.cwrap('eraFaju03', 'number', ['number']),
+        /** double eraFasa03(double t); */
+        fasa03: Module.cwrap('eraFasa03', 'number', ['number']),
+        /** double eraFaur03(double t); */
+        faur03: Module.cwrap('eraFaur03', 'number', ['number']),
+        /** double eraFane03(double t); */
+        fane03: Module.cwrap('eraFane03', 'number', ['number']),
 
-
-
-
-
+        //PrecNutPolar
 
         //Rotation and Time
         /** double eraEra00(double dj1, double dj2); */
@@ -287,48 +333,13 @@
         /** double eraGst94(double uta, double utb); */
         gst94: Module.cwrap('eraGst94', 'number', ['number', 'number']),
 
+        //SpaceMotion
+        //StarCatalogs
+        //GalacticCoordinates
+        /** void eraG2icrs ( double dl, double db, double *dr, double *dd ); */
+        /** void eraIcrs2g ( double dr, double dd, double *dl, double *db ); */
 
-
-
-
-
-        //Fundamental arguments
-        /** double eraFal03(double t); */
-        fal03: Module.cwrap('eraFal03', 'number', ['number']),
-        /** double eraFalp03(double t); */
-        falp03: Module.cwrap('eraFalp03', 'number', ['number']),
-        /** double eraFaf03(double t); */
-        faf03: Module.cwrap('eraFaf03', 'number', ['number']),
-        /** double eraFad03(double t); */
-        fad03: Module.cwrap('eraFad03', 'number', ['number']),
-        /** double eraFaom03(double t); */
-        faom03: Module.cwrap('eraFaom03', 'number', ['number']),
-        /** double eraFave03(double t); */
-        fave03: Module.cwrap('eraFave03', 'number', ['number']),
-        /** double eraFae03(double t); */
-        fae03: Module.cwrap('eraFae03', 'number', ['number']),
-        /** double eraFapa03(double t); */
-        fapa03: Module.cwrap('eraFapa03', 'number', ['number']),
-        /** double eraFame03(double t); */
-        fame03: Module.cwrap('eraFame03', 'number', ['number']),
-        /** double eraFama03(double t); */
-        fama03: Module.cwrap('eraFama03', 'number', ['number']),
-        /** double eraFaju03(double t); */
-        faju03: Module.cwrap('eraFaju03', 'number', ['number']),
-        /** double eraFasa03(double t); */
-        fasa03: Module.cwrap('eraFasa03', 'number', ['number']),
-        /** double eraFaur03(double t); */
-        faur03: Module.cwrap('eraFaur03', 'number', ['number']),
-        /** double eraFane03(double t); */
-        fane03: Module.cwrap('eraFane03', 'number', ['number']),
-
-
-
-
-
-
-
-
+    //GeodeticGeocentric
 
         //Timescales
         /** int eraD2dtf(const char *scale, int ndp, double d1, double d2, int *iy, int *im, int *id, int ihmsf[4]); */
@@ -472,11 +483,50 @@
         /** int eraUtcut1(double utc1, double utc2, double dut1, double *ut11, double *ut12); */
         utcut1 : function (utc1, utc2, dut1) {
             return timeScaleConvertWithFactor(utc1, utc2, dut1,'_eraUtcut1','ut1');
+        },
+
+        //Angle ops
+        /** void eraA2af(int ndp, double angle, char *sign, int idmsf[4]); */
+        a2af: function (ndp, angle) {
+            return angleToDMSF('_eraA2af', ndp, angle);
+        },
+        /** void eraA2tf(int ndp, double angle, char *sign, int ihmsf[4]); */
+        a2tf: function (ndp, angle) {
+            return angleToDMSF('_eraA2tf', ndp, angle);
+        },
+        /** int eraAf2a(char s, int ideg, int iamin, double asec, double *rad); */
+        af2a : function (s, ideg, iamin, iasec) {
+            return dmsToAngle('_eraAf2a', s,ideg, iamin, iasec);
+        },
+        /** double eraAnp(double a); */
+        anp: Module.cwrap('eraAnp','number',['number']),
+        /** double eraAnpm(double a); */
+        anpm: Module.cwrap('eraAnpm','number',['number']),
+        /** void eraD2tf(int ndp, double days, char *sign, int ihmsf[4]); */
+        d2tf: function (ndp, days) {
+            var r = angleToDMSF('_eraD2tf', ndp, days);
+            r.hours = r.degrees;
+            delete r.degrees;
+            return r;
+        },
+        /** int eraTf2a(char s, int ihour, int imin, double sec, double *rad); */
+        tf2a: function (s, ihour, imin, sec) {
+            return dmsToAngle('_eraTf2a', s, ihour, imin, sec);
+        },
+        /** int eraTf2d(char s, int ihour, int imin, double sec, double *days); */
+        tf2d: function (s, ihour, imin, sec) {
+            return dmsToAngle('_eraTf2d', s, ihour, imin, sec);
         }
 
-
-
-
+        //BuildRotations
+        //CopyExtendExtract
+        //Initialization
+        //MatrixOps
+        //MatrixVectorProducts
+        //RotationVectors
+        //SeparationAndAngle
+        //SphericalCartesian
+        //VectorOps
 
     };
 
