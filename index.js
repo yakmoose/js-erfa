@@ -102,14 +102,106 @@
 
         // Astronomy/Calendars
         /** int eraCal2jd(int iy, int im, int id, double *djm0, double *djm); */
-        /** double eraEpb(double dj1, double dj2); */
-        /** void eraEpb2jd(double epb, double *djm0, double *djm); */
-        /** double eraEpj(double dj1, double dj2); */
-        /** void eraEpj2jd(double epj, double *djm0, double *djm); */
-        /** int eraJd2cal(double dj1, double dj2, */
-        /** int *iy, int *im, int *id, double *fd); */
-        /** int eraJdcalf(int ndp, double dj1, double dj2, int iymdf[4]); */
+        cal2jd: function(iy, im, id) {
 
+            var djm0Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                djmBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+            var status = Module._eraCal2jd(iy, im, id, djm0Buffer, djmBuffer),
+                ret = {
+                    status: status,
+                    djm0: Module.HEAPF64[ djm0Buffer >> 3],
+                    djm: Module.HEAPF64[ djmBuffer >> 3]
+                };
+
+
+            Module._free(djm0Buffer);
+            Module._free(djmBuffer);
+
+            return ret;
+        },
+        /** double eraEpb(double dj1, double dj2); */
+        epb: Module.cwrap('eraEpb','number',['number','number']),
+        /** void eraEpb2jd(double epb, double *djm0, double *djm); */
+        epb2jd: function (epb){
+            var djm0Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                djmBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+            var status = Module._eraEpb2jd(epb, djm0Buffer, djmBuffer),
+                ret = {
+                    status: status,
+                    djm0: Module.HEAPF64[ djm0Buffer >> 3],
+                    djm: Module.HEAPF64[ djmBuffer >> 3]
+                };
+
+
+            Module._free(djm0Buffer);
+            Module._free(djmBuffer);
+
+            return ret;
+        },
+        /** double eraEpj(double dj1, double dj2); */
+        epj: Module.cwrap('eraEpj', 'number', ['number','number']),
+        /** void eraEpj2jd(double epj, double *djm0, double *djm); */
+        epj2jd: function (epj) {
+            var djm0Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                djmBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+            var status = Module._eraEpj2jd(epj, djm0Buffer, djmBuffer),
+                ret = {
+                    status: status,
+                    djm0: Module.HEAPF64[ djm0Buffer >> 3],
+                    djm: Module.HEAPF64[ djmBuffer >> 3]
+                };
+
+
+            Module._free(djm0Buffer);
+            Module._free(djmBuffer);
+
+            return ret;
+        },
+        /** int eraJd2cal(double dj1, double dj2, int *iy, int *im, int *id, double *fd); */
+        jd2cal: function (dj1, dj2) {
+            var iyBuffer = Module._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
+                imBuffer = Module._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
+                idBuffer = Module._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
+                fBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+            //we use ccall here so we don't need to mess about with string pointers etc..
+            var status = Module._eraJd2cal(dj1, dj2, iyBuffer, imBuffer, idBuffer, fBuffer),
+                ret = {
+                    year: Module.HEAP32[iyBuffer>>2],
+                    month: Module.HEAP32[imBuffer>>2],
+                    day: Module.HEAP32[idBuffer>>2],
+                    fraction: Module.HEAPF64[fBuffer>>3],
+                    status: status
+                };
+
+            Module._free(iyBuffer);
+            Module._free(imBuffer);
+            Module._free(idBuffer);
+            Module._free(fBuffer);
+
+            return ret;
+        },
+        /** int eraJdcalf(int ndp, double dj1, double dj2, int iymdf[4]); */
+        jdcalf: function (ndp, dj1, dj2) {
+            var iymdfBuffer = Module._malloc(4 * Float64Array.BYTES_PER_ELEMENT);
+
+            //we use ccall here so we don't need to mess about with string pointers etc..
+            var status = Module._eraJdcalf(ndp, dj1, dj2, iymdfBuffer),
+                ret = {
+                    year: Module.HEAP32[(iymdfBuffer>>2) +0],
+                    month: Module.HEAP32[(iymdfBuffer>>2) +1],
+                    day: Module.HEAP32[(iymdfBuffer>>2) +2],
+                    fraction: Module.HEAP32[(iymdfBuffer>>2) +3],
+                    status: status
+                };
+
+            Module._free(iymdfBuffer);
+
+            return ret;
+        },
 
         //Angle ops
         /** void eraA2af(int ndp, double angle, char *sign, int idmsf[4]); */
