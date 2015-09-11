@@ -7,7 +7,7 @@ var chai = require('chai'),
 describe('Ephemerides', function () {
 
     describe("#epv00()", function () {
-        it('Should return **  Earth position and velocity, heliocentric and barycentric, with ' +
+        it('Should return Earth position and velocity, heliocentric and barycentric, with ' +
             'respect to the Barycentric Celestial Reference System', function () {
 
             //j = eraEpv00(2400000.5, 53411.52501161, pvh, pvb);

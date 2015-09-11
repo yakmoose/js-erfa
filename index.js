@@ -337,9 +337,42 @@
         //StarCatalogs
         //GalacticCoordinates
         /** void eraG2icrs ( double dl, double db, double *dr, double *dd ); */
-        /** void eraIcrs2g ( double dr, double dd, double *dl, double *db ); */
+        g2icrs: function (dl, db) {
+            var drBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                ddBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-    //GeodeticGeocentric
+            var status = Module._eraG2icrs(dl , db, drBuffer, ddBuffer),
+                ret = {
+                    status: status,
+                    dr: Module.HEAPF64[ drBuffer >> 3],
+                    dd: Module.HEAPF64[ ddBuffer >> 3]
+                };
+
+
+            Module._free(drBuffer);
+            Module._free(ddBuffer);
+
+            return ret;
+        },
+        /** void eraIcrs2g ( double dr, double dd, double *dl, double *db ); */
+        icrs2g: function (dr, dd) {
+            var dlBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dbBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+            var status = Module._eraIcrs2g(dr , dd, dlBuffer, dbBuffer),
+                ret = {
+                    status: status,
+                    dl: Module.HEAPF64[ dlBuffer >> 3],
+                    db: Module.HEAPF64[ dbBuffer >> 3]
+                };
+
+
+            Module._free(dlBuffer);
+            Module._free(dbBuffer);
+
+            return ret;
+        },
+        //GeodeticGeocentric
 
         //Timescales
         /** int eraD2dtf(const char *scale, int ndp, double d1, double d2, int *iy, int *im, int *id, int ihmsf[4]); */
