@@ -409,6 +409,30 @@
         },
 
         //StarCatalogs
+        /** void eraFk52h(double r5, double d5, double dr5, double dd5, double px5, double rv5, double *rh, double *dh, double *drh, double *ddh, double *pxh, double *rvh); */
+        fk52h: function (r5, d5, dr5, dd5, px5, rv5) {
+
+        },
+        /** void eraFk5hip(double r5h[3][3], double s5h[3]); */
+        fk5hip: function (r5h) {
+
+        },
+        /** void eraFk5hz(double r5, double d5, double date1, double date2, double *rh, double *dh); */
+        fk5hz: function (r5, d5, date1, date2) {
+
+        },
+        /** void eraH2fk5(double rh, double dh, double drh, double ddh, double pxh, double rvh, double *r5, double *d5, double *dr5, double *dd5, double *px5, double *rv5); */
+        h2fk5: function (rh, dh, drh, ddh, pxh, rvh) {
+
+        },
+        /** void eraHfk5z(double rh, double dh, double date1, double date2, double *r5, double *d5, double *dr5, double *dd5); */
+        hfk5z: function (rh, dh, date1, date2){
+
+        },
+        /** int eraStarpm(double ra1, double dec1, double pmr1, double pmd1, double px1, double rv1, double ep1a, double ep1b, double ep2a, double ep2b, double *ra2, double *dec2, double *pmr2, double *pmd2, double *px2, double *rv2); */
+        starpm: function(ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b) {
+
+        },
 
         //GalacticCoordinates
         /** void eraG2icrs ( double dl, double db, double *dr, double *dd ); */
