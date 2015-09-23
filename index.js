@@ -602,6 +602,61 @@
         },
 
         //GeodeticGeocentric
+        /** int eraEform(int n, double *a, double *f); */
+        eform: function (n) {
+            var aBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                fBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+            var status = Module._eraEform(n, aBuffer, fBuffer),
+                ret = {
+                    status: status,
+                    a: Module.HEAPF64[ aBuffer >> 3],
+                    f: Module.HEAPF64[ fBuffer >> 3]
+                };
+
+            Module._free(aBuffer);
+            Module._free(fBuffer);
+
+            return ret;
+        },
+        /** int eraGc2gd(int n, double xyz[3], double *elong, double *phi, double *height); */
+        gc2gd: function (n, xyz) {
+
+            var eBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                hBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                xyzBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(xyzBuffer, xyz);
+
+            var status = Module._eraGc2gd(n, xyzBuffer, eBuffer, pBuffer, hBuffer),
+                ret = {
+                    status: status,
+                    e: Module.HEAPF64[ eBuffer >> 3],
+                    p: Module.HEAPF64[ pBuffer >> 3],
+                    h: Module.HEAPF64[ hBuffer >> 3]
+                };
+
+            Module._free(eBuffer);
+            Module._free(pBuffer);
+            Module._free(hBuffer);
+            Module._free(xyzBuffer);
+
+            return ret;
+        },
+        /** int eraGc2gde(double a, double f, double xyz[3], double *elong, double *phi, double *height); */
+        gc2gde: function (a, f, xyz) {
+
+        },
+        /** int eraGd2gc(int n, double elong, double phi, double height, double xyz[3]); */
+        gd2gc: function (n, elong, phi, height) {
+
+        },
+        /** int eraGd2gce(double a, double f, double elong, double phi, double height, double xyz[3]); */
+        gd2gce: function (a, f, elong, phi, height) {
+
+        },
+
 
         //Timescales
         /** int eraD2dtf(const char *scale, int ndp, double d1, double d2, int *iy, int *im, int *id, int ihmsf[4]); */
@@ -791,5 +846,8 @@
         //VectorOps
 
     };
+
+
+
 
 })();
