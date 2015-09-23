@@ -411,27 +411,156 @@
         //StarCatalogs
         /** void eraFk52h(double r5, double d5, double dr5, double dd5, double px5, double rv5, double *rh, double *dh, double *drh, double *ddh, double *pxh, double *rvh); */
         fk52h: function (r5, d5, dr5, dd5, px5, rv5) {
+            var rhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                drhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                ddhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pxhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                rvhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+
+
+            Module._eraFk52h(r5, d5, dr5, dd5, px5, rv5, rhBuffer, dhBuffer, drhBuffer, ddhBuffer, pxhBuffer, rvhBuffer);
+
+            var ret = {
+                rh: Module.HEAPF64[ rhBuffer >> 3],
+                dh: Module.HEAPF64[ dhBuffer >> 3],
+                drh: Module.HEAPF64[ drhBuffer >> 3],
+                ddh: Module.HEAPF64[ ddhBuffer >> 3],
+                pxh: Module.HEAPF64[ pxhBuffer >> 3],
+                rvh: Module.HEAPF64[ rvhBuffer >> 3]
+            };
+
+            Module._free(rhBuffer);
+            Module._free(dhBuffer);
+            Module._free(drhBuffer);
+            Module._free(ddhBuffer);
+            Module._free(pxhBuffer);
+            Module._free(rvhBuffer);
+
+            return ret;
 
         },
         /** void eraFk5hip(double r5h[3][3], double s5h[3]); */
-        fk5hip: function (r5h) {
+        fk5hip: function () {
+            var r5hBuffer = Module._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT),
+                s5hBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
+            Module._eraFk5hip(r5hBuffer, s5hBuffer);
+
+            var r5h = Module.HEAPF64.subarray((r5hBuffer>>3),(r5hBuffer>>3) + 9),
+                s5h = Module.HEAPF64.subarray((s5hBuffer>>3),(s5hBuffer>>3) + 3),
+                ret = {
+                    r5h: Array.prototype.slice.call(r5h).chunk(3),
+                    s5h: Array.prototype.slice.call(s5h)
+                };
+
+            Module._free(r5hBuffer);
+            Module._free(s5hBuffer);
+
+            return ret;
         },
         /** void eraFk5hz(double r5, double d5, double date1, double date2, double *rh, double *dh); */
         fk5hz: function (r5, d5, date1, date2) {
+            var rhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
+            //we use ccall here so we don't need to mess about with string pointers etc..
+            var status = Module._eraFk5hz(r5, d5, date1, date2, rhBuffer, dhBuffer),
+                ret = {
+                    dh: Module.HEAPF64[dhBuffer>>3],
+                    rh: Module.HEAPF64[rhBuffer>>3]
+                };
+
+            Module._free(rhBuffer);
+            Module._free(dhBuffer);
+
+            return ret;
         },
         /** void eraH2fk5(double rh, double dh, double drh, double ddh, double pxh, double rvh, double *r5, double *d5, double *dr5, double *dd5, double *px5, double *rv5); */
         h2fk5: function (rh, dh, drh, ddh, pxh, rvh) {
+            var r5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                d5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dr5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dd5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                px5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                rv5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
+            Module._eraH2fk5(rh, dh, drh, ddh, pxh, rvh, r5Buffer, d5Buffer, dr5Buffer, dd5Buffer, px5Buffer, rv5Buffer);
+
+            var ret = {
+                r5: Module.HEAPF64[ r5Buffer >> 3],
+                d5: Module.HEAPF64[ d5Buffer >> 3],
+                dr5: Module.HEAPF64[ dr5Buffer >> 3],
+                dd5: Module.HEAPF64[ dd5Buffer >> 3],
+                px5: Module.HEAPF64[ px5Buffer >> 3],
+                rv5: Module.HEAPF64[ rv5Buffer >> 3]
+            };
+
+            Module._free(r5Buffer);
+            Module._free(d5Buffer);
+            Module._free(dr5Buffer);
+            Module._free(dd5Buffer);
+            Module._free(px5Buffer);
+            Module._free(rv5Buffer);
+
+            return ret;
         },
         /** void eraHfk5z(double rh, double dh, double date1, double date2, double *r5, double *d5, double *dr5, double *dd5); */
         hfk5z: function (rh, dh, date1, date2){
+
+            var r5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                d5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dr5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dd5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+            Module._eraHfk5z(rh, dh, date1, date2, r5Buffer, d5Buffer, dr5Buffer, dd5Buffer);
+
+            var ret = {
+                r5: Module.HEAPF64[ r5Buffer >> 3],
+                d5: Module.HEAPF64[ d5Buffer >> 3],
+                dr5: Module.HEAPF64[ dr5Buffer >> 3],
+                dd5: Module.HEAPF64[ dd5Buffer >> 3]
+            };
+
+            Module._free(r5Buffer);
+            Module._free(d5Buffer);
+            Module._free(dr5Buffer);
+            Module._free(dd5Buffer);
+
+            return ret;
 
         },
         /** int eraStarpm(double ra1, double dec1, double pmr1, double pmd1, double px1, double rv1, double ep1a, double ep1b, double ep2a, double ep2b, double *ra2, double *dec2, double *pmr2, double *pmd2, double *px2, double *rv2); */
         starpm: function(ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b) {
 
+            var raBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                decBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pmrBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pmdBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pxBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                rvBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+
+            var status = Module._eraStarpm(ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b, raBuffer, decBuffer, pmrBuffer, pmdBuffer, pxBuffer, rvBuffer),
+                ret = {
+                    status: status,
+                    ra: Module.HEAPF64[ raBuffer >> 3],
+                    dec: Module.HEAPF64[ decBuffer >> 3],
+                    pmr: Module.HEAPF64[ pmrBuffer >> 3],
+                    pmd: Module.HEAPF64[ pmdBuffer >> 3],
+                    px: Module.HEAPF64[ pxBuffer >> 3],
+                    rv: Module.HEAPF64[ rvBuffer >> 3]
+                };
+
+            Module._free(raBuffer);
+            Module._free(decBuffer);
+            Module._free(pmrBuffer);
+            Module._free(pmdBuffer);
+            Module._free(pxBuffer);
+            Module._free(rvBuffer);
+
+            return ret;
         },
 
         //GalacticCoordinates
