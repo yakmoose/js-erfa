@@ -646,14 +646,59 @@
         },
         /** int eraGc2gde(double a, double f, double xyz[3], double *elong, double *phi, double *height); */
         gc2gde: function (a, f, xyz) {
+            var eBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                hBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                xyzBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
+            writeFloat64Buffer(xyzBuffer, xyz);
+
+            var status = Module._eraGc2gde(a, f, xyzBuffer, eBuffer, pBuffer, hBuffer),
+                ret = {
+                    status: status,
+                    e: Module.HEAPF64[ eBuffer >> 3],
+                    p: Module.HEAPF64[ pBuffer >> 3],
+                    h: Module.HEAPF64[ hBuffer >> 3]
+                };
+
+            Module._free(eBuffer);
+            Module._free(pBuffer);
+            Module._free(hBuffer);
+            Module._free(xyzBuffer);
+
+            return ret;
         },
         /** int eraGd2gc(int n, double elong, double phi, double height, double xyz[3]); */
         gd2gc: function (n, elong, phi, height) {
+            var xyzBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
+            var status = Module._eraGd2gc(n, elong, phi, height, xyzBuffer),
+                ret = {
+                    status: status,
+                    x: Module.HEAPF64[ (xyzBuffer >> 3) + 0 ],
+                    y: Module.HEAPF64[ (xyzBuffer >> 3) + 1],
+                    z: Module.HEAPF64[ (xyzBuffer >> 3) +2]
+                };
+
+            Module._free(xyzBuffer);
+
+            return ret;
         },
         /** int eraGd2gce(double a, double f, double elong, double phi, double height, double xyz[3]); */
         gd2gce: function (a, f, elong, phi, height) {
+            var xyzBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+
+            var status = Module._eraGd2gce(a, f, elong, phi, height, xyzBuffer),
+                ret = {
+                    status: status,
+                    x: Module.HEAPF64[ (xyzBuffer >> 3) + 0 ],
+                    y: Module.HEAPF64[ (xyzBuffer >> 3) + 1],
+                    z: Module.HEAPF64[ (xyzBuffer >> 3) +2]
+                };
+
+            Module._free(xyzBuffer);
+
+            return ret;
 
         },
 
