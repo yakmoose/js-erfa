@@ -88,17 +88,96 @@
         },
         /** helper to wrap writing to heap/buffer */
         writeFloat64Buffer = function (ptr, data) {
-            for (var i = 0; i < data.length; i++) {
-                var ofs = ((ptr>>3) + i);
-                Module.HEAPF64[ofs]= data[i];
+            for (var i = 0, c = data.length, ofs = ptr >> 3; i < c; i++) {
+                Module.HEAPF64[ofs + i ]= data[i];
             }
+        },
+        /** helper that will read a buffer into an array */
+        readFloat64Buffer = function (ptr, size) {
+            var ret = new Float64Array(size);
+            for(var i = 0, ofs = ptr >> 3; i < size; i++) {
+                ret[i] = Module.HEAPF64[ofs + i];
+            }
+
+            return ret;
+        },
+        /** wrapper for the struct eraASTROM defined in erfam.h */
+        ASTROM = function (raw) {
+
+            raw = raw || new Float64Array(ASTROM.STRUCT_SIZE);
+
+            /** PM time interval (SSB, Julian years) */
+            this.pmt = raw[0];
+            /** SSB to observer (vector, au) */
+            this.eb = [
+                raw[1],
+                raw[2],
+                raw[3]
+            ];
+            /** Sun to observer (unit vector) */
+            this.eh =[
+                raw[4],
+                raw[5],
+                raw[6]
+            ];
+            /** distance from Sun to observer (au) */
+            this.em = raw[7];
+            /* barycentric observer velocity (vector, c) */
+            this.v = [
+                raw[8],
+                raw[9],
+                raw[10]
+            ];
+            /** sqrt(1-|v|^2): reciprocal of Lorenz factor */
+            this.bm1 = raw[11];
+            /** bias-precession-nutation matrix */
+            this.bpn = [
+              [
+                  raw[12],
+                  raw[13],
+                  raw[14]
+              ],
+              [
+                  raw[15],
+                  raw[16],
+                  raw[17]
+              ],
+              [
+                  raw[18],
+                  raw[19],
+                  raw[20]
+              ]
+            ];
+            /** longitude + s' + dERA(DUT) (radians) */
+            this.along = raw[21];
+            /** geodetic latitude (radians) */
+            this.phi  = raw[22];
+            /** polar motion xp wrt local meridian (radians) */
+            this.xpl  = raw[23];
+            /** polar motion yp wrt local meridian (radians) */
+            this.ypl  = raw[24];
+            /** sine of geodetic latitude */
+            this.sphi  = raw[25];
+            /** cosine of geodetic latitude */
+            this.cphi  = raw[26];
+            /** magnitude of diurnal aberration vector */
+            this.diurab = raw[27];
+            /** "local" Earth rotation angle (radians) */
+            this.eral  = raw[28];
+            /** refraction constant A (radians) */
+            this.refa = raw[29];
+            /** refraction constant B (radians) */
+            this.refb = raw[30];
         };
+        ASTROM.STRUCT_SIZE = 31;
+
 
 
 
 
     module.exports = {
-
+        _Module : Module,
+        ASTROM : ASTROM,
         // Astronomy/Calendars
         /** int eraCal2jd(int iy, int im, int id, double *djm0, double *djm); */
         cal2jd: function(iy, im, id) {
@@ -204,6 +283,153 @@
 
         //astrometry
 
+        /** void eraAb(double pnat[3], double v[3], double s, double bm1, double ppr[3]); */
+        ab: function (pnat, v, s, bm1) {
+            var pnatBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+                vBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+                pprBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+
+                //pnatBuffer
+                writeFloat64Buffer(pnatBuffer, pnat);
+                writeFloat64Buffer(vBuffer, v);
+
+                Module._eraAb(pnatBuffer, vBuffer, s, bm1, pprBuffer);
+
+                var ret = [
+                    Module.HEAPF64[(pprBuffer >> 3) + 0],
+                    Module.HEAPF64[(pprBuffer >> 3) + 1],
+                    Module.HEAPF64[(pprBuffer >> 3) + 2]
+                ];
+
+            Module._free(pnatBuffer);
+            Module._free(vBuffer);
+            Module._free(pprBuffer);
+
+            return ret;
+
+        },
+
+
+        /** void eraApcg(double date1, double date2, double ebpv[2][3], double ehp[3], eraASTROM *astrom); */
+        apcg: function (date1, date2, ebpv, ehp) {
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),// this is the size of the struct, trust me
+              ebpvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
+              ehpBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
+            writeFloat64Buffer(ehpBuffer, ehp);
+
+            Module._eraApcg(date1, date2, ebpvBuffer, ehpBuffer, astromBuffer );
+
+            var ret = readFloat64Buffer(astromBuffer, 31);
+
+            Module._free(astromBuffer);
+            Module._free(ebpvBuffer);
+            Module._free(ehpBuffer);
+
+            return new ASTROM(ret);
+        },
+
+        /** void eraApcg13(double date1, double date2, eraASTROM *astrom); */
+        apcg13: function (date1, date2) {
+
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+
+            Module._eraApcg13(date1, date2, astromBuffer);
+
+            var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
+            Module._free(astromBuffer);
+
+            return new ASTROM(ret);
+        },
+
+        /** void eraApci(double date1, double date2, double ebpv[2][3], double ehp[3], double x, double y, double s, eraASTROM *astrom); */
+        apci: function (date1, date2, ebpv, ehp, x, y, s) {
+
+            var ebpvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
+              ehpBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+              astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
+            writeFloat64Buffer(ehpBuffer, ehp);
+
+            Module._eraApci(date1, date2, ebpvBuffer, ehpBuffer, x, y, s, astromBuffer);
+
+            var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
+            Module._free(astromBuffer);
+            Module._free(ebpvBuffer);
+            Module._free(ehpBuffer);
+
+            return new ASTROM(ret);
+        },
+        /** void eraApci13(double date1, double date2, eraASTROM *astrom, double *eo);*/
+        apci13: function (date1, date2) {
+
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+                eoBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+            Module._eraApci13(date1, date2, astromBuffer, eoBuffer);
+
+            var ret = {
+                astrom: new ASTROM(readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE)),
+                eo: Module.HEAPF64[ eoBuffer >>> 3]
+            };
+
+            Module._free(astromBuffer);
+            Module._free(eoBuffer);
+
+
+            return ret;
+        },
+        /** void eraApco(double date1, double date2, double ebpv[2][3], double ehp[3], double x, double y, double s, double theta, double elong, double phi, double hm, double xp, double yp, double sp, double refa, double refb, eraASTROM *astrom);*/
+        apco: function (date1, date2, ebpv, ehp, x, y, s, theta, elong, phi, hm, xp, yp, sp, refa, refb) {
+
+            var ebpvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
+              ehpBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+              astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
+            writeFloat64Buffer(ehpBuffer, ehp);
+
+            Module._eraApco(date1, date2, ebpvBuffer, ehpBuffer, x, y, s, theta, elong, phi, hm, xp, yp, sp, refa, refb, astromBuffer);
+
+            var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
+
+            Module._free(astromBuffer);
+            Module._free(ebpvBuffer);
+            Module._free(ehpBuffer);
+
+            return new ASTROM(ret);
+        },
+        /* int eraApco13(double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, eraASTROM *astrom, double *eo);
+        void eraApcs(double date1, double date2, double pv[2][3], double ebpv[2][3], double ehp[3], eraASTROM *astrom);
+        void eraApcs13(double date1, double date2, double pv[2][3], eraASTROM *astrom);
+        void eraAper(double theta, eraASTROM *astrom);
+        void eraAper13(double ut11, double ut12, eraASTROM *astrom);
+        void eraApio(double sp, double theta, double elong, double phi, double hm, double xp, double yp, double refa, double refb, eraASTROM *astrom);
+        int eraApio13(double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, eraASTROM *astrom);
+        void eraAtci13(double rc, double dc, double pr, double pd, double px, double rv, double date1, double date2, double *ri, double *di, double *eo);
+        void eraAtciq(double rc, double dc, double pr, double pd, double px, double rv, eraASTROM *astrom, double *ri, double *di);
+        void eraAtciqn(double rc, double dc, double pr, double pd, double px, double rv, eraASTROM *astrom, int n, eraLDBODY b[], double *ri, double *di);
+        void eraAtciqz(double rc, double dc, eraASTROM *astrom, double *ri, double *di);
+        int eraAtco13(double rc, double dc, double pr, double pd, double px, double rv, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *aob, double *zob, double *hob, double *dob, double *rob, double *eo);
+        void eraAtic13(double ri, double di, double date1, double date2, double *rc, double *dc, double *eo);
+        void eraAticq(double ri, double di, eraASTROM *astrom, double *rc, double *dc);
+        void eraAticqn(double ri, double di, eraASTROM *astrom, int n, eraLDBODY b[], double *rc, double *dc);
+        int eraAtio13(double ri, double di, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *aob, double *zob, double *hob, double *dob, double *rob);
+        void eraAtioq(double ri, double di, eraASTROM *astrom, double *aob, double *zob, double *hob, double *dob, double *rob);
+        int eraAtoc13(const char *type, double ob1, double ob2, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *rc, double *dc);
+        int eraAtoi13(const char *type, double ob1, double ob2, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *ri, double *di);
+        void eraAtoiq(const char *type, double ob1, double ob2, eraASTROM *astrom, double *ri, double *di);
+        void eraLd(double bm, double p[3], double q[3], double e[3], double em, double dlim, double p1[3]);
+        void eraLdn(int n, eraLDBODY b[], double ob[3], double sc[3], double sn[3]);
+        void eraLdsun(double p[3], double e[3], double em, double p1[3]);
+        void eraPmpx(double rc, double dc, double pr, double pd, double px, double rv, double pmt, double pob[3], double pco[3]);
+        int eraPmsafe(double ra1, double dec1, double pmr1, double pmd1, double px1, double rv1, double ep1a, double ep1b, double ep2a, double ep2b, double *ra2, double *dec2, double *pmr2, double *pmd2, double *px2, double *rv2);
+        void eraPvtob(double elong, double phi, double height, double xp, double yp, double sp, double theta, double pv[2][3]);
+        void eraRefco(double phpa, double tc, double rh, double wl, double *refa, double *refb);
+        */
+
         //ephemerides
         /** int eraEpv00(double date1, double date2, double pvh[2][3], double pvb[2][3]); */
         epv00: function(date1, date2) {
@@ -298,7 +524,68 @@
         fane03: Module.cwrap('eraFane03', 'number', ['number']),
 
         //PrecNutPolar
-
+        /*
+        void eraBi00(double *dpsibi, double *depsbi, double *dra);
+        void eraBp00(double date1, double date2, double rb[3][3], double rp[3][3], double rbp[3][3]);
+        void eraBp06(double date1, double date2, double rb[3][3], double rp[3][3], double rbp[3][3]);
+        void eraBpn2xy(double rbpn[3][3], double *x, double *y);
+        void eraC2i00a(double date1, double date2, double rc2i[3][3]);
+        void eraC2i00b(double date1, double date2, double rc2i[3][3]);
+        void eraC2i06a(double date1, double date2, double rc2i[3][3]);
+        void eraC2ibpn(double date1, double date2, double rbpn[3][3], double rc2i[3][3]);
+        void eraC2ixy(double date1, double date2, double x, double y, double rc2i[3][3]);
+        void eraC2ixys(double x, double y, double s, double rc2i[3][3]);
+        void eraC2t00a(double tta, double ttb, double uta, double utb, double xp, double yp, double rc2t[3][3]);
+        void eraC2t00b(double tta, double ttb, double uta, double utb, double xp, double yp, double rc2t[3][3]);
+        void eraC2t06a(double tta, double ttb, double uta, double utb, double xp, double yp, double rc2t[3][3]);
+        void eraC2tcio(double rc2i[3][3], double era, double rpom[3][3], double rc2t[3][3]);
+        void eraC2teqx(double rbpn[3][3], double gst, double rpom[3][3], double rc2t[3][3]);
+        void eraC2tpe(double tta, double ttb, double uta, double utb, double dpsi, double deps, double xp, double yp, double rc2t[3][3]);
+        void eraC2txy(double tta, double ttb, double uta, double utb, double x, double y, double xp, double yp, double rc2t[3][3]);
+        double eraEo06a(double date1, double date2);
+        double eraEors(double rnpb[3][3], double s);
+        void eraFw2m(double gamb, double phib, double psi, double eps, double r[3][3]);
+        void eraFw2xy(double gamb, double phib, double psi, double eps, double *x, double *y);
+        void eraNum00a(double date1, double date2, double rmatn[3][3]);
+        void eraNum00b(double date1, double date2, double rmatn[3][3]);
+        void eraNum06a(double date1, double date2, double rmatn[3][3]);
+        void eraNumat(double epsa, double dpsi, double deps, double rmatn[3][3]);
+        void eraNut00a(double date1, double date2, double *dpsi, double *deps);
+        void eraNut00b(double date1, double date2, double *dpsi, double *deps);
+        void eraNut06a(double date1, double date2, double *dpsi, double *deps);
+        void eraNut80(double date1, double date2, double *dpsi, double *deps);
+        void eraNutm80(double date1, double date2, double rmatn[3][3]);
+        double eraObl06(double date1, double date2);
+        double eraObl80(double date1, double date2);
+        void eraP06e(double date1, double date2, double *eps0, double *psia, double *oma, double *bpa, double *bqa, double *pia, double *bpia, double *epsa, double *chia, double *za, double *zetaa, double *thetaa, double *pa, double *gam, double *phi, double *psi);
+        void eraPb06(double date1, double date2, double *bzeta, double *bz, double *btheta);
+        void eraPfw06(double date1, double date2, double *gamb, double *phib, double *psib, double *epsa);
+        void eraPmat00(double date1, double date2, double rbp[3][3]);
+        void eraPmat06(double date1, double date2, double rbp[3][3]);
+        void eraPmat76(double date1, double date2, double rmatp[3][3]);
+        void eraPn00(double date1, double date2, double dpsi, double deps, double *epsa, double rb[3][3], double rp[3][3], double rbp[3][3], double rn[3][3], double rbpn[3][3]);
+        void eraPn00a(double date1, double date2, double *dpsi, double *deps, double *epsa, double rb[3][3], double rp[3][3], double rbp[3][3], double rn[3][3], double rbpn[3][3]);
+        void eraPn00b(double date1, double date2, double *dpsi, double *deps, double *epsa, double rb[3][3], double rp[3][3], double rbp[3][3], double rn[3][3], double rbpn[3][3]);
+        void eraPn06(double date1, double date2, double dpsi, double deps, double *epsa, double rb[3][3], double rp[3][3], double rbp[3][3], double rn[3][3], double rbpn[3][3]);
+        void eraPn06a(double date1, double date2, double *dpsi, double *deps, double *epsa, double rb[3][3], double rp[3][3], double rbp[3][3], double rn[3][3], double rbpn[3][3]);
+        void eraPnm00a(double date1, double date2, double rbpn[3][3]);
+        void eraPnm00b(double date1, double date2, double rbpn[3][3]);
+        void eraPnm06a(double date1, double date2, double rnpb[3][3]);
+        void eraPnm80(double date1, double date2, double rmatpn[3][3]);
+        void eraPom00(double xp, double yp, double sp, double rpom[3][3]);
+        void eraPr00(double date1, double date2, double *dpsipr, double *depspr);
+        void eraPrec76(double date01, double date02, double date11, double date12, double *zeta, double *z, double *theta);
+        double eraS00(double date1, double date2, double x, double y);
+        double eraS00a(double date1, double date2);
+        double eraS00b(double date1, double date2);
+        double eraS06(double date1, double date2, double x, double y);
+        double eraS06a(double date1, double date2);
+        double eraSp00(double date1, double date2);
+        void eraXy06(double date1, double date2, double *x, double *y);
+        void eraXys00a(double date1, double date2, double *x, double *y, double *s);
+        void eraXys00b(double date1, double date2, double *x, double *y, double *s);
+        void eraXys06a(double date1, double date2,  double *x, double *y, double *s);
+    */
         //Rotation and Time
         /** double eraEra00(double dj1, double dj2); */
         era00: Module.cwrap('eraEra00','number',['number','number']),
