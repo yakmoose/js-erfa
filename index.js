@@ -104,7 +104,10 @@
         /** wrapper for the struct eraASTROM defined in erfam.h */
         ASTROM = function (raw) {
 
-            raw = raw || new Float64Array(ASTROM.STRUCT_SIZE);
+            if (!raw) {
+                raw = new Float64Array(ASTROM.STRUCT_SIZE);
+                raw.fill(0);
+            }
 
             /** PM time interval (SSB, Julian years) */
             this.pmt = raw[0];
@@ -172,7 +175,38 @@
         ASTROM.STRUCT_SIZE = 31;
 
 
+    ASTROM.prototype.toArray = function () {
+        var propsOrder = [
+            'pmt',//0
+            'eb',//1
+            'eh',//2
+            'em',//3
+            'v',//4
+            'bm1',//5
+            'bpn',//6
+            'along',//7
+            'phi',//8
+            'xpl',//9
+            'ypl',//10
+            'sphi',//11
+            'cphi',//12
+            'diurab',//13
+            'eral',//14
+            'refa',//15
+            'refb'//16
+        ];
 
+        //var a =  propsOrder.map(function(item){
+        //   return this[item];
+        //}.bind(this));
+        var a = [];
+
+        propsOrder.forEach(function (item) {
+            a = a.concat(SH.flattenVector(this[item]));
+        }.bind(this));
+
+        return a;
+    };
 
 
     module.exports = {
@@ -401,12 +435,97 @@
 
             return new ASTROM(ret);
         },
-        /* int eraApco13(double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, eraASTROM *astrom, double *eo);
-        void eraApcs(double date1, double date2, double pv[2][3], double ebpv[2][3], double ehp[3], eraASTROM *astrom);
-        void eraApcs13(double date1, double date2, double pv[2][3], eraASTROM *astrom);
-        void eraAper(double theta, eraASTROM *astrom);
-        void eraAper13(double ut11, double ut12, eraASTROM *astrom);
-        void eraApio(double sp, double theta, double elong, double phi, double hm, double xp, double yp, double refa, double refb, eraASTROM *astrom);
+        /** int eraApco13(double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, eraASTROM *astrom, double *eo);*/
+        apco13: function (utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
+
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              eoBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+
+            var j = Module._eraApco13(utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, astromBuffer, eoBuffer);
+
+            var ret = {
+                astrom: new ASTROM(readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE)),
+                eo: Module.HEAPF64[ eoBuffer >>> 3],
+                status: j
+            };
+
+            Module._free(astromBuffer);
+            Module._free(eoBuffer);
+
+            return ret;
+        },
+        /** void eraApcs(double date1, double date2, double pv[2][3], double ebpv[2][3], double ehp[3], eraASTROM *astrom); */
+        apcs: function (date1, date2, pv, ebpv, ehp) {
+
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              pvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
+              ebpvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
+              ehpBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(pvBuffer, SH.flattenVector(pv));
+            writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
+            writeFloat64Buffer(ehpBuffer, ehp);
+
+            Module._eraApcs(date1, date2, pvBuffer, ebpvBuffer, ehpBuffer, astromBuffer);
+
+            var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
+
+            Module._free(astromBuffer);
+            Module._free(pvBuffer);
+            Module._free(ebpvBuffer);
+            Module._free(ehpBuffer);
+
+            return new ASTROM(ret);
+        },
+        /** void eraApcs13(double date1, double date2, double pv[2][3], eraASTROM *astrom);*/
+        apcs13: function (date1, date2, pv) {
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              pvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(pvBuffer, SH.flattenVector(pv));
+
+            Module._eraApcs13(date1, date2, pvBuffer, astromBuffer);
+
+            var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
+
+            Module._free(astromBuffer);
+            Module._free(pvBuffer);
+
+            return new ASTROM(ret);
+
+        },
+        /** void eraAper(double theta, eraASTROM *astrom); */
+        aper: function(theta, astrom) {
+
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(astromBuffer, astrom.toArray());
+
+            Module._eraAper(theta, astromBuffer);
+
+            var ret =readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
+
+            Module._free(astromBuffer);
+
+            return  new ASTROM(ret);//return the one we were passed in??
+        },
+
+        /** void eraAper13(double ut11, double ut12, eraASTROM *astrom); */
+        aper13: function (ut11, ut12, astrom) {
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(astromBuffer, astrom.toArray());
+
+            Module._eraAper13(ut11, ut12, astromBuffer);
+
+            var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
+
+            Module._free(astromBuffer);
+
+            return  new ASTROM(ret);//return the one we were passed in??
+        },
+        /* void eraApio(double sp, double theta, double elong, double phi, double hm, double xp, double yp, double refa, double refb, eraASTROM *astrom);
         int eraApio13(double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, eraASTROM *astrom);
         void eraAtci13(double rc, double dc, double pr, double pd, double px, double rv, double date1, double date2, double *ri, double *di, double *eo);
         void eraAtciq(double rc, double dc, double pr, double pd, double px, double rv, eraASTROM *astrom, double *ri, double *di);

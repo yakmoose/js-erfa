@@ -182,7 +182,7 @@ describe('Astrometry', function () {
     });
 
 
-    describe('#apco()', function (){
+    describe('#apco()', function () {
        it('For a terrestrial observer, prepare star-independent astrometry' +
          'parameters for transformations between ICRS and observedcoordinates', function () {
 
@@ -243,4 +243,171 @@ describe('Astrometry', function () {
 
        });
     });
+
+    describe('#apco13()', function () {
+      it('Should For a terrestrial observer, prepare star-independent astrometry' +
+        ' parameters for transformations between ICRS and observed coordinates', function () {
+
+        var utc1 = 2456384.5,
+            utc2 = 0.969254051,
+            dut1 = 0.1550675,
+            elong = -0.527800806,
+            phi = -1.2345856,
+            hm = 2738.0,
+            xp = 2.47230737e-7,
+            yp = 1.82640464e-6,
+            phpa = 731.0,
+            tc = 12.8,
+            rh = 0.59,
+            wl = 0.55;
+
+        var ret = erfa.apco13(utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl);
+
+        (ret.astrom.pmt).should.be.closeTo(13.25248468622475727, 1e-11);
+        (ret.astrom.eb[0]).should.be.closeTo(-0.9741827107321449445, 1e-12);
+        (ret.astrom.eb[1]).should.be.closeTo(-0.2115130190489386190, 1e-12);
+        (ret.astrom.eb[2]).should.be.closeTo(-0.09179840189515518726, 1e-12);
+        (ret.astrom.eh[0]).should.be.closeTo(-0.9736425572586866640, 1e-12);
+        (ret.astrom.eh[1]).should.be.closeTo(-0.2092452121602867431, 1e-12);
+        (ret.astrom.eh[2]).should.be.closeTo(-0.09075578153903832650, 1e-12);
+        (ret.astrom.em).should.be.closeTo(0.9998233240914558422, 1e-12);
+        (ret.astrom.v[0]).should.be.closeTo(0.2078704986751370303e-4, 1e-16);
+        (ret.astrom.v[1]).should.be.closeTo(-0.8955360100494469232e-4, 1e-16);
+        (ret.astrom.v[2]).should.be.closeTo(-0.3863338978840051024e-4, 1e-16);
+        (ret.astrom.bm1).should.be.closeTo(0.9999999950277561368, 1e-12);
+        (ret.astrom.bpn[0][0]).should.be.closeTo(0.9999991390295147999, 1e-12);
+        (ret.astrom.bpn[1][0]).should.be.closeTo(0.4978650075315529277e-7, 1e-12);
+        (ret.astrom.bpn[2][0]).should.be.closeTo(0.001312227200850293372, 1e-12);
+        (ret.astrom.bpn[0][1]).should.be.closeTo(-0.1136336652812486604e-7, 1e-12);
+        (ret.astrom.bpn[1][1]).should.be.closeTo(0.9999999995713154865, 1e-12);
+        (ret.astrom.bpn[2][1]).should.be.closeTo(-0.2928086230975367296e-4, 1e-12);
+        (ret.astrom.bpn[0][2]).should.be.closeTo(-0.001312227201745553566, 1e-12);
+        (ret.astrom.bpn[1][2]).should.be.closeTo(0.2928082218847679162e-4, 1e-12);
+        (ret.astrom.bpn[2][2]).should.be.closeTo(0.9999991386008312212, 1e-12);
+        (ret.astrom.along).should.be.closeTo(-0.5278008060301974337, 1e-12);
+        (ret.astrom.xpl).should.be.closeTo(0.1133427418174939329e-5, 1e-17);
+        (ret.astrom.ypl).should.be.closeTo(0.1453347595745898629e-5, 1e-17);
+        (ret.astrom.sphi).should.be.closeTo(-0.9440115679003211329, 1e-12);
+        (ret.astrom.cphi).should.be.closeTo(0.3299123514971474711, 1e-12);
+        (ret.astrom.diurab).should.be.closeTo(0, 0);
+        (ret.astrom.eral).should.be.closeTo(2.617608909189066140, 1e-12);
+        (ret.astrom.refa).should.be.closeTo(0.2014187785940396921e-3, 1e-15);
+        (ret.astrom.refb).should.be.closeTo(-0.2361408314943696227e-6, 1e-18);
+        (ret.eo).should.be.closeTo(-0.003020548354802412839, 1e-14);
+        (ret.status).should.equal(0);
+
+    });
+  });
+
+    describe('#apcs', function () {
+      it('Should For an observer whose geocentric position and velocity are known,' +
+        ' prepare star-independent astrometry parameters for transformations between ICRS and GCRS', function () {
+
+        var date1 = 2456384.5,
+            date2 = 0.970031644,
+            pv = [
+                [-1836024.09, 1056607.72, -5998795.26],
+                [-77.0361767, -133.310856, 0.0971855934]
+            ],
+            ebpv = [
+                [-0.974170438, -0.211520082, -0.0917583024],
+                [0.00364365824, -0.0154287319, -0.00668922024]
+            ],
+            ehp = [-0.973458265, -0.209215307, -0.0906996477];
+
+        var astrom = erfa.apcs(date1, date2, pv, ebpv, ehp);
+
+        (astrom.pmt).should.be.closeTo(13.25248468622587269, 1e-11);
+        (astrom.eb[0]).should.be.closeTo(-0.9741827110630456169, 1e-12);
+        (astrom.eb[1]).should.be.closeTo(-0.2115130190136085494, 1e-12);
+        (astrom.eb[2]).should.be.closeTo(-0.09179840186973175487, 1e-12);
+        (astrom.eh[0]).should.be.closeTo(-0.9736425571689386099, 1e-12);
+        (astrom.eh[1]).should.be.closeTo(-0.2092452125849967195, 1e-12);
+        (astrom.eh[2]).should.be.closeTo(-0.09075578152266466572, 1e-12);
+        (astrom.em).should.be.closeTo(0.9998233241710457140, 1e-12);
+        (astrom.v[0]).should.be.closeTo(0.2078704985513566571e-4, 1e-16);
+        (astrom.v[1]).should.be.closeTo(-0.8955360074245006073e-4, 1e-16);
+        (astrom.v[2]).should.be.closeTo(-0.3863338980073572719e-4, 1e-16);
+        (astrom.bm1).should.be.closeTo(0.9999999950277561601, 1e-12);
+        (astrom.bpn[0][0]).should.be.closeTo(1, 0);
+        (astrom.bpn[1][0]).should.be.closeTo(0, 0);
+        (astrom.bpn[2][0]).should.be.closeTo(0, 0);
+        (astrom.bpn[0][1]).should.be.closeTo(0, 0);
+        (astrom.bpn[1][1]).should.be.closeTo(1, 0);
+        (astrom.bpn[2][1]).should.be.closeTo(0, 0);
+        (astrom.bpn[0][2]).should.be.closeTo(0, 0);
+        (astrom.bpn[1][2]).should.be.closeTo(0, 0);
+        (astrom.bpn[2][2]).should.be.closeTo(1, 0);
+
+      });
+    });
+
+    describe('#apcs13()', function () {
+      it('Should  For an observer whose geocentric position and velocity are known,' +
+        'prepare star-independent astrometry parameters for transformations between ICRS and GCRS', function () {
+
+        var date1 = 2456165.5,
+          date2 = 0.401182685,
+          pv = [
+                [-6241497.16, 401346.896, -1251136.04],
+                [-29.264597, -455.021831, 0.0266151194]
+          ];
+
+        var astrom = erfa.apcs13(date1, date2, pv);
+
+        (astrom.pmt).should.be.closeTo(12.65133794027378508, 1e-11);
+        (astrom.eb[0]).should.be.closeTo(0.9012691529023298391, 1e-12);
+        (astrom.eb[1]).should.be.closeTo(-0.4173999812023068781, 1e-12);
+        (astrom.eb[2]).should.be.closeTo(-0.1809906511146821008, 1e-12);
+        (astrom.eh[0]).should.be.closeTo(0.8939939101759726824, 1e-12);
+        (astrom.eh[1]).should.be.closeTo(-0.4111053891734599955, 1e-12);
+        (astrom.eh[2]).should.be.closeTo(-0.1782336880637689334, 1e-12);
+        (astrom.em).should.be.closeTo(1.010428384373318379, 1e-12);
+        (astrom.v[0]).should.be.closeTo(0.4279877278327626511e-4, 1e-16);
+        (astrom.v[1]).should.be.closeTo(0.7963255057040027770e-4, 1e-16);
+        (astrom.v[2]).should.be.closeTo(0.3517564000441374759e-4, 1e-16);
+        (astrom.bm1).should.be.closeTo(0.9999999952947981330, 1e-12);
+        (astrom.bpn[0][0]).should.be.closeTo(1, 0);
+        (astrom.bpn[1][0]).should.be.closeTo(0, 0);
+        (astrom.bpn[2][0]).should.be.closeTo(0, 0);
+        (astrom.bpn[0][1]).should.be.closeTo(0, 0);
+        (astrom.bpn[1][1]).should.be.closeTo(1, 0);
+        (astrom.bpn[2][1]).should.be.closeTo(0, 0);
+        (astrom.bpn[0][2]).should.be.closeTo(0, 0);
+        (astrom.bpn[1][2]).should.be.closeTo(0, 0);
+        (astrom.bpn[2][2]).should.be.closeTo(1, 0);
+
+      });
+    });
+
+
+    describe('#aper()', function () {
+      it('Should ', function () {
+        var astrom = new erfa.ASTROM(),
+            theta = 5.678;
+
+        astrom.along = 1.234;
+
+        var ret = erfa.aper(theta, astrom);
+
+        (ret.eral).should.be.closeTo(6.912000000000000000, 1e-12);
+
+      });
+    });
+
+
+  describe('#aper13()', function () {
+    it('Should ', function () {
+      var astrom = new erfa.ASTROM(),
+          ut11 = 2456165.5,
+          ut12 = 0.401182685;
+
+      astrom.along = 1.234;
+
+      var ret = erfa.aper13(ut11, ut12, astrom);
+
+      (ret.eral).should.be.closeTo(3.316236661789694933, 1e-12);
+
+    });
+  });
 });
