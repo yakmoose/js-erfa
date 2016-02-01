@@ -101,7 +101,8 @@
 
             return ret;
         },
-        /** wrapper for the struct eraASTROM defined in erfam.h */
+        /* wrapper for the struct eraASTROM defined in erfam.h */
+        /** Star-independent astrometry parameters */
         ASTROM = function (raw) {
 
             if (!raw) {
@@ -196,9 +197,6 @@
             'refb'//16
         ];
 
-        //var a =  propsOrder.map(function(item){
-        //   return this[item];
-        //}.bind(this));
         var a = [];
 
         propsOrder.forEach(function (item) {
@@ -208,10 +206,49 @@
         return a;
     };
 
+    /* wrapper for the struct eraLDBODY defined in erfam.h */
+    /** Body parameters for light deflection */
+    var LDBODY = function(raw) {
+
+        if (!raw) {
+            raw = new Float64Array(LDBODY.STRUCT_SIZE);
+            raw.fill(0);
+        }
+
+        /** mass of the body (solar masses) */
+        this.bm = raw[0];
+        /** deflection limiter (radians^2/2) */
+        this.dl = raw[1];
+
+        /* barycentric PV of the body (au, au/day) */
+        this.pv =[
+            [
+                raw[2],
+                raw[3],
+                raw[4]
+            ],
+            [
+                raw[5],
+                raw[6],
+                raw[7]
+            ]];
+        };
+        LDBODY.STRUCT_SIZE = 8;
+        LDBODY.prototype.toArray = function () {
+            var a = [],
+                propsOrder = ['bm', 'dl', 'pv'];
+
+            propsOrder.forEach(function (item) {
+                a = a.concat(SH.flattenVector(this[item]));
+            }.bind(this));
+
+            return a;
+        };
 
     module.exports = {
         _Module : Module,
         ASTROM : ASTROM,
+        LDBODY: LDBODY,
         // Astronomy/Calendars
         /** int eraCal2jd(int iy, int im, int id, double *djm0, double *djm); */
         cal2jd: function(iy, im, id) {
@@ -525,22 +562,352 @@
 
             return  new ASTROM(ret);//return the one we were passed in??
         },
-        /* void eraApio(double sp, double theta, double elong, double phi, double hm, double xp, double yp, double refa, double refb, eraASTROM *astrom);
-        int eraApio13(double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, eraASTROM *astrom);
-        void eraAtci13(double rc, double dc, double pr, double pd, double px, double rv, double date1, double date2, double *ri, double *di, double *eo);
-        void eraAtciq(double rc, double dc, double pr, double pd, double px, double rv, eraASTROM *astrom, double *ri, double *di);
-        void eraAtciqn(double rc, double dc, double pr, double pd, double px, double rv, eraASTROM *astrom, int n, eraLDBODY b[], double *ri, double *di);
-        void eraAtciqz(double rc, double dc, eraASTROM *astrom, double *ri, double *di);
-        int eraAtco13(double rc, double dc, double pr, double pd, double px, double rv, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *aob, double *zob, double *hob, double *dob, double *rob, double *eo);
-        void eraAtic13(double ri, double di, double date1, double date2, double *rc, double *dc, double *eo);
-        void eraAticq(double ri, double di, eraASTROM *astrom, double *rc, double *dc);
-        void eraAticqn(double ri, double di, eraASTROM *astrom, int n, eraLDBODY b[], double *rc, double *dc);
-        int eraAtio13(double ri, double di, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *aob, double *zob, double *hob, double *dob, double *rob);
-        void eraAtioq(double ri, double di, eraASTROM *astrom, double *aob, double *zob, double *hob, double *dob, double *rob);
-        int eraAtoc13(const char *type, double ob1, double ob2, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *rc, double *dc);
-        int eraAtoi13(const char *type, double ob1, double ob2, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *ri, double *di);
-        void eraAtoiq(const char *type, double ob1, double ob2, eraASTROM *astrom, double *ri, double *di);
-        void eraLd(double bm, double p[3], double q[3], double e[3], double em, double dlim, double p1[3]);
+        /** void eraApio(double sp, double theta, double elong, double phi, double hm, double xp, double yp, double refa, double refb, eraASTROM *astrom); */
+        apio: function (sp, theta, elong, phi, hm, xp, yp, refa, refb) {
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+
+            Module._eraApio(sp, theta, elong, phi, hm, xp, yp, refa, refb, astromBuffer);
+
+            var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
+
+            Module._free(astromBuffer);
+
+            return  new ASTROM(ret);
+
+        },
+        /** int eraApio13(double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, eraASTROM *astrom);*/
+        apio13: function (utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+
+            var status = Module._eraApio13(utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, astromBuffer);
+
+            var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
+
+            Module._free(astromBuffer);
+
+            return  {
+                astrom: new ASTROM(ret),
+                status: status
+            };
+        },
+
+        /** void eraAtci13(double rc, double dc, double pr, double pd, double px, double rv, double date1, double date2, double *ri, double *di, double *eo); */
+        atci13: function (rc, dc, pr, pd, px, rv, date1, date2) {
+
+            var eoBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+
+            Module._eraAtci13(rc, dc, pr, pd, px, rv, date1, date2, riBuffer, diBuffer, eoBuffer);
+
+            var ret = {
+                ri: Module.HEAPF64[ riBuffer >>> 3],
+                di: Module.HEAPF64[ diBuffer >>> 3],
+                eo: Module.HEAPF64[ eoBuffer >>> 3]
+            };
+
+            Module._free(diBuffer);
+            Module._free(riBuffer);
+            Module._free(eoBuffer);
+
+            return ret;
+
+        },
+        /** void eraAtciq(double rc, double dc, double pr, double pd, double px, double rv, eraASTROM *astrom, double *ri, double *di); */
+        atciq: function (rc, dc, pr, pd, px, rv, astrom) {
+
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+                riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(astromBuffer, astrom.toArray());
+
+            Module._eraAtciq(rc, dc, pr, pd, px, rv, astromBuffer, riBuffer, diBuffer);
+
+            var ret = {
+                ri: Module.HEAPF64[riBuffer >>> 3],
+                di: Module.HEAPF64[diBuffer >>> 3]
+            };
+
+            Module._free(diBuffer);
+            Module._free(riBuffer);
+            Module._free(astromBuffer);
+
+            return ret;
+        },
+        /** void eraAtciqn(double rc, double dc, double pr, double pd, double px, double rv, eraASTROM *astrom, int n, eraLDBODY b[], double *ri, double *di); */
+        atciqn: function (rc, dc, pr, pd, px, rv, astrom, n, b) {
+
+            var bSize = b.length * LDBODY.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT;
+
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              bBuffer = Module._malloc(bSize);
+
+            writeFloat64Buffer(astromBuffer, astrom.toArray());
+
+
+            writeFloat64Buffer(bBuffer, SH.flattenVector(b.map(function (item){
+                return item.toArray();
+            })));
+
+            Module._eraAtciqn(rc, dc, pr, pd, px, rv, astromBuffer, b.length, bBuffer, riBuffer, diBuffer);
+
+            var ret = {
+                ri: Module.HEAPF64[riBuffer >>> 3],
+                di: Module.HEAPF64[diBuffer >>> 3]
+            };
+
+            Module._free(diBuffer);
+            Module._free(riBuffer);
+            Module._free(astromBuffer);
+            Module._free(bBuffer);
+
+            return ret;
+        },
+        /** void eraAtciqz(double rc, double dc, eraASTROM *astrom, double *ri, double *di); */
+        atciqz: function (rc, dc, astrom) {
+
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+                riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(astromBuffer, astrom.toArray());
+
+            Module._eraAtciqz(rc, dc, astromBuffer, riBuffer, diBuffer);
+
+
+            var ret = {
+                ri: Module.HEAPF64[riBuffer >>> 3],
+                di: Module.HEAPF64[diBuffer >>> 3]
+            };
+
+            Module._free(diBuffer);
+            Module._free(riBuffer);
+            Module._free(astromBuffer);
+
+            return ret;
+        },
+
+        /** int eraAtco13(double rc, double dc, double pr, double pd, double px, double rv, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *aob, double *zob, double *hob, double *dob, double *rob, double *eo); */
+        atco13: function (rc, dc, pr, pd, px, rv, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
+
+            var aobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                zobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                hobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                dobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                robBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                eoBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+
+            var status = Module._eraAtco13(
+              rc, dc, pr, pd, px, rv, utc1, utc2, dut1,
+              elong, phi, hm, xp, yp, phpa, tc, rh, wl,
+              aobBuffer, zobBuffer, hobBuffer, dobBuffer,
+              robBuffer, eoBuffer
+            );
+
+            var ret = {
+                aob: Module.HEAPF64[aobBuffer >>> 3],
+                zob: Module.HEAPF64[zobBuffer >>> 3],
+                hob: Module.HEAPF64[hobBuffer >>> 3],
+                dob: Module.HEAPF64[dobBuffer >>> 3],
+                rob: Module.HEAPF64[robBuffer >>> 3],
+                eo: Module.HEAPF64[eoBuffer >>> 3],
+                status: status
+            };
+
+            Module._free(aobBuffer);
+            Module._free(zobBuffer);
+            Module._free(hobBuffer);
+            Module._free(dobBuffer);
+            Module._free(robBuffer);
+            Module._free(eoBuffer);
+
+            return ret;
+
+        },
+
+        /** void eraAtic13(double ri, double di, double date1, double date2, double *rc, double *dc, double *eo); */
+        atic13: function (ri, di, date1, date2 ){
+            var riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                eoBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+
+            Module._eraAtic13(ri, di, date1, date2, riBuffer, diBuffer, eoBuffer);
+
+            var ret = {
+                rc: Module.HEAPF64[riBuffer >>> 3],
+                dc: Module.HEAPF64[diBuffer >>> 3],
+                eo: Module.HEAPF64[eoBuffer >>> 3]
+            };
+
+            Module._free(riBuffer);
+            Module._free(diBuffer);
+            Module._free(eoBuffer);
+
+            return ret;
+        },
+        /** void eraAticq(double ri, double di, eraASTROM *astrom, double *rc, double *dc);*/
+        aticq: function (ri, di, astrom) {
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              rcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              dcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(astromBuffer, astrom.toArray());
+
+            Module._eraAticq(ri, di, astromBuffer, rcBuffer, dcBuffer);
+
+            var ret = {
+                rc: Module.HEAPF64[rcBuffer >>> 3],
+                dc: Module.HEAPF64[dcBuffer >>> 3]
+            };
+
+            Module._free(rcBuffer);
+            Module._free(dcBuffer);
+            Module._free(astromBuffer);
+
+            return ret;
+
+        },
+        /**void eraAticqn(double ri, double di, eraASTROM *astrom, int n, eraLDBODY b[], double *rc, double *dc);*/
+        aticqn: function (ri, di, astrom, n, b) {
+
+            var bSize = b.length * LDBODY.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT;
+
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              rcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              dcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              bBuffer = Module._malloc(bSize);
+
+            writeFloat64Buffer(astromBuffer, astrom.toArray());
+            writeFloat64Buffer(bBuffer, SH.flattenVector(b.map(function (item){
+                return item.toArray();
+            })));
+
+            Module._eraAticqn(ri, di, astromBuffer, b.length, bBuffer, rcBuffer, dcBuffer);
+
+            var ret = {
+                rc: Module.HEAPF64[rcBuffer >>> 3],
+                dc: Module.HEAPF64[dcBuffer >>> 3]
+            };
+
+            Module._free(rcBuffer);
+            Module._free(dcBuffer);
+            Module._free(astromBuffer);
+            Module._free(bBuffer);
+
+            return ret;
+        },
+        /** int eraAtio13(double ri, double di, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *aob, double *zob, double *hob, double *dob, double *rob);*/
+        atio13: function (ri, di, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
+
+            var aobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                zobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                hobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                dobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                robBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+
+            var j = Module._eraAtio13(ri, di, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl,
+                                        aobBuffer, zobBuffer, hobBuffer,dobBuffer, robBuffer);
+
+            var ret = {
+                aob: Module.HEAPF64[aobBuffer >>> 3],
+                zob: Module.HEAPF64[zobBuffer >>> 3],
+                hob: Module.HEAPF64[hobBuffer >>> 3],
+                dob: Module.HEAPF64[dobBuffer >>> 3],
+                rob: Module.HEAPF64[robBuffer >>> 3],
+                status: j
+            };
+
+            Module._free(aobBuffer);
+            Module._free(zobBuffer);
+            Module._free(hobBuffer);
+            Module._free(dobBuffer);
+            Module._free(robBuffer);
+
+            return ret;
+        },
+        /** void eraAtioq(double ri, double di, eraASTROM *astrom, double *aob, double *zob, double *hob, double *dob, double *rob); */
+        atioq: function (ri, di, astrom) {
+            //double *aob, double *zob, double *hob, double *dob, double *rob
+
+            var aobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              zobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              hobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              dobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              robBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(astromBuffer, astrom.toArray());
+
+            
+            Module._eraAtioq(ri, di, astromBuffer,
+              aobBuffer, zobBuffer, hobBuffer,dobBuffer, robBuffer);
+
+            var ret = {
+                aob: Module.HEAPF64[aobBuffer >>> 3],
+                zob: Module.HEAPF64[zobBuffer >>> 3],
+                hob: Module.HEAPF64[hobBuffer >>> 3],
+                dob: Module.HEAPF64[dobBuffer >>> 3],
+                rob: Module.HEAPF64[robBuffer >>> 3]
+            };
+
+            Module._free(aobBuffer);
+            Module._free(zobBuffer);
+            Module._free(hobBuffer);
+            Module._free(dobBuffer);
+            Module._free(robBuffer);
+            Module._free(astromBuffer);
+
+            return ret;
+        },
+        /** int eraAtoc13(const char *type, double ob1, double ob2, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *rc, double *dc); */
+        atoc13: function (type, ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
+
+            var rcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              dcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              typeBuffer = Module._malloc(type.length);
+
+            Module.writeStringToMemory(type, typeBuffer, false);
+
+            var status = Module._eraAtoc13(typeBuffer, ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, rcBuffer, dcBuffer);
+
+            var ret = {
+                rc: Module.HEAPF64[rcBuffer >>> 3],
+                dc: Module.HEAPF64[dcBuffer >>> 3],
+                status: status
+            };
+
+            Module._free(rcBuffer);
+            Module._free(dcBuffer);
+
+            return ret;
+
+        },
+        /** int eraAtoi13(const char *type, double ob1, double ob2, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *ri, double *di); */
+        atoi13: function (type, ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
+            var riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                typeBuffer = Module._malloc(type.length);
+
+            Module.writeStringToMemory(type, typeBuffer, false);
+
+            var status = Module._eraAtoi13(typeBuffer, ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, riBuffer, diBuffer);
+
+            var ret = {
+                ri: Module.HEAPF64[riBuffer >>> 3],
+                di: Module.HEAPF64[diBuffer >>> 3],
+                status: status
+            };
+
+            Module._free(riBuffer);
+            Module._free(diBuffer);
+
+            return ret;
+        },
+        /** void eraAtoiq(const char *type, double ob1, double ob2, eraASTROM *astrom, double *ri, double *di); */
+        /*void eraLd(double bm, double p[3], double q[3], double e[3], double em, double dlim, double p1[3]);
         void eraLdn(int n, eraLDBODY b[], double ob[3], double sc[3], double sn[3]);
         void eraLdsun(double p[3], double e[3], double em, double p1[3]);
         void eraPmpx(double rc, double dc, double pr, double pd, double px, double rv, double pmt, double pob[3], double pco[3]);
