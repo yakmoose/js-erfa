@@ -92,6 +92,20 @@
                 LIBERFA.HEAPF64[ofs + i ]= data[i];
             }
         },
+        /** helper to wrap rotations */
+        rxyz = function (angle, axis, matrix) {
+            var matrixBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT);
+            
+            writeFloat64Buffer(matrixBuffer, SH.flattenVector(matrix));
+            
+            LIBERFA['_eraR' + axis](angle,  matrixBuffer);
+            
+            var retMatrix = readFloat64Buffer(matrixBuffer, 3 * 3);
+
+            LIBERFA._free(matrixBuffer);
+
+            return SH.chunkArray(Array.from(retMatrix), 3);
+        },
         /** helper that will read a buffer into an array */
         readFloat64Buffer = function (ptr, size) {
             var ret = new Float64Array(size);
@@ -1823,12 +1837,95 @@
 
         //BuildRotations
         /** void eraRx(double phi, double r[3][3]); */
-        rx: [],
+        rx: function (phi, r) {
+            return rxyz(phi, 'x', r);
+        },
         /** void eraRy(double theta, double r[3][3]); */
+        ry: function (theta, r) {
+            return rxyz(theta, 'y', r);
+        },
+
         /** void eraRz(double psi, double r[3][3]);*/
+        rz: function (psi, r) {
+            return rxyz(psi, 'z', r);
+        },
+
         //CopyExtendExtract
+
         //Initialization
+        /** void eraIr(double r[3][3]); */
+        ir: function () {
+            /* do it the hard way to get the example below
+            var rBuffer = LIBERFA._malloc( 3 * 3 * Float64Array.BYTES_PER_ELEMENT);
+
+            LIBERFA._eraIr(rBuffer);
+
+            var ret = SH.chunkArray(Array.from(readFloat64Buffer(rBuffer,3 * 3)),3);
+            Module._free(rBuffer);
+
+            return ret;
+            */
+
+            return [ [1.0, 0.0, 0.0], [0.0, 1.0, 0,0], [0.0, 0.0, 1.0]];
+        },
+        /** void eraZp(double p[3]); */
+        zp: function () {
+            //again, we could do this the hardway, but since we are going for
+            // some level of immutability, we just disgard what we are supplied with
+            // and return the zeroed out array
+            return [0, 0, 0];
+        },
+        /** void eraZpv(double pv[2][3]); */
+        zpv: function () {
+            //as above, we are only returning a simple vector, do not need to call into
+            // the core library
+            return [
+                this.zp(),
+                this.zp()
+            ];
+        },
+        /** void eraZr(double r[3][3]); */
+        zr: function () {
+            //notes as zp...
+            return [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+        },
         //MatrixOps
+        /** void eraRxr(double a[3][3], double b[3][3], double atb[3][3]); */
+        rxr: function (a, b) {
+            var aBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT),
+                bBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT),
+                atbBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(aBuffer, SH.flattenVector(a));
+            writeFloat64Buffer(bBuffer, SH.flattenVector(b));
+
+            LIBERFA._eraRxr(aBuffer, bBuffer, atbBuffer);
+
+            var atb = SH.chunkArray(Array.from(readFloat64Buffer(atbBuffer, 3*3)), 3);
+
+            LIBERFA._free(aBuffer);
+            LIBERFA._free(bBuffer);
+            LIBERFA._free(atbBuffer);
+
+            return atb;
+        },
+        /** void eraTr(double r[3][3], double rt[3][3]); */
+        tr: function (r) {
+
+            var rBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT),
+                rtBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(rBuffer, SH.flattenVector(r));
+            LIBERFA._eraTr(rBuffer, rtBuffer);
+
+            var rt = SH.chunkArray(Array.from(readFloat64Buffer(rtBuffer, 3 *3)), 3);
+
+            LIBERFA._free(rBuffer);
+            LIBERFA._free(rtBuffer);
+
+            return rt;
+
+        },
         //MatrixVectorProducts
         //RotationVectors
         //SeparationAndAngle
