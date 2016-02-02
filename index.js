@@ -1,43 +1,43 @@
 (function () {
     "use strict";
 
-    var Module = require('./lib/liberfa'),
+    var LIBERFA = require('./lib/liberfa'),
         SH = require('./lib/struct-helper');
 
     //simple wrappers that handle various heap/pointer shenanigans
     var angleToDMSF = function (fn,ndp, angle ) {
-            var signBuffer = Module._malloc(1 * Uint8Array.BYTES_PER_ELEMENT),// one byte for the sign char
-                idmsBuffer = Module._malloc(4 * Int32Array.BYTES_PER_ELEMENT),
+            var signBuffer = LIBERFA._malloc(1 * Uint8Array.BYTES_PER_ELEMENT),// one byte for the sign char
+                idmsBuffer = LIBERFA._malloc(4 * Int32Array.BYTES_PER_ELEMENT),
                 ofs = idmsBuffer>> 2,
-                status = Module[fn](ndp, angle, signBuffer, idmsBuffer),
+                status = LIBERFA[fn](ndp, angle, signBuffer, idmsBuffer),
 
             //we want to return a sensible structure not just a chunk of memory
             ret =  {
                 status: status,
-                sign: String.fromCharCode( Module.HEAP8[signBuffer]),
-                degrees: Module.HEAP32[ ofs + 0 ],
-                minutes: Module.HEAP32[ ofs + 1 ],
-                seconds: Module.HEAP32[ ofs + 2 ],
-                fraction: Module.HEAP32[ ofs + 3 ]
+                sign: String.fromCharCode( LIBERFA.HEAP8[signBuffer]),
+                degrees: LIBERFA.HEAP32[ ofs + 0 ],
+                minutes: LIBERFA.HEAP32[ ofs + 1 ],
+                seconds: LIBERFA.HEAP32[ ofs + 2 ],
+                fraction: LIBERFA.HEAP32[ ofs + 3 ]
             };
 
-            Module._free(signBuffer);
-            Module._free(idmsBuffer);
+            LIBERFA._free(signBuffer);
+            LIBERFA._free(idmsBuffer);
 
             return ret;
         },
         dmsToAngle = function (fn, s, ideg, iamin, iasec) {
-            var radBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+            var radBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
                 ret,
                 rad;
 
             s = s || "";
 
-            ret = Module[fn](s.charCodeAt(0), ideg, iamin, iasec, radBuffer);
+            ret = LIBERFA[fn](s.charCodeAt(0), ideg, iamin, iasec, radBuffer);
 
-            rad = Module.HEAPF64[ radBuffer >> 3];
+            rad = LIBERFA.HEAPF64[ radBuffer >> 3];
 
-            Module._free(radBuffer);
+            LIBERFA._free(radBuffer);
 
             if (ret != 0) {
                 //throw an exception here...
@@ -54,49 +54,49 @@
          * @returns {{}}
          */
         timeScaleConvert = function (t1, t2, fn, symbol) {
-            var t1Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                t2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var t1Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                t2Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module[fn](t1, t2, t1Buffer, t2Buffer),
+            var status = LIBERFA[fn](t1, t2, t1Buffer, t2Buffer),
                 ret = {};
 
-            ret[ symbol + '1'] = Module.HEAPF64[t1Buffer >> 3];
-            ret[ symbol + '2'] = Module.HEAPF64[t2Buffer >> 3];
+            ret[ symbol + '1'] = LIBERFA.HEAPF64[t1Buffer >> 3];
+            ret[ symbol + '2'] = LIBERFA.HEAPF64[t2Buffer >> 3];
             ret['status'] = status;
 
-            Module._free(t1Buffer);
-            Module._free(t2Buffer);
+            LIBERFA._free(t1Buffer);
+            LIBERFA._free(t2Buffer);
 
             return ret;
         },
         /** helper to simplfy buffers / pointers when converting between timecales with and additional correction factor */
         timeScaleConvertWithFactor = function (t1, t2, d, fn, symbol) {
-            var t1Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                t2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var t1Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                t2Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module[fn](t1, t2, d, t1Buffer, t2Buffer),
+            var status = LIBERFA[fn](t1, t2, d, t1Buffer, t2Buffer),
                 ret = {};
 
-            ret[ symbol + '1'] = Module.HEAPF64[t1Buffer >> 3];
-            ret[ symbol + '2'] = Module.HEAPF64[t2Buffer >> 3];
+            ret[ symbol + '1'] = LIBERFA.HEAPF64[t1Buffer >> 3];
+            ret[ symbol + '2'] = LIBERFA.HEAPF64[t2Buffer >> 3];
             ret['status'] = status;
 
-            Module._free(t1Buffer);
-            Module._free(t2Buffer);
+            LIBERFA._free(t1Buffer);
+            LIBERFA._free(t2Buffer);
 
             return ret;
         },
         /** helper to wrap writing to heap/buffer */
         writeFloat64Buffer = function (ptr, data) {
             for (var i = 0, c = data.length, ofs = ptr >> 3; i < c; i++) {
-                Module.HEAPF64[ofs + i ]= data[i];
+                LIBERFA.HEAPF64[ofs + i ]= data[i];
             }
         },
         /** helper that will read a buffer into an array */
         readFloat64Buffer = function (ptr, size) {
             var ret = new Float64Array(size);
             for(var i = 0, ofs = ptr >> 3; i < size; i++) {
-                ret[i] = Module.HEAPF64[ofs + i];
+                ret[i] = LIBERFA.HEAPF64[ofs + i];
             }
 
             return ret;
@@ -246,108 +246,108 @@
         };
 
     module.exports = {
-        _Module : Module,
+        _Module : LIBERFA,
         ASTROM : ASTROM,
         LDBODY: LDBODY,
         // Astronomy/Calendars
         /** int eraCal2jd(int iy, int im, int id, double *djm0, double *djm); */
         cal2jd: function(iy, im, id) {
 
-            var djm0Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                djmBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var djm0Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                djmBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module._eraCal2jd(iy, im, id, djm0Buffer, djmBuffer),
+            var status = LIBERFA._eraCal2jd(iy, im, id, djm0Buffer, djmBuffer),
                 ret = {
                     status: status,
-                    djm0: Module.HEAPF64[ djm0Buffer >> 3],
-                    djm: Module.HEAPF64[ djmBuffer >> 3]
+                    djm0: LIBERFA.HEAPF64[ djm0Buffer >> 3],
+                    djm: LIBERFA.HEAPF64[ djmBuffer >> 3]
                 };
 
 
-            Module._free(djm0Buffer);
-            Module._free(djmBuffer);
+            LIBERFA._free(djm0Buffer);
+            LIBERFA._free(djmBuffer);
 
             return ret;
         },
         /** double eraEpb(double dj1, double dj2); */
-        epb: Module.cwrap('eraEpb','number',['number','number']),
+        epb: LIBERFA.cwrap('eraEpb','number',['number','number']),
         /** void eraEpb2jd(double epb, double *djm0, double *djm); */
         epb2jd: function (epb){
-            var djm0Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                djmBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var djm0Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                djmBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module._eraEpb2jd(epb, djm0Buffer, djmBuffer),
+            var status = LIBERFA._eraEpb2jd(epb, djm0Buffer, djmBuffer),
                 ret = {
                     status: status,
-                    djm0: Module.HEAPF64[ djm0Buffer >> 3],
-                    djm: Module.HEAPF64[ djmBuffer >> 3]
+                    djm0: LIBERFA.HEAPF64[ djm0Buffer >> 3],
+                    djm: LIBERFA.HEAPF64[ djmBuffer >> 3]
                 };
 
 
-            Module._free(djm0Buffer);
-            Module._free(djmBuffer);
+            LIBERFA._free(djm0Buffer);
+            LIBERFA._free(djmBuffer);
 
             return ret;
         },
         /** double eraEpj(double dj1, double dj2); */
-        epj: Module.cwrap('eraEpj', 'number', ['number','number']),
+        epj: LIBERFA.cwrap('eraEpj', 'number', ['number','number']),
         /** void eraEpj2jd(double epj, double *djm0, double *djm); */
         epj2jd: function (epj) {
-            var djm0Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                djmBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var djm0Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                djmBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module._eraEpj2jd(epj, djm0Buffer, djmBuffer),
+            var status = LIBERFA._eraEpj2jd(epj, djm0Buffer, djmBuffer),
                 ret = {
                     status: status,
-                    djm0: Module.HEAPF64[ djm0Buffer >> 3],
-                    djm: Module.HEAPF64[ djmBuffer >> 3]
+                    djm0: LIBERFA.HEAPF64[ djm0Buffer >> 3],
+                    djm: LIBERFA.HEAPF64[ djmBuffer >> 3]
                 };
 
 
-            Module._free(djm0Buffer);
-            Module._free(djmBuffer);
+            LIBERFA._free(djm0Buffer);
+            LIBERFA._free(djmBuffer);
 
             return ret;
         },
         /** int eraJd2cal(double dj1, double dj2, int *iy, int *im, int *id, double *fd); */
         jd2cal: function (dj1, dj2) {
-            var iyBuffer = Module._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
-                imBuffer = Module._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
-                idBuffer = Module._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
-                fBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var iyBuffer = LIBERFA._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
+                imBuffer = LIBERFA._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
+                idBuffer = LIBERFA._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
+                fBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
             //we use ccall here so we don't need to mess about with string pointers etc..
-            var status = Module._eraJd2cal(dj1, dj2, iyBuffer, imBuffer, idBuffer, fBuffer),
+            var status = LIBERFA._eraJd2cal(dj1, dj2, iyBuffer, imBuffer, idBuffer, fBuffer),
                 ret = {
-                    year: Module.HEAP32[iyBuffer>>2],
-                    month: Module.HEAP32[imBuffer>>2],
-                    day: Module.HEAP32[idBuffer>>2],
-                    fraction: Module.HEAPF64[fBuffer>>3],
+                    year: LIBERFA.HEAP32[iyBuffer>>2],
+                    month: LIBERFA.HEAP32[imBuffer>>2],
+                    day: LIBERFA.HEAP32[idBuffer>>2],
+                    fraction: LIBERFA.HEAPF64[fBuffer>>3],
                     status: status
                 };
 
-            Module._free(iyBuffer);
-            Module._free(imBuffer);
-            Module._free(idBuffer);
-            Module._free(fBuffer);
+            LIBERFA._free(iyBuffer);
+            LIBERFA._free(imBuffer);
+            LIBERFA._free(idBuffer);
+            LIBERFA._free(fBuffer);
 
             return ret;
         },
         /** int eraJdcalf(int ndp, double dj1, double dj2, int iymdf[4]); */
         jdcalf: function (ndp, dj1, dj2) {
-            var iymdfBuffer = Module._malloc(4 * Float64Array.BYTES_PER_ELEMENT);
+            var iymdfBuffer = LIBERFA._malloc(4 * Float64Array.BYTES_PER_ELEMENT);
 
             //we use ccall here so we don't need to mess about with string pointers etc..
-            var status = Module._eraJdcalf(ndp, dj1, dj2, iymdfBuffer),
+            var status = LIBERFA._eraJdcalf(ndp, dj1, dj2, iymdfBuffer),
                 ret = {
-                    year: Module.HEAP32[(iymdfBuffer>>2) +0],
-                    month: Module.HEAP32[(iymdfBuffer>>2) +1],
-                    day: Module.HEAP32[(iymdfBuffer>>2) +2],
-                    fraction: Module.HEAP32[(iymdfBuffer>>2) +3],
+                    year: LIBERFA.HEAP32[(iymdfBuffer>>2) +0],
+                    month: LIBERFA.HEAP32[(iymdfBuffer>>2) +1],
+                    day: LIBERFA.HEAP32[(iymdfBuffer>>2) +2],
+                    fraction: LIBERFA.HEAP32[(iymdfBuffer>>2) +3],
                     status: status
                 };
 
-            Module._free(iymdfBuffer);
+            LIBERFA._free(iymdfBuffer);
 
             return ret;
         },
@@ -356,25 +356,25 @@
 
         /** void eraAb(double pnat[3], double v[3], double s, double bm1, double ppr[3]); */
         ab: function (pnat, v, s, bm1) {
-            var pnatBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-                vBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-                pprBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+            var pnatBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+                vBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+                pprBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
                 //pnatBuffer
                 writeFloat64Buffer(pnatBuffer, pnat);
                 writeFloat64Buffer(vBuffer, v);
 
-                Module._eraAb(pnatBuffer, vBuffer, s, bm1, pprBuffer);
+                LIBERFA._eraAb(pnatBuffer, vBuffer, s, bm1, pprBuffer);
 
                 var ret = [
-                    Module.HEAPF64[(pprBuffer >> 3) + 0],
-                    Module.HEAPF64[(pprBuffer >> 3) + 1],
-                    Module.HEAPF64[(pprBuffer >> 3) + 2]
+                    LIBERFA.HEAPF64[(pprBuffer >> 3) + 0],
+                    LIBERFA.HEAPF64[(pprBuffer >> 3) + 1],
+                    LIBERFA.HEAPF64[(pprBuffer >> 3) + 2]
                 ];
 
-            Module._free(pnatBuffer);
-            Module._free(vBuffer);
-            Module._free(pprBuffer);
+            LIBERFA._free(pnatBuffer);
+            LIBERFA._free(vBuffer);
+            LIBERFA._free(pprBuffer);
 
             return ret;
 
@@ -383,20 +383,20 @@
 
         /** void eraApcg(double date1, double date2, double ebpv[2][3], double ehp[3], eraASTROM *astrom); */
         apcg: function (date1, date2, ebpv, ehp) {
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),// this is the size of the struct, trust me
-              ebpvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
-              ehpBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),// this is the size of the struct, trust me
+              ebpvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
+              ehpBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
             writeFloat64Buffer(ehpBuffer, ehp);
 
-            Module._eraApcg(date1, date2, ebpvBuffer, ehpBuffer, astromBuffer );
+            LIBERFA._eraApcg(date1, date2, ebpvBuffer, ehpBuffer, astromBuffer );
 
             var ret = readFloat64Buffer(astromBuffer, 31);
 
-            Module._free(astromBuffer);
-            Module._free(ebpvBuffer);
-            Module._free(ehpBuffer);
+            LIBERFA._free(astromBuffer);
+            LIBERFA._free(ebpvBuffer);
+            LIBERFA._free(ehpBuffer);
 
             return new ASTROM(ret);
         },
@@ -404,12 +404,12 @@
         /** void eraApcg13(double date1, double date2, eraASTROM *astrom); */
         apcg13: function (date1, date2) {
 
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
 
-            Module._eraApcg13(date1, date2, astromBuffer);
+            LIBERFA._eraApcg13(date1, date2, astromBuffer);
 
             var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
-            Module._free(astromBuffer);
+            LIBERFA._free(astromBuffer);
 
             return new ASTROM(ret);
         },
@@ -417,37 +417,37 @@
         /** void eraApci(double date1, double date2, double ebpv[2][3], double ehp[3], double x, double y, double s, eraASTROM *astrom); */
         apci: function (date1, date2, ebpv, ehp, x, y, s) {
 
-            var ebpvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
-              ehpBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-              astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+            var ebpvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
+              ehpBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+              astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
             writeFloat64Buffer(ehpBuffer, ehp);
 
-            Module._eraApci(date1, date2, ebpvBuffer, ehpBuffer, x, y, s, astromBuffer);
+            LIBERFA._eraApci(date1, date2, ebpvBuffer, ehpBuffer, x, y, s, astromBuffer);
 
             var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
-            Module._free(astromBuffer);
-            Module._free(ebpvBuffer);
-            Module._free(ehpBuffer);
+            LIBERFA._free(astromBuffer);
+            LIBERFA._free(ebpvBuffer);
+            LIBERFA._free(ehpBuffer);
 
             return new ASTROM(ret);
         },
         /** void eraApci13(double date1, double date2, eraASTROM *astrom, double *eo);*/
         apci13: function (date1, date2) {
 
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
-                eoBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+                eoBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            Module._eraApci13(date1, date2, astromBuffer, eoBuffer);
+            LIBERFA._eraApci13(date1, date2, astromBuffer, eoBuffer);
 
             var ret = {
                 astrom: new ASTROM(readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE)),
-                eo: Module.HEAPF64[ eoBuffer >>> 3]
+                eo: LIBERFA.HEAPF64[ eoBuffer >>> 3]
             };
 
-            Module._free(astromBuffer);
-            Module._free(eoBuffer);
+            LIBERFA._free(astromBuffer);
+            LIBERFA._free(eoBuffer);
 
 
             return ret;
@@ -455,79 +455,79 @@
         /** void eraApco(double date1, double date2, double ebpv[2][3], double ehp[3], double x, double y, double s, double theta, double elong, double phi, double hm, double xp, double yp, double sp, double refa, double refb, eraASTROM *astrom);*/
         apco: function (date1, date2, ebpv, ehp, x, y, s, theta, elong, phi, hm, xp, yp, sp, refa, refb) {
 
-            var ebpvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
-              ehpBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-              astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+            var ebpvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
+              ehpBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+              astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
             writeFloat64Buffer(ehpBuffer, ehp);
 
-            Module._eraApco(date1, date2, ebpvBuffer, ehpBuffer, x, y, s, theta, elong, phi, hm, xp, yp, sp, refa, refb, astromBuffer);
+            LIBERFA._eraApco(date1, date2, ebpvBuffer, ehpBuffer, x, y, s, theta, elong, phi, hm, xp, yp, sp, refa, refb, astromBuffer);
 
             var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
 
-            Module._free(astromBuffer);
-            Module._free(ebpvBuffer);
-            Module._free(ehpBuffer);
+            LIBERFA._free(astromBuffer);
+            LIBERFA._free(ebpvBuffer);
+            LIBERFA._free(ehpBuffer);
 
             return new ASTROM(ret);
         },
         /** int eraApco13(double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, eraASTROM *astrom, double *eo);*/
         apco13: function (utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
 
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
-              eoBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              eoBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
 
-            var j = Module._eraApco13(utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, astromBuffer, eoBuffer);
+            var j = LIBERFA._eraApco13(utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, astromBuffer, eoBuffer);
 
             var ret = {
                 astrom: new ASTROM(readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE)),
-                eo: Module.HEAPF64[ eoBuffer >>> 3],
+                eo: LIBERFA.HEAPF64[ eoBuffer >>> 3],
                 status: j
             };
 
-            Module._free(astromBuffer);
-            Module._free(eoBuffer);
+            LIBERFA._free(astromBuffer);
+            LIBERFA._free(eoBuffer);
 
             return ret;
         },
         /** void eraApcs(double date1, double date2, double pv[2][3], double ebpv[2][3], double ehp[3], eraASTROM *astrom); */
         apcs: function (date1, date2, pv, ebpv, ehp) {
 
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
-              pvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
-              ebpvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
-              ehpBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              pvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
+              ebpvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
+              ehpBuffer = LIBERFA._malloc(3  * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(pvBuffer, SH.flattenVector(pv));
             writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
             writeFloat64Buffer(ehpBuffer, ehp);
 
-            Module._eraApcs(date1, date2, pvBuffer, ebpvBuffer, ehpBuffer, astromBuffer);
+            LIBERFA._eraApcs(date1, date2, pvBuffer, ebpvBuffer, ehpBuffer, astromBuffer);
 
             var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
 
-            Module._free(astromBuffer);
-            Module._free(pvBuffer);
-            Module._free(ebpvBuffer);
-            Module._free(ehpBuffer);
+            LIBERFA._free(astromBuffer);
+            LIBERFA._free(pvBuffer);
+            LIBERFA._free(ebpvBuffer);
+            LIBERFA._free(ehpBuffer);
 
             return new ASTROM(ret);
         },
         /** void eraApcs13(double date1, double date2, double pv[2][3], eraASTROM *astrom);*/
         apcs13: function (date1, date2, pv) {
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
-              pvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              pvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(pvBuffer, SH.flattenVector(pv));
 
-            Module._eraApcs13(date1, date2, pvBuffer, astromBuffer);
+            LIBERFA._eraApcs13(date1, date2, pvBuffer, astromBuffer);
 
             var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
 
-            Module._free(astromBuffer);
-            Module._free(pvBuffer);
+            LIBERFA._free(astromBuffer);
+            LIBERFA._free(pvBuffer);
 
             return new ASTROM(ret);
 
@@ -535,55 +535,55 @@
         /** void eraAper(double theta, eraASTROM *astrom); */
         aper: function(theta, astrom) {
 
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(astromBuffer, astrom.toArray());
 
-            Module._eraAper(theta, astromBuffer);
+            LIBERFA._eraAper(theta, astromBuffer);
 
             var ret =readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
 
-            Module._free(astromBuffer);
+            LIBERFA._free(astromBuffer);
 
             return  new ASTROM(ret);//return the one we were passed in??
         },
 
         /** void eraAper13(double ut11, double ut12, eraASTROM *astrom); */
         aper13: function (ut11, ut12, astrom) {
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(astromBuffer, astrom.toArray());
 
-            Module._eraAper13(ut11, ut12, astromBuffer);
+            LIBERFA._eraAper13(ut11, ut12, astromBuffer);
 
             var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
 
-            Module._free(astromBuffer);
+            LIBERFA._free(astromBuffer);
 
             return  new ASTROM(ret);//return the one we were passed in??
         },
         /** void eraApio(double sp, double theta, double elong, double phi, double hm, double xp, double yp, double refa, double refb, eraASTROM *astrom); */
         apio: function (sp, theta, elong, phi, hm, xp, yp, refa, refb) {
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
 
-            Module._eraApio(sp, theta, elong, phi, hm, xp, yp, refa, refb, astromBuffer);
+            LIBERFA._eraApio(sp, theta, elong, phi, hm, xp, yp, refa, refb, astromBuffer);
 
             var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
 
-            Module._free(astromBuffer);
+            LIBERFA._free(astromBuffer);
 
             return  new ASTROM(ret);
 
         },
         /** int eraApio13(double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, eraASTROM *astrom);*/
         apio13: function (utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module._eraApio13(utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, astromBuffer);
+            var status = LIBERFA._eraApio13(utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, astromBuffer);
 
             var ret = readFloat64Buffer(astromBuffer, ASTROM.STRUCT_SIZE);
 
-            Module._free(astromBuffer);
+            LIBERFA._free(astromBuffer);
 
             return  {
                 astrom: new ASTROM(ret),
@@ -594,21 +594,21 @@
         /** void eraAtci13(double rc, double dc, double pr, double pd, double px, double rv, double date1, double date2, double *ri, double *di, double *eo); */
         atci13: function (rc, dc, pr, pd, px, rv, date1, date2) {
 
-            var eoBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+            var eoBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                riBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                diBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
 
-            Module._eraAtci13(rc, dc, pr, pd, px, rv, date1, date2, riBuffer, diBuffer, eoBuffer);
+            LIBERFA._eraAtci13(rc, dc, pr, pd, px, rv, date1, date2, riBuffer, diBuffer, eoBuffer);
 
             var ret = {
-                ri: Module.HEAPF64[ riBuffer >>> 3],
-                di: Module.HEAPF64[ diBuffer >>> 3],
-                eo: Module.HEAPF64[ eoBuffer >>> 3]
+                ri: LIBERFA.HEAPF64[ riBuffer >>> 3],
+                di: LIBERFA.HEAPF64[ diBuffer >>> 3],
+                eo: LIBERFA.HEAPF64[ eoBuffer >>> 3]
             };
 
-            Module._free(diBuffer);
-            Module._free(riBuffer);
-            Module._free(eoBuffer);
+            LIBERFA._free(diBuffer);
+            LIBERFA._free(riBuffer);
+            LIBERFA._free(eoBuffer);
 
             return ret;
 
@@ -616,22 +616,22 @@
         /** void eraAtciq(double rc, double dc, double pr, double pd, double px, double rv, eraASTROM *astrom, double *ri, double *di); */
         atciq: function (rc, dc, pr, pd, px, rv, astrom) {
 
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
-                riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+                riBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                diBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(astromBuffer, astrom.toArray());
 
-            Module._eraAtciq(rc, dc, pr, pd, px, rv, astromBuffer, riBuffer, diBuffer);
+            LIBERFA._eraAtciq(rc, dc, pr, pd, px, rv, astromBuffer, riBuffer, diBuffer);
 
             var ret = {
-                ri: Module.HEAPF64[riBuffer >>> 3],
-                di: Module.HEAPF64[diBuffer >>> 3]
+                ri: LIBERFA.HEAPF64[riBuffer >>> 3],
+                di: LIBERFA.HEAPF64[diBuffer >>> 3]
             };
 
-            Module._free(diBuffer);
-            Module._free(riBuffer);
-            Module._free(astromBuffer);
+            LIBERFA._free(diBuffer);
+            LIBERFA._free(riBuffer);
+            LIBERFA._free(astromBuffer);
 
             return ret;
         },
@@ -640,10 +640,10 @@
 
             var bSize = b.length * LDBODY.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT;
 
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
-              riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              bBuffer = Module._malloc(bSize);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              riBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              diBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              bBuffer = LIBERFA._malloc(bSize);
 
             writeFloat64Buffer(astromBuffer, astrom.toArray());
 
@@ -652,40 +652,40 @@
                 return item.toArray();
             })));
 
-            Module._eraAtciqn(rc, dc, pr, pd, px, rv, astromBuffer, b.length, bBuffer, riBuffer, diBuffer);
+            LIBERFA._eraAtciqn(rc, dc, pr, pd, px, rv, astromBuffer, b.length, bBuffer, riBuffer, diBuffer);
 
             var ret = {
-                ri: Module.HEAPF64[riBuffer >>> 3],
-                di: Module.HEAPF64[diBuffer >>> 3]
+                ri: LIBERFA.HEAPF64[riBuffer >>> 3],
+                di: LIBERFA.HEAPF64[diBuffer >>> 3]
             };
 
-            Module._free(diBuffer);
-            Module._free(riBuffer);
-            Module._free(astromBuffer);
-            Module._free(bBuffer);
+            LIBERFA._free(diBuffer);
+            LIBERFA._free(riBuffer);
+            LIBERFA._free(astromBuffer);
+            LIBERFA._free(bBuffer);
 
             return ret;
         },
         /** void eraAtciqz(double rc, double dc, eraASTROM *astrom, double *ri, double *di); */
         atciqz: function (rc, dc, astrom) {
 
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
-                riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+                riBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                diBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(astromBuffer, astrom.toArray());
 
-            Module._eraAtciqz(rc, dc, astromBuffer, riBuffer, diBuffer);
+            LIBERFA._eraAtciqz(rc, dc, astromBuffer, riBuffer, diBuffer);
 
 
             var ret = {
-                ri: Module.HEAPF64[riBuffer >>> 3],
-                di: Module.HEAPF64[diBuffer >>> 3]
+                ri: LIBERFA.HEAPF64[riBuffer >>> 3],
+                di: LIBERFA.HEAPF64[diBuffer >>> 3]
             };
 
-            Module._free(diBuffer);
-            Module._free(riBuffer);
-            Module._free(astromBuffer);
+            LIBERFA._free(diBuffer);
+            LIBERFA._free(riBuffer);
+            LIBERFA._free(astromBuffer);
 
             return ret;
         },
@@ -693,14 +693,14 @@
         /** int eraAtco13(double rc, double dc, double pr, double pd, double px, double rv, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *aob, double *zob, double *hob, double *dob, double *rob, double *eo); */
         atco13: function (rc, dc, pr, pd, px, rv, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
 
-            var aobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                zobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                hobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                dobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                robBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                eoBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+            var aobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                zobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                hobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                dobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                robBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                eoBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module._eraAtco13(
+            var status = LIBERFA._eraAtco13(
               rc, dc, pr, pd, px, rv, utc1, utc2, dut1,
               elong, phi, hm, xp, yp, phpa, tc, rh, wl,
               aobBuffer, zobBuffer, hobBuffer, dobBuffer,
@@ -708,21 +708,21 @@
             );
 
             var ret = {
-                aob: Module.HEAPF64[aobBuffer >>> 3],
-                zob: Module.HEAPF64[zobBuffer >>> 3],
-                hob: Module.HEAPF64[hobBuffer >>> 3],
-                dob: Module.HEAPF64[dobBuffer >>> 3],
-                rob: Module.HEAPF64[robBuffer >>> 3],
-                eo: Module.HEAPF64[eoBuffer >>> 3],
+                aob: LIBERFA.HEAPF64[aobBuffer >>> 3],
+                zob: LIBERFA.HEAPF64[zobBuffer >>> 3],
+                hob: LIBERFA.HEAPF64[hobBuffer >>> 3],
+                dob: LIBERFA.HEAPF64[dobBuffer >>> 3],
+                rob: LIBERFA.HEAPF64[robBuffer >>> 3],
+                eo: LIBERFA.HEAPF64[eoBuffer >>> 3],
                 status: status
             };
 
-            Module._free(aobBuffer);
-            Module._free(zobBuffer);
-            Module._free(hobBuffer);
-            Module._free(dobBuffer);
-            Module._free(robBuffer);
-            Module._free(eoBuffer);
+            LIBERFA._free(aobBuffer);
+            LIBERFA._free(zobBuffer);
+            LIBERFA._free(hobBuffer);
+            LIBERFA._free(dobBuffer);
+            LIBERFA._free(robBuffer);
+            LIBERFA._free(eoBuffer);
 
             return ret;
 
@@ -730,42 +730,42 @@
 
         /** void eraAtic13(double ri, double di, double date1, double date2, double *rc, double *dc, double *eo); */
         atic13: function (ri, di, date1, date2 ){
-            var riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                eoBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+            var riBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                diBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                eoBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
 
-            Module._eraAtic13(ri, di, date1, date2, riBuffer, diBuffer, eoBuffer);
+            LIBERFA._eraAtic13(ri, di, date1, date2, riBuffer, diBuffer, eoBuffer);
 
             var ret = {
-                rc: Module.HEAPF64[riBuffer >>> 3],
-                dc: Module.HEAPF64[diBuffer >>> 3],
-                eo: Module.HEAPF64[eoBuffer >>> 3]
+                rc: LIBERFA.HEAPF64[riBuffer >>> 3],
+                dc: LIBERFA.HEAPF64[diBuffer >>> 3],
+                eo: LIBERFA.HEAPF64[eoBuffer >>> 3]
             };
 
-            Module._free(riBuffer);
-            Module._free(diBuffer);
-            Module._free(eoBuffer);
+            LIBERFA._free(riBuffer);
+            LIBERFA._free(diBuffer);
+            LIBERFA._free(eoBuffer);
 
             return ret;
         },
         /** void eraAticq(double ri, double di, eraASTROM *astrom, double *rc, double *dc);*/
         aticq: function (ri, di, astrom) {
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
-              rcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              dcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              rcBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              dcBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(astromBuffer, astrom.toArray());
 
-            Module._eraAticq(ri, di, astromBuffer, rcBuffer, dcBuffer);
+            LIBERFA._eraAticq(ri, di, astromBuffer, rcBuffer, dcBuffer);
 
             var ret = {
-                rc: Module.HEAPF64[rcBuffer >>> 3],
-                dc: Module.HEAPF64[dcBuffer >>> 3]
+                rc: LIBERFA.HEAPF64[rcBuffer >>> 3],
+                dc: LIBERFA.HEAPF64[dcBuffer >>> 3]
             };
 
-            Module._free(rcBuffer);
-            Module._free(dcBuffer);
-            Module._free(astromBuffer);
+            LIBERFA._free(rcBuffer);
+            LIBERFA._free(dcBuffer);
+            LIBERFA._free(astromBuffer);
 
             return ret;
 
@@ -775,56 +775,56 @@
 
             var bSize = b.length * LDBODY.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT;
 
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
-              rcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              dcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              bBuffer = Module._malloc(bSize);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              rcBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              dcBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              bBuffer = LIBERFA._malloc(bSize);
 
             writeFloat64Buffer(astromBuffer, astrom.toArray());
             writeFloat64Buffer(bBuffer, SH.flattenVector(b.map(function (item){
                 return item.toArray();
             })));
 
-            Module._eraAticqn(ri, di, astromBuffer, b.length, bBuffer, rcBuffer, dcBuffer);
+            LIBERFA._eraAticqn(ri, di, astromBuffer, b.length, bBuffer, rcBuffer, dcBuffer);
 
             var ret = {
-                rc: Module.HEAPF64[rcBuffer >>> 3],
-                dc: Module.HEAPF64[dcBuffer >>> 3]
+                rc: LIBERFA.HEAPF64[rcBuffer >>> 3],
+                dc: LIBERFA.HEAPF64[dcBuffer >>> 3]
             };
 
-            Module._free(rcBuffer);
-            Module._free(dcBuffer);
-            Module._free(astromBuffer);
-            Module._free(bBuffer);
+            LIBERFA._free(rcBuffer);
+            LIBERFA._free(dcBuffer);
+            LIBERFA._free(astromBuffer);
+            LIBERFA._free(bBuffer);
 
             return ret;
         },
         /** int eraAtio13(double ri, double di, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *aob, double *zob, double *hob, double *dob, double *rob);*/
         atio13: function (ri, di, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
 
-            var aobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                zobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                hobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                dobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                robBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
+            var aobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                zobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                hobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                dobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                robBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT);
 
-            var j = Module._eraAtio13(ri, di, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl,
+            var j = LIBERFA._eraAtio13(ri, di, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl,
                                         aobBuffer, zobBuffer, hobBuffer,dobBuffer, robBuffer);
 
             var ret = {
-                aob: Module.HEAPF64[aobBuffer >>> 3],
-                zob: Module.HEAPF64[zobBuffer >>> 3],
-                hob: Module.HEAPF64[hobBuffer >>> 3],
-                dob: Module.HEAPF64[dobBuffer >>> 3],
-                rob: Module.HEAPF64[robBuffer >>> 3],
+                aob: LIBERFA.HEAPF64[aobBuffer >>> 3],
+                zob: LIBERFA.HEAPF64[zobBuffer >>> 3],
+                hob: LIBERFA.HEAPF64[hobBuffer >>> 3],
+                dob: LIBERFA.HEAPF64[dobBuffer >>> 3],
+                rob: LIBERFA.HEAPF64[robBuffer >>> 3],
                 status: j
             };
 
-            Module._free(aobBuffer);
-            Module._free(zobBuffer);
-            Module._free(hobBuffer);
-            Module._free(dobBuffer);
-            Module._free(robBuffer);
+            LIBERFA._free(aobBuffer);
+            LIBERFA._free(zobBuffer);
+            LIBERFA._free(hobBuffer);
+            LIBERFA._free(dobBuffer);
+            LIBERFA._free(robBuffer);
 
             return ret;
         },
@@ -832,124 +832,124 @@
         atioq: function (ri, di, astrom) {
             //double *aob, double *zob, double *hob, double *dob, double *rob
 
-            var aobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              zobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              hobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              dobBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              robBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
+            var aobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              zobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              hobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              dobBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              robBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(astromBuffer, astrom.toArray());
 
             
-            Module._eraAtioq(ri, di, astromBuffer,
+            LIBERFA._eraAtioq(ri, di, astromBuffer,
               aobBuffer, zobBuffer, hobBuffer,dobBuffer, robBuffer);
 
             var ret = {
-                aob: Module.HEAPF64[aobBuffer >>> 3],
-                zob: Module.HEAPF64[zobBuffer >>> 3],
-                hob: Module.HEAPF64[hobBuffer >>> 3],
-                dob: Module.HEAPF64[dobBuffer >>> 3],
-                rob: Module.HEAPF64[robBuffer >>> 3]
+                aob: LIBERFA.HEAPF64[aobBuffer >>> 3],
+                zob: LIBERFA.HEAPF64[zobBuffer >>> 3],
+                hob: LIBERFA.HEAPF64[hobBuffer >>> 3],
+                dob: LIBERFA.HEAPF64[dobBuffer >>> 3],
+                rob: LIBERFA.HEAPF64[robBuffer >>> 3]
             };
 
-            Module._free(aobBuffer);
-            Module._free(zobBuffer);
-            Module._free(hobBuffer);
-            Module._free(dobBuffer);
-            Module._free(robBuffer);
-            Module._free(astromBuffer);
+            LIBERFA._free(aobBuffer);
+            LIBERFA._free(zobBuffer);
+            LIBERFA._free(hobBuffer);
+            LIBERFA._free(dobBuffer);
+            LIBERFA._free(robBuffer);
+            LIBERFA._free(astromBuffer);
 
             return ret;
         },
         /** int eraAtoc13(const char *type, double ob1, double ob2, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *rc, double *dc); */
         atoc13: function (type, ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
 
-            var rcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              dcBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              typeBuffer = Module._malloc(type.length);
+            var rcBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              dcBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              typeBuffer = LIBERFA._malloc(type.length);
 
-            Module.writeStringToMemory(type, typeBuffer, false);
+            LIBERFA.writeStringToMemory(type, typeBuffer, false);
 
-            var status = Module._eraAtoc13(typeBuffer, ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, rcBuffer, dcBuffer);
+            var status = LIBERFA._eraAtoc13(typeBuffer, ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, rcBuffer, dcBuffer);
 
             var ret = {
-                rc: Module.HEAPF64[rcBuffer >>> 3],
-                dc: Module.HEAPF64[dcBuffer >>> 3],
+                rc: LIBERFA.HEAPF64[rcBuffer >>> 3],
+                dc: LIBERFA.HEAPF64[dcBuffer >>> 3],
                 status: status
             };
 
-            Module._free(rcBuffer);
-            Module._free(dcBuffer);
+            LIBERFA._free(rcBuffer);
+            LIBERFA._free(dcBuffer);
 
             return ret;
 
         },
         /** int eraAtoi13(const char *type, double ob1, double ob2, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *ri, double *di); */
         atoi13: function (type, ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
-            var riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-                typeBuffer = Module._malloc(type.length);
+            var riBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                diBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+                typeBuffer = LIBERFA._malloc(type.length);
 
-            Module.writeStringToMemory(type, typeBuffer, false);
+            LIBERFA.writeStringToMemory(type, typeBuffer, false);
 
-            var status = Module._eraAtoi13(typeBuffer, ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, riBuffer, diBuffer);
+            var status = LIBERFA._eraAtoi13(typeBuffer, ob1, ob2, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl, riBuffer, diBuffer);
 
             var ret = {
-                ri: Module.HEAPF64[riBuffer >>> 3],
-                di: Module.HEAPF64[diBuffer >>> 3],
+                ri: LIBERFA.HEAPF64[riBuffer >>> 3],
+                di: LIBERFA.HEAPF64[diBuffer >>> 3],
                 status: status
             };
 
-            Module._free(riBuffer);
-            Module._free(diBuffer);
+            LIBERFA._free(riBuffer);
+            LIBERFA._free(diBuffer);
 
             return ret;
         },
         /** void eraAtoiq(const char *type, double ob1, double ob2, eraASTROM *astrom, double *ri, double *di); */
         atoiq: function(type, ob1, ob2, astrom) {
 
-            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
-              riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
-              typeBuffer = Module._malloc(type.length);
+            var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              riBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              diBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              typeBuffer = LIBERFA._malloc(type.length);
 
-            Module.writeStringToMemory(type, typeBuffer, false);
+            LIBERFA.writeStringToMemory(type, typeBuffer, false);
             writeFloat64Buffer(astromBuffer, astrom.toArray());
 
-            Module._eraAtoiq(typeBuffer, ob1, ob2, astromBuffer);
+            LIBERFA._eraAtoiq(typeBuffer, ob1, ob2, astromBuffer);
 
             var ret = {
-                ri: Module.HEAPF64[riBuffer >>> 3],
-                di: Module.HEAPF64[diBuffer >>> 3]
+                ri: LIBERFA.HEAPF64[riBuffer >>> 3],
+                di: LIBERFA.HEAPF64[diBuffer >>> 3]
             };
 
-            Module._free(riBuffer);
-            Module._free(diBuffer);
-            Module._free(astromBuffer);
-            Module._free(typeBuffer);
+            LIBERFA._free(riBuffer);
+            LIBERFA._free(diBuffer);
+            LIBERFA._free(astromBuffer);
+            LIBERFA._free(typeBuffer);
 
             return ret;
         },
         /** void eraLd(double bm, double p[3], double q[3], double e[3], double em, double dlim, double p1[3]);*/
         ld: function (bm, p, q, e, em, dlim) {
 
-            var pBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
-                qBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
-                eBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
-                p1Buffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT);
+            var pBuffer = LIBERFA._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
+                qBuffer = LIBERFA._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
+                eBuffer = LIBERFA._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
+                p1Buffer = LIBERFA._malloc(3  * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(pBuffer, p);
             writeFloat64Buffer(qBuffer, q);
             writeFloat64Buffer(eBuffer, e);
 
-            Module._eraLd(bm, pBuffer, qBuffer, eBuffer, em, dlim, p1Buffer);
+            LIBERFA._eraLd(bm, pBuffer, qBuffer, eBuffer, em, dlim, p1Buffer);
 
             var ret = readFloat64Buffer(p1Buffer, 3);
 
-            Module._free(pBuffer);
-            Module._free(qBuffer);
-            Module._free(eBuffer);
+            LIBERFA._free(pBuffer);
+            LIBERFA._free(qBuffer);
+            LIBERFA._free(eBuffer);
 
             return ret;
         },
@@ -957,10 +957,10 @@
         ldn: function (n, b, ob, sc) {
 
             var bSize = b.length * LDBODY.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT;
-            var bBuffer = Module._malloc(bSize),
-                obBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
-                scBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
-                snBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT);
+            var bBuffer = LIBERFA._malloc(bSize),
+                obBuffer = LIBERFA._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
+                scBuffer = LIBERFA._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
+                snBuffer = LIBERFA._malloc(3  * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(obBuffer, ob);
             writeFloat64Buffer(scBuffer, sc);
@@ -968,14 +968,14 @@
                 return item.toArray();
             })));
 
-            Module._eraLdn(b.length, bBuffer, obBuffer, scBuffer, snBuffer);
+            LIBERFA._eraLdn(b.length, bBuffer, obBuffer, scBuffer, snBuffer);
 
             var ret = readFloat64Buffer(snBuffer, 3);
 
-            Module._free(bBuffer);
-            Module._free(obBuffer);
-            Module._free(scBuffer);
-            Module._free(snBuffer);
+            LIBERFA._free(bBuffer);
+            LIBERFA._free(obBuffer);
+            LIBERFA._free(scBuffer);
+            LIBERFA._free(snBuffer);
 
             return ret;
 
@@ -983,20 +983,20 @@
         /** void eraLdsun(double p[3], double e[3], double em, double p1[3]);*/
         ldsun: function (p, e, em, p1) {
 
-            var pBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-                eBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-                p1Buffer = Module._malloc( 3 * Float64Array.BYTES_PER_ELEMENT);
+            var pBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+                eBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+                p1Buffer = LIBERFA._malloc( 3 * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(pBuffer, p);
             writeFloat64Buffer(eBuffer, e);
 
-            Module._eraLdsun(pBuffer, eBuffer, em, p1Buffer);
+            LIBERFA._eraLdsun(pBuffer, eBuffer, em, p1Buffer);
 
             var ret = readFloat64Buffer(p1Buffer, 3);
 
-            Module._free(pBuffer);
-            Module._free(eBuffer);
-            Module._free(p1Buffer);
+            LIBERFA._free(pBuffer);
+            LIBERFA._free(eBuffer);
+            LIBERFA._free(p1Buffer);
 
             return ret;
 
@@ -1004,17 +1004,17 @@
         /** void eraPmpx(double rc, double dc, double pr, double pd, double px, double rv, double pmt, double pob[3], double pco[3]);*/
         pmpx: function (rc, dc, pr, pd, px, rv, pmt, pob) {
 
-            var pobBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-                pcoBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+            var pobBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+                pcoBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(pobBuffer, pob);
 
-            Module._eraPmpx(rc, dc, pr, pd, px, rv, pmt, pobBuffer, pcoBuffer);
+            LIBERFA._eraPmpx(rc, dc, pr, pd, px, rv, pmt, pobBuffer, pcoBuffer);
 
             var ret = readFloat64Buffer(pcoBuffer, 3);
 
-            Module._free(pobBuffer);
-            Module._free(pcoBuffer);
+            LIBERFA._free(pobBuffer);
+            LIBERFA._free(pcoBuffer);
 
             return ret;
 
@@ -1023,44 +1023,44 @@
         pmsafe: function (ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b) {
             //double *ra2, double *dec2, double *pmr2, double *pmd2, double *px2, double *rv2
 
-            var ra2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                dec2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                pmr2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                pmd2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                px2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                rv2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var ra2Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dec2Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pmr2Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pmd2Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                px2Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                rv2Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
 
-            var status = Module._eraPmsafe(ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b, ra2Buffer, dec2Buffer, pmr2Buffer, pmd2Buffer, px2Buffer, rv2Buffer);
+            var status = LIBERFA._eraPmsafe(ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b, ra2Buffer, dec2Buffer, pmr2Buffer, pmd2Buffer, px2Buffer, rv2Buffer);
 
             var ret = {
                 status: status,
-                ra2: Module.HEAPF64[ra2Buffer >>> 3],
-                dec2: Module.HEAPF64[dec2Buffer >>> 3],
-                pmr2: Module.HEAPF64[pmr2Buffer >>> 3],
-                pmd2: Module.HEAPF64[pmd2Buffer >>> 3],
-                px2: Module.HEAPF64[px2Buffer >>> 3],
-                rv2: Module.HEAPF64[rv2Buffer >>> 3]
+                ra2: LIBERFA.HEAPF64[ra2Buffer >>> 3],
+                dec2: LIBERFA.HEAPF64[dec2Buffer >>> 3],
+                pmr2: LIBERFA.HEAPF64[pmr2Buffer >>> 3],
+                pmd2: LIBERFA.HEAPF64[pmd2Buffer >>> 3],
+                px2: LIBERFA.HEAPF64[px2Buffer >>> 3],
+                rv2: LIBERFA.HEAPF64[rv2Buffer >>> 3]
             };
 
-            Module._free(ra2Buffer);
-            Module._free(dec2Buffer);
-            Module._free(pmr2Buffer);
-            Module._free(pmd2Buffer);
-            Module._free(px2Buffer);
-            Module._free(rv2Buffer);
+            LIBERFA._free(ra2Buffer);
+            LIBERFA._free(dec2Buffer);
+            LIBERFA._free(pmr2Buffer);
+            LIBERFA._free(pmd2Buffer);
+            LIBERFA._free(px2Buffer);
+            LIBERFA._free(rv2Buffer);
 
             return ret;
         },
       /** void eraPvtob(double elong, double phi, double height, double xp, double yp, double sp, double theta, double pv[2][3]);*/
         pvtob: function (elong, phi, height, xp, yp, sp, theta) {
 
-          var pvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT );
-          Module._eraPvtob(elong, phi, height, xp, yp, sp, theta, pvBuffer);
+          var pvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT );
+          LIBERFA._eraPvtob(elong, phi, height, xp, yp, sp, theta, pvBuffer);
 
           var pv = SH.chunkArray(Array.from(readFloat64Buffer(pvBuffer, 6)) ,3);
 
-          Module._free(pvBuffer);
+          LIBERFA._free(pvBuffer);
 
           return pv;
 
@@ -1068,18 +1068,18 @@
         /** void eraRefco(double phpa, double tc, double rh, double wl, double *refa, double *refb); */
         refco: function (phpa, tc, rh, wl) {
             //refa, double *refb
-            var refaBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                refbBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var refaBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                refbBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            Module._eraRefco(phpa, tc, rh, wl, refaBuffer, refbBuffer);
+            LIBERFA._eraRefco(phpa, tc, rh, wl, refaBuffer, refbBuffer);
 
             var ret = {
-                refa: Module.HEAPF64[refaBuffer >>> 3],
-                refb: Module.HEAPF64[refbBuffer >>> 3]
+                refa: LIBERFA.HEAPF64[refaBuffer >>> 3],
+                refb: LIBERFA.HEAPF64[refbBuffer >>> 3]
             };
 
-            Module._free(refaBuffer);
-            Module._free(refbBuffer);
+            LIBERFA._free(refaBuffer);
+            LIBERFA._free(refbBuffer);
 
             return ret;
         },
@@ -1088,94 +1088,94 @@
         /** int eraEpv00(double date1, double date2, double pvh[2][3], double pvb[2][3]); */
         epv00: function(date1, date2) {
 
-            var pvhBuffer = Module._malloc( 2 * 3 * Float64Array.BYTES_PER_ELEMENT),
-                pvbBuffer = Module._malloc( 2 * 3 * Float64Array.BYTES_PER_ELEMENT);
+            var pvhBuffer = LIBERFA._malloc( 2 * 3 * Float64Array.BYTES_PER_ELEMENT),
+                pvbBuffer = LIBERFA._malloc( 2 * 3 * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module._eraEpv00(date1, date2, pvhBuffer, pvbBuffer),
+            var status = LIBERFA._eraEpv00(date1, date2, pvhBuffer, pvbBuffer),
                 ret = {
                     status: status,
                     //we leave these as arrays, as that is how the comeout/go in
                     pvh: [
                         [
-                            Module.HEAPF64[(pvhBuffer>>3) +0],
-                            Module.HEAPF64[(pvhBuffer>>3) +1],
-                            Module.HEAPF64[(pvhBuffer>>3) +2]
+                            LIBERFA.HEAPF64[(pvhBuffer>>3) +0],
+                            LIBERFA.HEAPF64[(pvhBuffer>>3) +1],
+                            LIBERFA.HEAPF64[(pvhBuffer>>3) +2]
                         ],
                         [
-                            Module.HEAPF64[(pvhBuffer>>3) +3],
-                            Module.HEAPF64[(pvhBuffer>>3) +4],
-                            Module.HEAPF64[(pvhBuffer>>3) +5]
+                            LIBERFA.HEAPF64[(pvhBuffer>>3) +3],
+                            LIBERFA.HEAPF64[(pvhBuffer>>3) +4],
+                            LIBERFA.HEAPF64[(pvhBuffer>>3) +5]
                         ]
                     ],
                     pvb: [
                         [
-                            Module.HEAPF64[(pvbBuffer>>3) +0],
-                            Module.HEAPF64[(pvbBuffer>>3) +1],
-                            Module.HEAPF64[(pvbBuffer>>3) +2]
+                            LIBERFA.HEAPF64[(pvbBuffer>>3) +0],
+                            LIBERFA.HEAPF64[(pvbBuffer>>3) +1],
+                            LIBERFA.HEAPF64[(pvbBuffer>>3) +2]
                         ],
                         [
-                            Module.HEAPF64[(pvbBuffer>>3) +3],
-                            Module.HEAPF64[(pvbBuffer>>3) +4],
-                            Module.HEAPF64[(pvbBuffer>>3) +5]
+                            LIBERFA.HEAPF64[(pvbBuffer>>3) +3],
+                            LIBERFA.HEAPF64[(pvbBuffer>>3) +4],
+                            LIBERFA.HEAPF64[(pvbBuffer>>3) +5]
                         ]
                     ]
 
                 };
 
-            Module._free(pvhBuffer);
-            Module._free(pvbBuffer);
+            LIBERFA._free(pvhBuffer);
+            LIBERFA._free(pvbBuffer);
 
             return ret;
         },
         /** int eraPlan94(double date1, double date2, int np, double pv[2][3]); */
         plan94: function(date1, date2, np) {
-            var pvBuffer = Module._malloc( 2  * 3 * Float64Array.BYTES_PER_ELEMENT);
-            var status = Module._eraPlan94(date1, date2, np, pvBuffer),
+            var pvBuffer = LIBERFA._malloc( 2  * 3 * Float64Array.BYTES_PER_ELEMENT);
+            var status = LIBERFA._eraPlan94(date1, date2, np, pvBuffer),
                 ret = {
                     status: status,
-                    x: Module.HEAPF64[(pvBuffer>>3) +0],
-                    y: Module.HEAPF64[(pvBuffer>>3) +1],
-                    z: Module.HEAPF64[(pvBuffer>>3) +2],
+                    x: LIBERFA.HEAPF64[(pvBuffer>>3) +0],
+                    y: LIBERFA.HEAPF64[(pvBuffer>>3) +1],
+                    z: LIBERFA.HEAPF64[(pvBuffer>>3) +2],
 
-                    vx: Module.HEAPF64[(pvBuffer>>3) +3],
-                    vy: Module.HEAPF64[(pvBuffer>>3) +4],
-                    vz: Module.HEAPF64[(pvBuffer>>3) +5]
+                    vx: LIBERFA.HEAPF64[(pvBuffer>>3) +3],
+                    vy: LIBERFA.HEAPF64[(pvBuffer>>3) +4],
+                    vz: LIBERFA.HEAPF64[(pvBuffer>>3) +5]
                 };
 
-            Module._free(pvBuffer);
+            LIBERFA._free(pvBuffer);
 
             return ret;
         },
 
         //Fundamental arguments
         /** double eraFal03(double t); */
-        fal03: Module.cwrap('eraFal03', 'number', ['number']),
+        fal03: LIBERFA.cwrap('eraFal03', 'number', ['number']),
         /** double eraFalp03(double t); */
-        falp03: Module.cwrap('eraFalp03', 'number', ['number']),
+        falp03: LIBERFA.cwrap('eraFalp03', 'number', ['number']),
         /** double eraFaf03(double t); */
-        faf03: Module.cwrap('eraFaf03', 'number', ['number']),
+        faf03: LIBERFA.cwrap('eraFaf03', 'number', ['number']),
         /** double eraFad03(double t); */
-        fad03: Module.cwrap('eraFad03', 'number', ['number']),
+        fad03: LIBERFA.cwrap('eraFad03', 'number', ['number']),
         /** double eraFaom03(double t); */
-        faom03: Module.cwrap('eraFaom03', 'number', ['number']),
+        faom03: LIBERFA.cwrap('eraFaom03', 'number', ['number']),
         /** double eraFave03(double t); */
-        fave03: Module.cwrap('eraFave03', 'number', ['number']),
+        fave03: LIBERFA.cwrap('eraFave03', 'number', ['number']),
         /** double eraFae03(double t); */
-        fae03: Module.cwrap('eraFae03', 'number', ['number']),
+        fae03: LIBERFA.cwrap('eraFae03', 'number', ['number']),
         /** double eraFapa03(double t); */
-        fapa03: Module.cwrap('eraFapa03', 'number', ['number']),
+        fapa03: LIBERFA.cwrap('eraFapa03', 'number', ['number']),
         /** double eraFame03(double t); */
-        fame03: Module.cwrap('eraFame03', 'number', ['number']),
+        fame03: LIBERFA.cwrap('eraFame03', 'number', ['number']),
         /** double eraFama03(double t); */
-        fama03: Module.cwrap('eraFama03', 'number', ['number']),
+        fama03: LIBERFA.cwrap('eraFama03', 'number', ['number']),
         /** double eraFaju03(double t); */
-        faju03: Module.cwrap('eraFaju03', 'number', ['number']),
+        faju03: LIBERFA.cwrap('eraFaju03', 'number', ['number']),
         /** double eraFasa03(double t); */
-        fasa03: Module.cwrap('eraFasa03', 'number', ['number']),
+        fasa03: LIBERFA.cwrap('eraFasa03', 'number', ['number']),
         /** double eraFaur03(double t); */
-        faur03: Module.cwrap('eraFaur03', 'number', ['number']),
+        faur03: LIBERFA.cwrap('eraFaur03', 'number', ['number']),
         /** double eraFane03(double t); */
-        fane03: Module.cwrap('eraFane03', 'number', ['number']),
+        fane03: LIBERFA.cwrap('eraFane03', 'number', ['number']),
 
         //PrecNutPolar
         /*
@@ -1242,109 +1242,109 @@
     */
         //Rotation and Time
         /** double eraEra00(double dj1, double dj2); */
-        era00: Module.cwrap('eraEra00','number',['number','number']),
+        era00: LIBERFA.cwrap('eraEra00','number',['number','number']),
         /** double eraGmst06(double uta, double utb, double tta, double ttb); */
-        gmst06: Module.cwrap('eraGmst06','number', ['number', 'number', 'number', 'number']),
+        gmst06: LIBERFA.cwrap('eraGmst06','number', ['number', 'number', 'number', 'number']),
         /**  double eraGmst00(double uta, double utb, double tta, double ttb); */
-        gmst00: Module.cwrap('eraGmst00', 'number', ['number', 'number', 'number', 'number']),
+        gmst00: LIBERFA.cwrap('eraGmst00', 'number', ['number', 'number', 'number', 'number']),
         /** double eraGmst82(double dj1, double dj2); */
-        gmst82: Module.cwrap('eraGmst82', 'number', ['number', 'number']),
+        gmst82: LIBERFA.cwrap('eraGmst82', 'number', ['number', 'number']),
         /** double eraGst06(double uta, double utb, double tta, double ttb, double rnpb[3][3]); */
         gst06: function (uta, utb, tta, ttb, rnpb) {
 
             var data = SH.flattenVector(rnpb),
-                buffer = Module._malloc( data.length * Float64Array.BYTES_PER_ELEMENT),
+                buffer = LIBERFA._malloc( data.length * Float64Array.BYTES_PER_ELEMENT),
                 result;
 
             writeFloat64Buffer(buffer, data);
 
-            result = Module._eraGst06(uta, utb, tta, ttb, buffer);
-            Module._free(buffer);
+            result = LIBERFA._eraGst06(uta, utb, tta, ttb, buffer);
+            LIBERFA._free(buffer);
 
             return result;
 
         },
         /** double eraGst00a(double uta, double utb, double tta, double ttb); */
-        gst00a: Module.cwrap('eraGst00a', 'number', ['number', 'number', 'number', 'number']),
+        gst00a: LIBERFA.cwrap('eraGst00a', 'number', ['number', 'number', 'number', 'number']),
         /** double eraGst00b(double uta, double utb); */
-        gst00b: Module.cwrap('eraGst00b', 'number', ['number', 'number']),
+        gst00b: LIBERFA.cwrap('eraGst00b', 'number', ['number', 'number']),
         /** double eraEe00a(double date1, double date2); */
-        ee00a: Module.cwrap('eraEe00a', 'number', ['number', 'number']),
+        ee00a: LIBERFA.cwrap('eraEe00a', 'number', ['number', 'number']),
         /** double eraEe00b(double date1, double date2); */
-        ee00b: Module.cwrap('eraEe00b', 'number', ['number', 'number']),
+        ee00b: LIBERFA.cwrap('eraEe00b', 'number', ['number', 'number']),
         /** double eraEe00(double date1, double date2, double epsa, double dpsi); */
-        ee00: Module.cwrap('eraEe00', 'number', ['number', 'number', 'number', 'number']),
+        ee00: LIBERFA.cwrap('eraEe00', 'number', ['number', 'number', 'number', 'number']),
         /** double eraEect00(double date1, double date2); */
-        eect00: Module.cwrap('eraEect00', 'number', ['number', 'number']),
+        eect00: LIBERFA.cwrap('eraEect00', 'number', ['number', 'number']),
         /** double eraEe06a(double date1, double date2); */
-        ee06a: Module.cwrap('eraEe06a', 'number', ['number', 'number']),
+        ee06a: LIBERFA.cwrap('eraEe06a', 'number', ['number', 'number']),
         /** double eraEqeq94(double date1, double date2); */
-        eqeq94: Module.cwrap('eraEqeq94', 'number', ['number', 'number']),
+        eqeq94: LIBERFA.cwrap('eraEqeq94', 'number', ['number', 'number']),
         /** double eraGst06a(double uta, double utb, double tta, double ttb); */
-        gst06a: Module.cwrap('eraGst06a', 'number', ['number', 'number', 'number', 'number']),
+        gst06a: LIBERFA.cwrap('eraGst06a', 'number', ['number', 'number', 'number', 'number']),
         /** double eraGst94(double uta, double utb); */
-        gst94: Module.cwrap('eraGst94', 'number', ['number', 'number']),
+        gst94: LIBERFA.cwrap('eraGst94', 'number', ['number', 'number']),
 
         //SpaceMotion
         /** int eraPvstar(double pv[2][3], double *ra, double *dec, double *pmr, double *pmd, double *px, double *rv); */
         pvstar: function (pv) {
             var data = SH.flattenVector(pv),
-                pvBuffer = Module._malloc( data.length * Float64Array.BYTES_PER_ELEMENT),
-                raBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                decBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                pmrBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                pmdBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                pxBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                rvBuffer = Module._malloc( 1 * Float64Array.BYTES_PER_ELEMENT);
+                pvBuffer = LIBERFA._malloc( data.length * Float64Array.BYTES_PER_ELEMENT),
+                raBuffer = LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                decBuffer = LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                pmrBuffer = LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                pmdBuffer = LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                pxBuffer = LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                rvBuffer = LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(pvBuffer, data);
 
-            var status = Module._eraPvstar(pvBuffer, raBuffer, decBuffer, pmrBuffer, pmdBuffer, pxBuffer, rvBuffer),
+            var status = LIBERFA._eraPvstar(pvBuffer, raBuffer, decBuffer, pmrBuffer, pmdBuffer, pxBuffer, rvBuffer),
                 ret = {
                     status: status,
-                    ra: Module.HEAPF64[raBuffer >> 3],
-                    dec: Module.HEAPF64[decBuffer >> 3],
-                    pmr: Module.HEAPF64[pmrBuffer >> 3],
-                    pmd: Module.HEAPF64[pmdBuffer >> 3],
-                    px: Module.HEAPF64[pxBuffer >> 3],
-                    rv: Module.HEAPF64[rvBuffer >> 3]
+                    ra: LIBERFA.HEAPF64[raBuffer >> 3],
+                    dec: LIBERFA.HEAPF64[decBuffer >> 3],
+                    pmr: LIBERFA.HEAPF64[pmrBuffer >> 3],
+                    pmd: LIBERFA.HEAPF64[pmdBuffer >> 3],
+                    px: LIBERFA.HEAPF64[pxBuffer >> 3],
+                    rv: LIBERFA.HEAPF64[rvBuffer >> 3]
                 };
 
 
-            Module._free(pvBuffer);
-            Module._free(raBuffer);
-            Module._free(decBuffer);
-            Module._free(pmrBuffer);
-            Module._free(pmdBuffer);
-            Module._free(pxBuffer);
-            Module._free(rvBuffer);
+            LIBERFA._free(pvBuffer);
+            LIBERFA._free(raBuffer);
+            LIBERFA._free(decBuffer);
+            LIBERFA._free(pmrBuffer);
+            LIBERFA._free(pmdBuffer);
+            LIBERFA._free(pxBuffer);
+            LIBERFA._free(rvBuffer);
 
             return ret;
         },
         /** int eraStarpv(double ra, double dec, double pmr, double pmd, double px, double rv, double pv[2][3]); */
         starpv: function(ra, dec, pmr, pmd, px, rv) {
 
-            var pvBuffer = Module._malloc(2 * 3 * Float64Array.BYTES_PER_ELEMENT ),
-                status = Module._eraStarpv(ra, dec, pmr, pmd, px, rv, pvBuffer),
+            var pvBuffer = LIBERFA._malloc(2 * 3 * Float64Array.BYTES_PER_ELEMENT ),
+                status = LIBERFA._eraStarpv(ra, dec, pmr, pmd, px, rv, pvBuffer),
                 ret = {
                     status: status,
 
                     //going to put this back into an array, as that is how these functions roll.
                     pv: [
                         [
-                            Module.HEAPF64[(pvBuffer >> 3)],
-                            Module.HEAPF64[(pvBuffer >> 3) + 1],
-                            Module.HEAPF64[(pvBuffer >> 3) + 2]
+                            LIBERFA.HEAPF64[(pvBuffer >> 3)],
+                            LIBERFA.HEAPF64[(pvBuffer >> 3) + 1],
+                            LIBERFA.HEAPF64[(pvBuffer >> 3) + 2]
                         ],
                         [
-                            Module.HEAPF64[(pvBuffer >> 3) + 3],
-                            Module.HEAPF64[(pvBuffer >> 3) + 4],
-                            Module.HEAPF64[(pvBuffer >> 3) + 5]
+                            LIBERFA.HEAPF64[(pvBuffer >> 3) + 3],
+                            LIBERFA.HEAPF64[(pvBuffer >> 3) + 4],
+                            LIBERFA.HEAPF64[(pvBuffer >> 3) + 5]
                         ]
                     ]
                 };
 
-            Module._free(pvBuffer);
+            LIBERFA._free(pvBuffer);
 
             return ret;
         },
@@ -1352,122 +1352,122 @@
         //StarCatalogs
         /** void eraFk52h(double r5, double d5, double dr5, double dd5, double px5, double rv5, double *rh, double *dh, double *drh, double *ddh, double *pxh, double *rvh); */
         fk52h: function (r5, d5, dr5, dd5, px5, rv5) {
-            var rhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                dhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                drhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                ddhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                pxhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                rvhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var rhBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dhBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                drhBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                ddhBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pxhBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                rvhBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
 
 
-            Module._eraFk52h(r5, d5, dr5, dd5, px5, rv5, rhBuffer, dhBuffer, drhBuffer, ddhBuffer, pxhBuffer, rvhBuffer);
+            LIBERFA._eraFk52h(r5, d5, dr5, dd5, px5, rv5, rhBuffer, dhBuffer, drhBuffer, ddhBuffer, pxhBuffer, rvhBuffer);
 
             var ret = {
-                rh: Module.HEAPF64[ rhBuffer >> 3],
-                dh: Module.HEAPF64[ dhBuffer >> 3],
-                drh: Module.HEAPF64[ drhBuffer >> 3],
-                ddh: Module.HEAPF64[ ddhBuffer >> 3],
-                pxh: Module.HEAPF64[ pxhBuffer >> 3],
-                rvh: Module.HEAPF64[ rvhBuffer >> 3]
+                rh: LIBERFA.HEAPF64[ rhBuffer >> 3],
+                dh: LIBERFA.HEAPF64[ dhBuffer >> 3],
+                drh: LIBERFA.HEAPF64[ drhBuffer >> 3],
+                ddh: LIBERFA.HEAPF64[ ddhBuffer >> 3],
+                pxh: LIBERFA.HEAPF64[ pxhBuffer >> 3],
+                rvh: LIBERFA.HEAPF64[ rvhBuffer >> 3]
             };
 
-            Module._free(rhBuffer);
-            Module._free(dhBuffer);
-            Module._free(drhBuffer);
-            Module._free(ddhBuffer);
-            Module._free(pxhBuffer);
-            Module._free(rvhBuffer);
+            LIBERFA._free(rhBuffer);
+            LIBERFA._free(dhBuffer);
+            LIBERFA._free(drhBuffer);
+            LIBERFA._free(ddhBuffer);
+            LIBERFA._free(pxhBuffer);
+            LIBERFA._free(rvhBuffer);
 
             return ret;
 
         },
         /** void eraFk5hip(double r5h[3][3], double s5h[3]); */
         fk5hip: function () {
-            var r5hBuffer = Module._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT),
-                s5hBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+            var r5hBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT),
+                s5hBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
-            Module._eraFk5hip(r5hBuffer, s5hBuffer);
+            LIBERFA._eraFk5hip(r5hBuffer, s5hBuffer);
 
-            var r5h = Module.HEAPF64.subarray((r5hBuffer>>3),(r5hBuffer>>3) + 9),
-                s5h = Module.HEAPF64.subarray((s5hBuffer>>3),(s5hBuffer>>3) + 3),
+            var r5h = LIBERFA.HEAPF64.subarray((r5hBuffer>>3),(r5hBuffer>>3) + 9),
+                s5h = LIBERFA.HEAPF64.subarray((s5hBuffer>>3),(s5hBuffer>>3) + 3),
                 ret = {
                     r5h: Array.prototype.slice.call(r5h).chunk(3),
                     s5h: Array.prototype.slice.call(s5h)
                 };
 
-            Module._free(r5hBuffer);
-            Module._free(s5hBuffer);
+            LIBERFA._free(r5hBuffer);
+            LIBERFA._free(s5hBuffer);
 
             return ret;
         },
         /** void eraFk5hz(double r5, double d5, double date1, double date2, double *rh, double *dh); */
         fk5hz: function (r5, d5, date1, date2) {
-            var rhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                dhBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var rhBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dhBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
             //we use ccall here so we don't need to mess about with string pointers etc..
-            var status = Module._eraFk5hz(r5, d5, date1, date2, rhBuffer, dhBuffer),
+            var status = LIBERFA._eraFk5hz(r5, d5, date1, date2, rhBuffer, dhBuffer),
                 ret = {
-                    dh: Module.HEAPF64[dhBuffer>>3],
-                    rh: Module.HEAPF64[rhBuffer>>3]
+                    dh: LIBERFA.HEAPF64[dhBuffer>>3],
+                    rh: LIBERFA.HEAPF64[rhBuffer>>3]
                 };
 
-            Module._free(rhBuffer);
-            Module._free(dhBuffer);
+            LIBERFA._free(rhBuffer);
+            LIBERFA._free(dhBuffer);
 
             return ret;
         },
         /** void eraH2fk5(double rh, double dh, double drh, double ddh, double pxh, double rvh, double *r5, double *d5, double *dr5, double *dd5, double *px5, double *rv5); */
         h2fk5: function (rh, dh, drh, ddh, pxh, rvh) {
-            var r5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                d5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                dr5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                dd5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                px5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                rv5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var r5Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                d5Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dr5Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dd5Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                px5Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                rv5Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            Module._eraH2fk5(rh, dh, drh, ddh, pxh, rvh, r5Buffer, d5Buffer, dr5Buffer, dd5Buffer, px5Buffer, rv5Buffer);
+            LIBERFA._eraH2fk5(rh, dh, drh, ddh, pxh, rvh, r5Buffer, d5Buffer, dr5Buffer, dd5Buffer, px5Buffer, rv5Buffer);
 
             var ret = {
-                r5: Module.HEAPF64[ r5Buffer >> 3],
-                d5: Module.HEAPF64[ d5Buffer >> 3],
-                dr5: Module.HEAPF64[ dr5Buffer >> 3],
-                dd5: Module.HEAPF64[ dd5Buffer >> 3],
-                px5: Module.HEAPF64[ px5Buffer >> 3],
-                rv5: Module.HEAPF64[ rv5Buffer >> 3]
+                r5: LIBERFA.HEAPF64[ r5Buffer >> 3],
+                d5: LIBERFA.HEAPF64[ d5Buffer >> 3],
+                dr5: LIBERFA.HEAPF64[ dr5Buffer >> 3],
+                dd5: LIBERFA.HEAPF64[ dd5Buffer >> 3],
+                px5: LIBERFA.HEAPF64[ px5Buffer >> 3],
+                rv5: LIBERFA.HEAPF64[ rv5Buffer >> 3]
             };
 
-            Module._free(r5Buffer);
-            Module._free(d5Buffer);
-            Module._free(dr5Buffer);
-            Module._free(dd5Buffer);
-            Module._free(px5Buffer);
-            Module._free(rv5Buffer);
+            LIBERFA._free(r5Buffer);
+            LIBERFA._free(d5Buffer);
+            LIBERFA._free(dr5Buffer);
+            LIBERFA._free(dd5Buffer);
+            LIBERFA._free(px5Buffer);
+            LIBERFA._free(rv5Buffer);
 
             return ret;
         },
         /** void eraHfk5z(double rh, double dh, double date1, double date2, double *r5, double *d5, double *dr5, double *dd5); */
         hfk5z: function (rh, dh, date1, date2){
 
-            var r5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                d5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                dr5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                dd5Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var r5Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                d5Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dr5Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dd5Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            Module._eraHfk5z(rh, dh, date1, date2, r5Buffer, d5Buffer, dr5Buffer, dd5Buffer);
+            LIBERFA._eraHfk5z(rh, dh, date1, date2, r5Buffer, d5Buffer, dr5Buffer, dd5Buffer);
 
             var ret = {
-                r5: Module.HEAPF64[ r5Buffer >> 3],
-                d5: Module.HEAPF64[ d5Buffer >> 3],
-                dr5: Module.HEAPF64[ dr5Buffer >> 3],
-                dd5: Module.HEAPF64[ dd5Buffer >> 3]
+                r5: LIBERFA.HEAPF64[ r5Buffer >> 3],
+                d5: LIBERFA.HEAPF64[ d5Buffer >> 3],
+                dr5: LIBERFA.HEAPF64[ dr5Buffer >> 3],
+                dd5: LIBERFA.HEAPF64[ dd5Buffer >> 3]
             };
 
-            Module._free(r5Buffer);
-            Module._free(d5Buffer);
-            Module._free(dr5Buffer);
-            Module._free(dd5Buffer);
+            LIBERFA._free(r5Buffer);
+            LIBERFA._free(d5Buffer);
+            LIBERFA._free(dr5Buffer);
+            LIBERFA._free(dd5Buffer);
 
             return ret;
 
@@ -1475,31 +1475,31 @@
         /** int eraStarpm(double ra1, double dec1, double pmr1, double pmd1, double px1, double rv1, double ep1a, double ep1b, double ep2a, double ep2b, double *ra2, double *dec2, double *pmr2, double *pmd2, double *px2, double *rv2); */
         starpm: function(ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b) {
 
-            var raBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                decBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                pmrBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                pmdBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                pxBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                rvBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var raBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                decBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pmrBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pmdBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pxBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                rvBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
 
-            var status = Module._eraStarpm(ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b, raBuffer, decBuffer, pmrBuffer, pmdBuffer, pxBuffer, rvBuffer),
+            var status = LIBERFA._eraStarpm(ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b, raBuffer, decBuffer, pmrBuffer, pmdBuffer, pxBuffer, rvBuffer),
                 ret = {
                     status: status,
-                    ra: Module.HEAPF64[ raBuffer >> 3],
-                    dec: Module.HEAPF64[ decBuffer >> 3],
-                    pmr: Module.HEAPF64[ pmrBuffer >> 3],
-                    pmd: Module.HEAPF64[ pmdBuffer >> 3],
-                    px: Module.HEAPF64[ pxBuffer >> 3],
-                    rv: Module.HEAPF64[ rvBuffer >> 3]
+                    ra: LIBERFA.HEAPF64[ raBuffer >> 3],
+                    dec: LIBERFA.HEAPF64[ decBuffer >> 3],
+                    pmr: LIBERFA.HEAPF64[ pmrBuffer >> 3],
+                    pmd: LIBERFA.HEAPF64[ pmdBuffer >> 3],
+                    px: LIBERFA.HEAPF64[ pxBuffer >> 3],
+                    rv: LIBERFA.HEAPF64[ rvBuffer >> 3]
                 };
 
-            Module._free(raBuffer);
-            Module._free(decBuffer);
-            Module._free(pmrBuffer);
-            Module._free(pmdBuffer);
-            Module._free(pxBuffer);
-            Module._free(rvBuffer);
+            LIBERFA._free(raBuffer);
+            LIBERFA._free(decBuffer);
+            LIBERFA._free(pmrBuffer);
+            LIBERFA._free(pmdBuffer);
+            LIBERFA._free(pxBuffer);
+            LIBERFA._free(rvBuffer);
 
             return ret;
         },
@@ -1507,37 +1507,37 @@
         //GalacticCoordinates
         /** void eraG2icrs ( double dl, double db, double *dr, double *dd ); */
         g2icrs: function (dl, db) {
-            var drBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                ddBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var drBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                ddBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module._eraG2icrs(dl , db, drBuffer, ddBuffer),
+            var status = LIBERFA._eraG2icrs(dl , db, drBuffer, ddBuffer),
                 ret = {
                     status: status,
-                    dr: Module.HEAPF64[ drBuffer >> 3],
-                    dd: Module.HEAPF64[ ddBuffer >> 3]
+                    dr: LIBERFA.HEAPF64[ drBuffer >> 3],
+                    dd: LIBERFA.HEAPF64[ ddBuffer >> 3]
                 };
 
 
-            Module._free(drBuffer);
-            Module._free(ddBuffer);
+            LIBERFA._free(drBuffer);
+            LIBERFA._free(ddBuffer);
 
             return ret;
         },
         /** void eraIcrs2g ( double dr, double dd, double *dl, double *db ); */
         icrs2g: function (dr, dd) {
-            var dlBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                dbBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var dlBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dbBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module._eraIcrs2g(dr , dd, dlBuffer, dbBuffer),
+            var status = LIBERFA._eraIcrs2g(dr , dd, dlBuffer, dbBuffer),
                 ret = {
                     status: status,
-                    dl: Module.HEAPF64[ dlBuffer >> 3],
-                    db: Module.HEAPF64[ dbBuffer >> 3]
+                    dl: LIBERFA.HEAPF64[ dlBuffer >> 3],
+                    db: LIBERFA.HEAPF64[ dbBuffer >> 3]
                 };
 
 
-            Module._free(dlBuffer);
-            Module._free(dbBuffer);
+            LIBERFA._free(dlBuffer);
+            LIBERFA._free(dbBuffer);
 
             return ret;
         },
@@ -1545,99 +1545,99 @@
         //GeodeticGeocentric
         /** int eraEform(int n, double *a, double *f); */
         eform: function (n) {
-            var aBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                fBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var aBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                fBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module._eraEform(n, aBuffer, fBuffer),
+            var status = LIBERFA._eraEform(n, aBuffer, fBuffer),
                 ret = {
                     status: status,
-                    a: Module.HEAPF64[ aBuffer >> 3],
-                    f: Module.HEAPF64[ fBuffer >> 3]
+                    a: LIBERFA.HEAPF64[ aBuffer >> 3],
+                    f: LIBERFA.HEAPF64[ fBuffer >> 3]
                 };
 
-            Module._free(aBuffer);
-            Module._free(fBuffer);
+            LIBERFA._free(aBuffer);
+            LIBERFA._free(fBuffer);
 
             return ret;
         },
         /** int eraGc2gd(int n, double xyz[3], double *elong, double *phi, double *height); */
         gc2gd: function (n, xyz) {
 
-            var eBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                pBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                hBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                xyzBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+            var eBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                hBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                xyzBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(xyzBuffer, xyz);
 
-            var status = Module._eraGc2gd(n, xyzBuffer, eBuffer, pBuffer, hBuffer),
+            var status = LIBERFA._eraGc2gd(n, xyzBuffer, eBuffer, pBuffer, hBuffer),
                 ret = {
                     status: status,
-                    e: Module.HEAPF64[ eBuffer >> 3],
-                    p: Module.HEAPF64[ pBuffer >> 3],
-                    h: Module.HEAPF64[ hBuffer >> 3]
+                    e: LIBERFA.HEAPF64[ eBuffer >> 3],
+                    p: LIBERFA.HEAPF64[ pBuffer >> 3],
+                    h: LIBERFA.HEAPF64[ hBuffer >> 3]
                 };
 
-            Module._free(eBuffer);
-            Module._free(pBuffer);
-            Module._free(hBuffer);
-            Module._free(xyzBuffer);
+            LIBERFA._free(eBuffer);
+            LIBERFA._free(pBuffer);
+            LIBERFA._free(hBuffer);
+            LIBERFA._free(xyzBuffer);
 
             return ret;
         },
         /** int eraGc2gde(double a, double f, double xyz[3], double *elong, double *phi, double *height); */
         gc2gde: function (a, f, xyz) {
-            var eBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                pBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                hBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                xyzBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+            var eBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                hBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                xyzBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
             writeFloat64Buffer(xyzBuffer, xyz);
 
-            var status = Module._eraGc2gde(a, f, xyzBuffer, eBuffer, pBuffer, hBuffer),
+            var status = LIBERFA._eraGc2gde(a, f, xyzBuffer, eBuffer, pBuffer, hBuffer),
                 ret = {
                     status: status,
-                    e: Module.HEAPF64[ eBuffer >> 3],
-                    p: Module.HEAPF64[ pBuffer >> 3],
-                    h: Module.HEAPF64[ hBuffer >> 3]
+                    e: LIBERFA.HEAPF64[ eBuffer >> 3],
+                    p: LIBERFA.HEAPF64[ pBuffer >> 3],
+                    h: LIBERFA.HEAPF64[ hBuffer >> 3]
                 };
 
-            Module._free(eBuffer);
-            Module._free(pBuffer);
-            Module._free(hBuffer);
-            Module._free(xyzBuffer);
+            LIBERFA._free(eBuffer);
+            LIBERFA._free(pBuffer);
+            LIBERFA._free(hBuffer);
+            LIBERFA._free(xyzBuffer);
 
             return ret;
         },
         /** int eraGd2gc(int n, double elong, double phi, double height, double xyz[3]); */
         gd2gc: function (n, elong, phi, height) {
-            var xyzBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+            var xyzBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module._eraGd2gc(n, elong, phi, height, xyzBuffer),
+            var status = LIBERFA._eraGd2gc(n, elong, phi, height, xyzBuffer),
                 ret = {
                     status: status,
-                    x: Module.HEAPF64[ (xyzBuffer >> 3) + 0 ],
-                    y: Module.HEAPF64[ (xyzBuffer >> 3) + 1],
-                    z: Module.HEAPF64[ (xyzBuffer >> 3) +2]
+                    x: LIBERFA.HEAPF64[ (xyzBuffer >> 3) + 0 ],
+                    y: LIBERFA.HEAPF64[ (xyzBuffer >> 3) + 1],
+                    z: LIBERFA.HEAPF64[ (xyzBuffer >> 3) +2]
                 };
 
-            Module._free(xyzBuffer);
+            LIBERFA._free(xyzBuffer);
 
             return ret;
         },
         /** int eraGd2gce(double a, double f, double elong, double phi, double height, double xyz[3]); */
         gd2gce: function (a, f, elong, phi, height) {
-            var xyzBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+            var xyzBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
-            var status = Module._eraGd2gce(a, f, elong, phi, height, xyzBuffer),
+            var status = LIBERFA._eraGd2gce(a, f, elong, phi, height, xyzBuffer),
                 ret = {
                     status: status,
-                    x: Module.HEAPF64[ (xyzBuffer >> 3) + 0 ],
-                    y: Module.HEAPF64[ (xyzBuffer >> 3) + 1],
-                    z: Module.HEAPF64[ (xyzBuffer >> 3) +2]
+                    x: LIBERFA.HEAPF64[ (xyzBuffer >> 3) + 0 ],
+                    y: LIBERFA.HEAPF64[ (xyzBuffer >> 3) + 1],
+                    z: LIBERFA.HEAPF64[ (xyzBuffer >> 3) +2]
                 };
 
-            Module._free(xyzBuffer);
+            LIBERFA._free(xyzBuffer);
 
             return ret;
 
@@ -1648,33 +1648,33 @@
         /** int eraD2dtf(const char *scale, int ndp, double d1, double d2, int *iy, int *im, int *id, int ihmsf[4]); */
         d2dtf: function (scale, ndp, d1, d2 /*, int *iy, int *im, int *id, int ihmsf[4]*/) {
 
-            var iyBuffer = Module._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
-                imBuffer = Module._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
-                idBuffer = Module._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
-                ihmsfBuffer = Module._malloc(4 * Int32Array.BYTES_PER_ELEMENT);
+            var iyBuffer = LIBERFA._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
+                imBuffer = LIBERFA._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
+                idBuffer = LIBERFA._malloc(1 * Int32Array.BYTES_PER_ELEMENT),
+                ihmsfBuffer = LIBERFA._malloc(4 * Int32Array.BYTES_PER_ELEMENT);
 
             //we use ccall here so we don't need to mess about with string pointers etc..
-            var status = Module.ccall(
+            var status = LIBERFA.ccall(
                     'eraD2dtf',
                     'number',
                     ['string','number','number','number','number','number','number','number'],
                     [scale, ndp, d1, d2, iyBuffer, imBuffer, idBuffer, ihmsfBuffer]
                 ),
                 ret = {
-                    year: Module.HEAP32[iyBuffer>>2],
-                    month: Module.HEAP32[imBuffer>>2],
-                    day: Module.HEAP32[idBuffer>>2],
-                    hour: Module.HEAP32[(ihmsfBuffer>>2) +0],
-                    minute: Module.HEAP32[(ihmsfBuffer>>2) +1],
-                    second: Module.HEAP32[(ihmsfBuffer>>2) +2],
-                    fraction: Module.HEAP32[(ihmsfBuffer>>2) +3],
+                    year: LIBERFA.HEAP32[iyBuffer>>2],
+                    month: LIBERFA.HEAP32[imBuffer>>2],
+                    day: LIBERFA.HEAP32[idBuffer>>2],
+                    hour: LIBERFA.HEAP32[(ihmsfBuffer>>2) +0],
+                    minute: LIBERFA.HEAP32[(ihmsfBuffer>>2) +1],
+                    second: LIBERFA.HEAP32[(ihmsfBuffer>>2) +2],
+                    fraction: LIBERFA.HEAP32[(ihmsfBuffer>>2) +3],
                     status: status
                 };
 
-            Module._free(iyBuffer);
-            Module._free(imBuffer);
-            Module._free(idBuffer);
-            Module._free(ihmsfBuffer);
+            LIBERFA._free(iyBuffer);
+            LIBERFA._free(imBuffer);
+            LIBERFA._free(idBuffer);
+            LIBERFA._free(ihmsfBuffer);
 
             return ret;
 
@@ -1682,43 +1682,43 @@
         /** int eraDat(int iy, int im, int id, double fd, double *deltat); */
         dat: function (iy, im, id, fd) {
 
-            var deltaBuffer = Module._malloc(4 * Float64Array.BYTES_PER_ELEMENT);
+            var deltaBuffer = LIBERFA._malloc(4 * Float64Array.BYTES_PER_ELEMENT);
 
-            var ret = Module._eraDat(iy, im, id, fd,deltaBuffer );
+            var ret = LIBERFA._eraDat(iy, im, id, fd,deltaBuffer );
 
             //TODO: put this in an structure
             //if (ret != 0){
             //    //how to handle non normal results??
             //}
 
-            ret = Module.HEAPF64[ deltaBuffer >> 3];
+            ret = LIBERFA.HEAPF64[ deltaBuffer >> 3];
 
-            Module._free(deltaBuffer);
+            LIBERFA._free(deltaBuffer);
 
             return ret;
         },
         /** double eraDtdb(double date1, double date2, double ut, double elong, double u, double v); */
-        dtdb: Module.cwrap('eraDtdb', 'number', ['number','number','number','number','number','number']),
+        dtdb: LIBERFA.cwrap('eraDtdb', 'number', ['number','number','number','number','number','number']),
         /** int eraDtf2d(const char *scale, int iy, int im, int id, int ihr, int imn, double sec, double *d1, double *d2); */
         dtf2d : function (scale, iy, im, id, ihr, imn, sec) {
-            var u1Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-                u2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+            var u1Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                u2Buffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
             //we use ccall here so we don't need to mess about with string pointers etc..
-            var status = Module.ccall(
+            var status = LIBERFA.ccall(
                     'eraDtf2d',
                     'number',
                     ['string','number','number','number','number','number','number','number','number'],
                     [scale, iy, im, id, ihr, imn, sec, u1Buffer, u2Buffer]
                 ),
                 ret = {
-                    u1: Module.HEAPF64[u1Buffer >> 3],
-                    u2: Module.HEAPF64[u2Buffer >> 3],
+                    u1: LIBERFA.HEAPF64[u1Buffer >> 3],
+                    u2: LIBERFA.HEAPF64[u2Buffer >> 3],
                     status: status
                 };
 
-            Module._free(u1Buffer);
-            Module._free(u2Buffer);
+            LIBERFA._free(u1Buffer);
+            LIBERFA._free(u2Buffer);
 
             return ret;
 
@@ -1802,9 +1802,9 @@
             return dmsToAngle('_eraAf2a', s,ideg, iamin, iasec);
         },
         /** double eraAnp(double a); */
-        anp: Module.cwrap('eraAnp','number',['number']),
+        anp: LIBERFA.cwrap('eraAnp','number',['number']),
         /** double eraAnpm(double a); */
-        anpm: Module.cwrap('eraAnpm','number',['number']),
+        anpm: LIBERFA.cwrap('eraAnpm','number',['number']),
         /** void eraD2tf(int ndp, double days, char *sign, int ihmsf[4]); */
         d2tf: function (ndp, days) {
             var r = angleToDMSF('_eraD2tf', ndp, days);
@@ -1819,9 +1819,13 @@
         /** int eraTf2d(char s, int ihour, int imin, double sec, double *days); */
         tf2d: function (s, ihour, imin, sec) {
             return dmsToAngle('_eraTf2d', s, ihour, imin, sec);
-        }
+        },
 
         //BuildRotations
+        /** void eraRx(double phi, double r[3][3]); */
+        rx: [],
+        /** void eraRy(double theta, double r[3][3]); */
+        /** void eraRz(double psi, double r[3][3]);*/
         //CopyExtendExtract
         //Initialization
         //MatrixOps
