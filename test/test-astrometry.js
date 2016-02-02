@@ -845,5 +845,171 @@ describe('Astrometry', function () {
       (ret.status).should.equal(0);
 
     });
+
+    describe('#eraLd()', function () {
+      it('Should Apply light deflection by a solar-system body, as part of ' +
+        'transforming coordinate direction into natural direction', function () {
+
+        var bm = 0.00028574, q= [], e=[],
+        p =[-0.763276255, -0.608633767, -0.216735543],
+        q = [-0.763276255, -0.608633767, -0.216735543],
+        e = [0.76700421, 0.605629598, 0.211937094],
+        em = 8.91276983,
+        dlim = 3e-10;
+
+        var p1 = erfa.ld(bm, p, q, e, em, dlim);
+
+        (p1[0]).should.be.closeTo(-0.7632762548968159627, 1e-12);
+        (p1[1]).should.be.closeTo(-0.6086337670823762701, 1e-12);
+        (p1[2]).should.be.closeTo(-0.2167355431320546947, 1e-12);
+
+      });
+    });
+  });
+
+  describe('#eraldn', function () {
+    it('Should For a star, apply light deflection by multiple solar-system bodies', function () {
+
+      var n = 3,
+          b = [new erfa.LDBODY(), new erfa.LDBODY(), new erfa.LDBODY()];
+
+      b[0].bm = 0.00028574;
+      b[0].dl = 3e-10;
+      b[0].pv = [
+        [-7.81014427, -5.60956681, -1.98079819],
+        [0.0030723249, -0.00406995477,  -0.00181335842]
+      ];
+
+      b[1].bm = 0.00095435;
+      b[1].dl = 3e-9;
+      b[1].pv = [
+        [0.738098796, 4.63658692, 1.9693136],
+        [-0.00755816922, 0.00126913722, 0.000727999001]
+      ];
+
+      b[2].bm = 1.0;
+      b[2].dl = 6e-6;
+      b[2].pv = [
+        [-0.000712174377, -0.00230478303, -0.00105865966],
+        [6.29235213e-6, -3.30888387e-7, -2.96486623e-7]
+      ];
+
+      var ob = [-0.974170437, -0.2115201, -0.0917583114],
+          sc = [-0.763276255, -0.608633767, -0.216735543];
+
+      var sn = erfa.ldn(n, b, ob, sc);
+
+      (sn[0]).should.be.closeTo(-0.7632762579693333866, 1e-12);
+      (sn[1]).should.be.closeTo(-0.6086337636093002660, 1e-12);
+      (sn[2]).should.be.closeTo(-0.2167355420646328159, 1e-12);
+
+    });
+  });
+
+  describe('#ldsun()', function () {
+    it('Should calculate deflection of starlight by the Sun', function () {
+
+      var p = [-0.763276255, -0.608633767, -0.216735543],
+      e = [-0.973644023, -0.20925523, -0.0907169552],
+      em = 0.999809214;
+
+      var p1 = erfa.ldsun(p, e, em);
+
+      (p1[0]).should.be.closeTo(-0.7632762580731413169, 1e-12);
+      (p1[1]).should.be.closeTo(-0.6086337635262647900, 1e-12);
+      (p1[2]).should.be.closeTo(-0.2167355419322321302, 1e-12);
+
+      
+    });
+  });
+
+  describe('#pmpx()', function () {
+    it('Should calculate proper motion and parallax', function () {
+
+      var rc = 1.234,
+      dc = 0.789,
+      pr = 1e-5,
+      pd = -2e-5,
+      px = 1e-2,
+      rv = 10.0,
+      pmt = 8.75,
+      pob = [0.9, 0.4, 0.1];
+
+      var pco = erfa.pmpx(rc, dc, pr, pd, px, rv, pmt, pob, pco);
+
+      (pco[0]).should.be.closeTo(0.2328137623960308440, 1e-12);
+      (pco[1]).should.be.closeTo(0.6651097085397855317, 1e-12);
+      (pco[2]).should.be.closeTo(0.7095257765896359847, 1e-12);
+
+    });
+  });
+
+  describe('pmsafe', function () {
+    it('Should provide update star catalog data for space motion, with' +
+      'special handling to handle the zero parallax case', function () {
+
+      var ra1 = 1.234,
+          dec1 = 0.789,
+          pmr1 = 1e-5,
+          pmd1 = -2e-5,
+          px1 = 1e-2,
+          rv1 = 10.0,
+          ep1a = 2400000.5,
+          ep1b = 48348.5625,
+          ep2a = 2400000.5,
+          ep2b = 51544.5;
+
+      var ret = erfa.pmsafe(ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b);
+
+      (ret.ra2).should.be.closeTo(1.234087484501017061, 1e-12);
+      (ret.dec2).should.be.closeTo(0.7888249982450468574, 1e-12);
+      (ret.pmr2).should.be.closeTo(0.9996457663586073988e-5, 1e-12);
+      (ret.pmd2).should.be.closeTo(-0.2000040085106737816e-4, 1e-16);
+      (ret.px2).should.be.closeTo(0.9999997295356765185e-2, 1e-12);
+      (ret.rv2).should.be.closeTo(10.38468380113917014, 1e-10);
+
+      (ret.status).should.equal(0);
+
+    });
+  });
+
+  describe('#pvtob()', function () {
+    it('Should get the position and velocity of a terrestrial observing station', function () {
+
+      var elong = 2.0,
+        phi = 0.5,
+        hm = 3000.0,
+        xp = 1e-6,
+        yp = -0.5e-6,
+        sp = 1e-8,
+        theta = 5.0;
+
+      var pv = erfa.pvtob(elong, phi, hm, xp, yp, sp, theta);
+
+      (pv[0][0]).should.be.closeTo(4225081.367071159207, 1e-5);
+      (pv[0][1]).should.be.closeTo(3681943.215856198144, 1e-5);
+      (pv[0][2]).should.be.closeTo(3041149.399241260785, 1e-5);
+      (pv[1][0]).should.be.closeTo(-268.4915389365998787, 1e-9);
+      (pv[1][1]).should.be.closeTo(308.0977983288903123, 1e-9);
+      (pv[1][2]).should.be.closeTo(0, 0);
+
+    });
+  });
+
+
+  describe('#refco()', function () {
+    it('Should determine the constants A and B in the atmospheric refraction model', function () {
+
+      var phpa = 800.0,
+          tc = 10.0,
+          rh = 0.9,
+          wl = 0.4;
+
+      var ret = erfa.refco(phpa, tc, rh, wl);
+
+      (ret.refa).should.be.closeTo(0.2264949956241415009e-3, 1e-15);
+      (ret.refb).should.be.closeTo(-0.2598658261729343970e-6, 1e-18);
+
+    });
   });
 });

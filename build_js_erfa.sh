@@ -7,7 +7,7 @@
 
 
 #clone upstream
-git clone https://github.com/liberfa/erfa
+#git clone https://github.com/liberfa/erfa
 
 #try and build our library
 cd erfa/src

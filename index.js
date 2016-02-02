@@ -907,14 +907,182 @@
             return ret;
         },
         /** void eraAtoiq(const char *type, double ob1, double ob2, eraASTROM *astrom, double *ri, double *di); */
-        /*void eraLd(double bm, double p[3], double q[3], double e[3], double em, double dlim, double p1[3]);
-        void eraLdn(int n, eraLDBODY b[], double ob[3], double sc[3], double sn[3]);
-        void eraLdsun(double p[3], double e[3], double em, double p1[3]);
-        void eraPmpx(double rc, double dc, double pr, double pd, double px, double rv, double pmt, double pob[3], double pco[3]);
-        int eraPmsafe(double ra1, double dec1, double pmr1, double pmd1, double px1, double rv1, double ep1a, double ep1b, double ep2a, double ep2b, double *ra2, double *dec2, double *pmr2, double *pmd2, double *px2, double *rv2);
-        void eraPvtob(double elong, double phi, double height, double xp, double yp, double sp, double theta, double pv[2][3]);
-        void eraRefco(double phpa, double tc, double rh, double wl, double *refa, double *refb);
-        */
+        atoiq: function(type, ob1, ob2, astrom) {
+
+            var astromBuffer = Module._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
+              riBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              diBuffer = Module._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
+              typeBuffer = Module._malloc(type.length);
+
+            Module.writeStringToMemory(type, typeBuffer, false);
+            writeFloat64Buffer(astromBuffer, astrom.toArray());
+
+            Module._eraAtoiq(typeBuffer, ob1, ob2, astromBuffer);
+
+            var ret = {
+                ri: Module.HEAPF64[riBuffer >>> 3],
+                di: Module.HEAPF64[diBuffer >>> 3]
+            };
+
+            Module._free(riBuffer);
+            Module._free(diBuffer);
+            Module._free(astromBuffer);
+            Module._free(typeBuffer);
+
+            return ret;
+        },
+        /** void eraLd(double bm, double p[3], double q[3], double e[3], double em, double dlim, double p1[3]);*/
+        ld: function (bm, p, q, e, em, dlim) {
+
+            var pBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
+                qBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
+                eBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
+                p1Buffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(pBuffer, p);
+            writeFloat64Buffer(qBuffer, q);
+            writeFloat64Buffer(eBuffer, e);
+
+            Module._eraLd(bm, pBuffer, qBuffer, eBuffer, em, dlim, p1Buffer);
+
+            var ret = readFloat64Buffer(p1Buffer, 3);
+
+            Module._free(pBuffer);
+            Module._free(qBuffer);
+            Module._free(eBuffer);
+
+            return ret;
+        },
+        /** void eraLdn(int n, eraLDBODY b[], double ob[3], double sc[3], double sn[3]); */
+        ldn: function (n, b, ob, sc) {
+
+            var bSize = b.length * LDBODY.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT;
+            var bBuffer = Module._malloc(bSize),
+                obBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
+                scBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT),
+                snBuffer = Module._malloc(3  * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(obBuffer, ob);
+            writeFloat64Buffer(scBuffer, sc);
+            writeFloat64Buffer(bBuffer, SH.flattenVector(b.map(function (item){
+                return item.toArray();
+            })));
+
+            Module._eraLdn(b.length, bBuffer, obBuffer, scBuffer, snBuffer);
+
+            var ret = readFloat64Buffer(snBuffer, 3);
+
+            Module._free(bBuffer);
+            Module._free(obBuffer);
+            Module._free(scBuffer);
+            Module._free(snBuffer);
+
+            return ret;
+
+        },
+        /** void eraLdsun(double p[3], double e[3], double em, double p1[3]);*/
+        ldsun: function (p, e, em, p1) {
+
+            var pBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+                eBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+                p1Buffer = Module._malloc( 3 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(pBuffer, p);
+            writeFloat64Buffer(eBuffer, e);
+
+            Module._eraLdsun(pBuffer, eBuffer, em, p1Buffer);
+
+            var ret = readFloat64Buffer(p1Buffer, 3);
+
+            Module._free(pBuffer);
+            Module._free(eBuffer);
+            Module._free(p1Buffer);
+
+            return ret;
+
+        },
+        /** void eraPmpx(double rc, double dc, double pr, double pd, double px, double rv, double pmt, double pob[3], double pco[3]);*/
+        pmpx: function (rc, dc, pr, pd, px, rv, pmt, pob) {
+
+            var pobBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+                pcoBuffer = Module._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(pobBuffer, pob);
+
+            Module._eraPmpx(rc, dc, pr, pd, px, rv, pmt, pobBuffer, pcoBuffer);
+
+            var ret = readFloat64Buffer(pcoBuffer, 3);
+
+            Module._free(pobBuffer);
+            Module._free(pcoBuffer);
+
+            return ret;
+
+        },
+        /** int eraPmsafe(double ra1, double dec1, double pmr1, double pmd1, double px1, double rv1, double ep1a, double ep1b, double ep2a, double ep2b, double *ra2, double *dec2, double *pmr2, double *pmd2, double *px2, double *rv2); */
+        pmsafe: function (ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b) {
+            //double *ra2, double *dec2, double *pmr2, double *pmd2, double *px2, double *rv2
+
+            var ra2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                dec2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pmr2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                pmd2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                px2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                rv2Buffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+
+            var status = Module._eraPmsafe(ra1, dec1, pmr1, pmd1, px1, rv1, ep1a, ep1b, ep2a, ep2b, ra2Buffer, dec2Buffer, pmr2Buffer, pmd2Buffer, px2Buffer, rv2Buffer);
+
+            var ret = {
+                status: status,
+                ra2: Module.HEAPF64[ra2Buffer >>> 3],
+                dec2: Module.HEAPF64[dec2Buffer >>> 3],
+                pmr2: Module.HEAPF64[pmr2Buffer >>> 3],
+                pmd2: Module.HEAPF64[pmd2Buffer >>> 3],
+                px2: Module.HEAPF64[px2Buffer >>> 3],
+                rv2: Module.HEAPF64[rv2Buffer >>> 3]
+            };
+
+            Module._free(ra2Buffer);
+            Module._free(dec2Buffer);
+            Module._free(pmr2Buffer);
+            Module._free(pmd2Buffer);
+            Module._free(px2Buffer);
+            Module._free(rv2Buffer);
+
+            return ret;
+        },
+      /** void eraPvtob(double elong, double phi, double height, double xp, double yp, double sp, double theta, double pv[2][3]);*/
+        pvtob: function (elong, phi, height, xp, yp, sp, theta) {
+
+          var pvBuffer = Module._malloc(6 * Float64Array.BYTES_PER_ELEMENT );
+          Module._eraPvtob(elong, phi, height, xp, yp, sp, theta, pvBuffer);
+
+          var pv = SH.chunkArray(Array.from(readFloat64Buffer(pvBuffer, 6)) ,3);
+
+          Module._free(pvBuffer);
+
+          return pv;
+
+        },
+        /** void eraRefco(double phpa, double tc, double rh, double wl, double *refa, double *refb); */
+        refco: function (phpa, tc, rh, wl) {
+            //refa, double *refb
+            var refaBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
+                refbBuffer = Module._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
+
+            Module._eraRefco(phpa, tc, rh, wl, refaBuffer, refbBuffer);
+
+            var ret = {
+                refa: Module.HEAPF64[refaBuffer >>> 3],
+                refb: Module.HEAPF64[refbBuffer >>> 3]
+            };
+
+            Module._free(refaBuffer);
+            Module._free(refbBuffer);
+
+            return ret;
+        },
 
         //ephemerides
         /** int eraEpv00(double date1, double date2, double pvh[2][3], double pvb[2][3]); */
