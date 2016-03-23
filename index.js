@@ -2034,6 +2034,38 @@
         },
 
         //RotationVectors
+        /** void eraRm2v(double r[3][3], double w[3]); */
+        rm2v: function (r) {
+            var rBuffer = LIBERFA._malloc(9 * Float64Array.BYTES_PER_ELEMENT),
+              wBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(rBuffer, SH.flattenVector(r));
+
+            LIBERFA._eraRm2v(rBuffer, wBuffer);
+
+            var ret = readFloat64Buffer(wBuffer, 6);
+
+            LIBERFA._free(rBuffer);
+            LIBERFA._free(wBuffer);
+
+            return ret;
+        },
+        /** void eraRv2m(double w[3], double r[3][3]); */
+        rv2m: function (w) {
+            var wBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+              rBuffer = LIBERFA._malloc(9 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(wBuffer, SH.flattenVector(w));
+
+            LIBERFA._eraRv2m(wBuffer, rBuffer);
+
+            var ret = SH.chunkArray(Array.from(readFloat64Buffer(rBuffer, 9)), 3);
+
+            LIBERFA._free(wBuffer);
+            LIBERFA._free(rBuffer);
+
+            return ret;
+        }
         //SeparationAndAngle
         //SphericalCartesian
         //VectorOps
