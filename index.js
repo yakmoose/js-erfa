@@ -2065,9 +2065,46 @@
             LIBERFA._free(rBuffer);
 
             return ret;
-        }
+        },
         //SeparationAndAngle
-        //SphericalCartesian
+        /** double eraPap(double a[3], double b[3]); */
+        pap: function (a, b) {
+          var aBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+              bBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+
+          writeFloat64Buffer(aBuffer, SH.flattenVector(a));
+          writeFloat64Buffer(bBuffer, SH.flattenVector(b));
+
+          var ret = LIBERFA._eraPap(aBuffer, bBuffer);
+
+          LIBERFA._free(aBuffer);
+          LIBERFA._free(bBuffer);
+
+          return ret;
+        },
+        /** double eraPas(double al, double ap, double bl, double bp);*/
+        //pas: function (al, ap, bl, bp) {},
+        pas: LIBERFA.cwrap('eraPas', 'number', ['number','number','number','number']),
+        /** double eraSepp(double a[3], double b[3]);*/
+        sepp: function (a, b) {
+          var aBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+            bBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+
+          writeFloat64Buffer(aBuffer, SH.flattenVector(a));
+          writeFloat64Buffer(bBuffer, SH.flattenVector(b));
+
+          var ret = LIBERFA._eraSepp(aBuffer, bBuffer);
+
+          LIBERFA._free(aBuffer);
+          LIBERFA._free(bBuffer);
+
+          return ret;
+        },
+        /** double eraSeps(double al, double ap, double bl, double bp);*/
+        //seps: function (al, ap, bl, bp) {}
+        seps: LIBERFA.cwrap('eraSeps', 'number', ['number','number','number','number']),
+
+      //SphericalCartesian
         //VectorOps
 
     };
