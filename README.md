@@ -1,5 +1,8 @@
 What is jsERFA
 ==============
+[![Build Status](https://travis-ci.org/yakmoose/js-erfa.svg?branch=master)](https://travis-ci.org/yakmoose/js-erfa)
+
+
 This is a Javascript implementation/wrapper of the [liberfa](https://github.com/liberfa/erfa) library. liberfa is a collection of key algorithms for astronomy, and is in turn, based on the [SOFA](http://www.iausofa.org/) library published by the International Astronomical Union (IAU). 
 
 The core ERFA functions have been compiled to javascript using Emscripten and have been wrapped accordingly to hide all the C like pointer behaviours. 

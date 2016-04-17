@@ -1,6 +1,15 @@
 (function () {
     "use strict";
 
+    if (!Object.assign || !Map || !Float64Array.prototype.fill) {
+        var s = require("es6-shim");
+
+        // yeah, this is not shimmed in... and we kinda need it...
+        if (!Float64Array.prototype.fill) {
+            Float64Array.prototype.fill = s.Array.prototype.fill;
+        }
+    }
+
     var LIBERFA = require('./lib/liberfa'),
         SH = require('./lib/struct-helper');
 
@@ -2226,7 +2235,23 @@
         }
 
         //VectorOps
-
+        /** double eraPdp(double a[3], double b[3]); */
+        /** double eraPm(double p[3]); */
+        /** void eraPmp(double a[3], double b[3], double amb[3]); */
+        /** void eraPn(double p[3], double *r, double u[3]); */
+        /** void eraPpp(double a[3], double b[3], double apb[3]); */
+        /** void eraPpsp(double a[3], double s, double b[3], double apsb[3]); */
+        /** void eraPvdpv(double a[2][3], double b[2][3], double adb[2]); */
+        /** void eraPvm(double pv[2][3], double *r, double *s); */
+        /** void eraPvmpv(double a[2][3], double b[2][3], double amb[2][3]); */
+        /** void eraPvppv(double a[2][3], double b[2][3], double apb[2][3]); */
+        /** void eraPvu(double dt, double pv[2][3], double upv[2][3]); */
+        /** void eraPvup(double dt, double pv[2][3], double p[3]); */
+        /** void eraPvxpv(double a[2][3], double b[2][3], double axb[2][3]); */
+        /** void eraPxp(double a[3], double b[3], double axb[3]); */
+        /** void eraS2xpv(double s1, double s2, double pv[2][3], double spv[2][3]); */
+        /** void eraSxp(double s, double p[3], double sp[3]); */
+        /** void eraSxpv(double s, double pv[2][3], double spv[2][3]); */
     };
 
 })();
