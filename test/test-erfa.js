@@ -8,7 +8,7 @@ var chai = require('chai'),
   erfa = require('../index'),
   LIBERFA = require('../lib/liberfa');
 
-describe.skip('Exports have functions', function () {
+describe('Exports have functions', function () {
 
   var erfaExports = Object.getOwnPropertyNames(LIBERFA).filter(function (prop) {
     return /^_era/.test(prop);
