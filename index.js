@@ -2232,12 +2232,70 @@
           LIBERFA._free(pvBuffer);
 
           return ret;
-        }
+        },
 
         //VectorOps
         /** double eraPdp(double a[3], double b[3]); */
+        pdp: function (a, b) {
+            // var aBuffer = LIBERFA._malloc(a.length * Float64Array.BYTES_PER_ELEMENT),
+            //     bBuffer = LIBERFA._malloc(b.length * Float64Array.BYTES_PER_ELEMENT);
+            //
+            // writeFloat64Buffer(aBuffer, a);
+            // writeFloat64Buffer(bBuffer, b);
+            //
+            // var ret = LIBERFA._eraPdp(aBuffer, bBuffer);
+            //
+            //
+            // LIBERFA._free(aBuffer);
+            // LIBERFA._free(bBuffer);
+            //
+            // return ret;
+
+
+            var w  = a[0] * b[0]
+              + a[1] * b[1]
+              + a[2] * b[2];
+
+            return w;
+        },
         /** double eraPm(double p[3]); */
+        pm: function (p) {
+            // var pBuffer = LIBERFA._malloc(p.length * Float64Array.BYTES_PER_ELEMENT);
+            //
+            // writeFloat64Buffer(pBuffer, p);
+            // var ret = LIBERFA._eraPm(pBuffer);
+            //
+            // LIBERFA._free(pBuffer);
+            //
+            // return ret;
+            return Math.sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2]);
+        },
         /** void eraPmp(double a[3], double b[3], double amb[3]); */
+        pmp: function (a, b) {
+            // var aBuffer = LIBERFA._malloc(a.length * Float64Array.BYTES_PER_ELEMENT),
+            //     bBuffer = LIBERFA._malloc(b.length * Float64Array.BYTES_PER_ELEMENT),
+            //     ambBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+            //
+            // writeFloat64Buffer(aBuffer, a);
+            // writeFloat64Buffer(bBuffer, b);
+            //
+            // LIBERFA._eraPmp(aBuffer, bBuffer, ambBuffer);
+            //
+            // var ret = readFloat64Buffer(ambBuffer, 3);
+            //
+            // LIBERFA._free(aBuffer);
+            // LIBERFA._free(bBuffer);
+            // LIBERFA._free(ambBuffer);
+            //
+            // return ret;
+
+
+            return [
+                a[0] - b[0],
+                a[1] - b[1],
+                a[2] - b[2]
+            ];
+        },
         /** void eraPn(double p[3], double *r, double u[3]); */
         /** void eraPpp(double a[3], double b[3], double apb[3]); */
         /** void eraPpsp(double a[3], double s, double b[3], double apsb[3]); */
