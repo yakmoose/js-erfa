@@ -189,6 +189,36 @@ describe('Vector Ops', function () {
   describe('#pvup()', function () {
     it('Should update a pv-vector, discarding the velocity component', function () {
 
+      var pv = [
+        [126668.5912743160734, 2136.792716839935565, -245251.2339876830229],
+        [-0.4051854035740713039e-2, -0.6253919754866175788e-2, 0.1189353719774107615e-1]
+      ];
+
+      var ret = erfa.pvup(2920.0, pv);
+
+      (ret[0]).should.be.closeTo(126656.7598605317105, 1e-12);
+      (ret[1]).should.be.closeTo(2118.531271155726332, 1e-12);
+      (ret[2]).should.be.closeTo(-245216.5048590656190, 1e-12);
+
+    });
+  });
+
+  describe('#pvxpv()', function () {
+    it('Should calculate outer (=vector=cross) product of two pv-vectors', function () {
+
+      var a = [[2.0, 2.0, 3.0],[6.0, 0.0, 4.0]],
+          b = [[1.0, 3.0, 4.0],[0.0, 2.0, 8.0]];
+
+      var ret =  erfa.pvxpv(a, b);
+
+      (ret[0][0]).should.be.closeTo(-1.0, 1e-12);
+      (ret[0][1]).should.be.closeTo(-5.0, 1e-12);
+      (ret[0][2]).should.be.closeTo(4.0, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-2.0, 1e-12);
+      (ret[1][1]).should.be.closeTo(-36.0, 1e-12);
+      (ret[1][2]).should.be.closeTo(22.0, 1e-12);
+
     });
   });
 

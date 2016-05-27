@@ -2482,10 +2482,53 @@
 
         },
         /** void eraPvup(double dt, double pv[2][3], double p[3]); */
-        pvup: function () {
+        pvup: function (dt, pv) {
+            // pv = SH.flattenVector(pv);
+            //
+            // var pvBuffer = LIBERFA._malloc(pv.length * Float64Array.BYTES_PER_ELEMENT),
+            //     pBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+            //
+            // writeFloat64Buffer(pvBuffer, pv);
+            //
+            // LIBERFA._eraPvup(dt, pvBuffer, pBuffer);
+            //
+            // var ret = readFloat64Buffer(pBuffer, 3);
+            //
+            // LIBERFA._free(pvBuffer);
+            // LIBERFA._free(pBuffer);
+            //
+            // return ret;
+            return [
+                pv[0][0] + dt * pv[1][0],
+                pv[0][1] + dt * pv[1][1],
+                pv[0][2] + dt * pv[1][2]
+            ];
+
+        },
+        /** void eraPvxpv(double a[2][3], double b[2][3], double axb[2][3]); */
+        pvxpv: function (a, b) {
+
+            a = SH.flattenVector(a);
+            b = SH.flattenVector(b);
+
+            var aBuffer = LIBERFA._malloc(a.length * Float64Array.BYTES_PER_ELEMENT),
+              bBuffer = LIBERFA._malloc(b.length * Float64Array.BYTES_PER_ELEMENT),
+              axbBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(aBuffer, a);
+            writeFloat64Buffer(bBuffer, b);
+
+            LIBERFA._eraPvmpv(aBuffer, bBuffer, axbBuffer);
+
+            var ret = SH.chunkArray(Array.from(readFloat64Buffer(axbBuffer, 6)), 3);
+
+            LIBERFA._free(aBuffer);
+            LIBERFA._free(bBuffer);
+            LIBERFA._free(axbBuffer);
+
+            return ret;
 
         }
-        /** void eraPvxpv(double a[2][3], double b[2][3], double axb[2][3]); */
         /** void eraPxp(double a[3], double b[3], double axb[3]); */
         /** void eraS2xpv(double s1, double s2, double pv[2][3], double spv[2][3]); */
         /** void eraSxp(double s, double p[3], double sp[3]); */
