@@ -2518,7 +2518,7 @@
             writeFloat64Buffer(aBuffer, a);
             writeFloat64Buffer(bBuffer, b);
 
-            LIBERFA._eraPvmpv(aBuffer, bBuffer, axbBuffer);
+            LIBERFA._eraPvxpv(aBuffer, bBuffer, axbBuffer);
 
             var ret = SH.chunkArray(Array.from(readFloat64Buffer(axbBuffer, 6)), 3);
 
