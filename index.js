@@ -2528,11 +2528,89 @@
 
             return ret;
 
-        }
+        },
         /** void eraPxp(double a[3], double b[3], double axb[3]); */
+        pxp: function (a, b) {
+
+            var aBuffer = LIBERFA._malloc(a.length * Float64Array.BYTES_PER_ELEMENT),
+              bBuffer = LIBERFA._malloc(b.length * Float64Array.BYTES_PER_ELEMENT),
+              axbBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(aBuffer, a);
+            writeFloat64Buffer(bBuffer, b);
+
+            LIBERFA._eraPxp(aBuffer, bBuffer, axbBuffer);
+
+            var ret = readFloat64Buffer(axbBuffer, 3);
+
+            LIBERFA._free(aBuffer);
+            LIBERFA._free(bBuffer);
+            LIBERFA._free(axbBuffer);
+
+            return ret;
+        },
+
         /** void eraS2xpv(double s1, double s2, double pv[2][3], double spv[2][3]); */
+        s2xpv: function (s1, s2, pv) {
+
+            pv = SH.flattenVector(pv);
+
+            var pvBuffer = LIBERFA._malloc(pv.length * Float64Array.BYTES_PER_ELEMENT),
+                spvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
+
+            writeFloat64Buffer(pvBuffer, pv);
+
+            LIBERFA._eraS2xpv(s1, s2, pvBuffer, spvBuffer);
+
+            var ret = SH.chunkArray(Array.from(readFloat64Buffer(spvBuffer, 6)), 3);
+
+
+            LIBERFA._free(pvBuffer);
+            LIBERFA._free(spvBuffer);
+
+            return ret;
+
+        },
         /** void eraSxp(double s, double p[3], double sp[3]); */
+        sxp: function (s, p) {
+
+            // var pBuffer = LIBERFA._malloc(p.length * Float64Array.BYTES_PER_ELEMENT);
+            // var spBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
+            //
+            // writeFloat64Buffer(pBuffer, p);
+            //
+            // LIBERFA._eraSxpv(s, pBuffer, spBuffer);
+            //
+            // var ret = readFloat64Buffer(spBuffer, 3);
+            //
+            //
+            // LIBERFA._free(pBuffer);
+            // LIBERFA._free(spBuffer);
+            //
+            // return ret;
+            return    [s * p[0], s * p[1], s * p[2]];
+        },
         /** void eraSxpv(double s, double pv[2][3], double spv[2][3]); */
+        sxpv: function (s, pv) {
+
+            // pv = SH.flattenVector(pv);
+            //
+            // var pvBuffer = LIBERFA._malloc(pv.length * Float64Array.BYTES_PER_ELEMENT);
+            // var spvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
+            //
+            // writeFloat64Buffer(pvBuffer, pv);
+            //
+            // LIBERFA._eraSxpv(s, pvBuffer, spvBuffer);
+            //
+            // var ret = SH.chunkArray(Array.from(readFloat64Buffer(spvBuffer, 6)), 3);
+            //
+            //
+            // LIBERFA._free(pvBuffer);
+            // LIBERFA._free(spvBuffer);
+            //
+            // return ret;
+            return this.s2xpv(s, s, pv);
+        }
     };
 
 })();

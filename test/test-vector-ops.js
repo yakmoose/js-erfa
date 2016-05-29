@@ -14,8 +14,7 @@ describe('Vector Ops', function () {
 
       var ret = erfa.pdp(a, b);
 
-      (ret).should.be.closeTo(20, 1e-12)
-
+      (ret).should.be.closeTo(20, 1e-12);
 
     });
   });
@@ -128,7 +127,6 @@ describe('Vector Ops', function () {
   describe('#pvmpv()', function () {
     it('Should calculate p-vector minus p-vector', function () {
 
-
       var a = [[2.0, 2.0, 3.0], [5.0, 6.0, 3.0]],
           b = [[1.0, 3.0, 4.0], [3.0, 2.0, 1.0]];
 
@@ -218,6 +216,76 @@ describe('Vector Ops', function () {
       (ret[1][0]).should.be.closeTo(-2.0, 1e-12);
       (ret[1][1]).should.be.closeTo(-36.0, 1e-12);
       (ret[1][2]).should.be.closeTo(22.0, 1e-12);
+
+    });
+  });
+
+
+  describe('#pxp()', function () {
+    it('Should calculate p-vector outer (=vector=cross) product.', function () {
+      var a = [2.0, 2.0, 3.0],
+          b = [1.0, 3.0, 4.0];
+
+      var ret = erfa.pxp(a, b);
+
+      (ret[0]).should.be.closeTo(-1.0, 1e-12);
+      (ret[1]).should.be.closeTo(-5.0, 1e-12);
+      (ret[2]).should.be.closeTo(4.0, 1e-12);
+    });
+  });
+
+  describe('#S2xpv()', function () {
+    it('Should multiply a pv-vector by two scalars', function () {
+
+      var s1 = 2.0,
+        s2 = 3.0,
+        pv = [[0.3, 1.2, -2.5], [0.5, 2.3, -0.4]];
+
+      var ret = erfa.s2xpv(s1, s2, pv);
+
+      (ret[0][0]).should.be.closeTo(0.6, 1e-12);
+      (ret[0][1]).should.be.closeTo(2.4, 1e-12);
+      (ret[0][2]).should.be.closeTo(-5.0, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(1.5, 1e-12);
+      (ret[1][1]).should.be.closeTo(6.9, 1e-12);
+      (ret[1][2]).should.be.closeTo(-1.2, 1e-12);
+
+    });
+  });
+
+  describe('#sxp()', function () {
+    it('Should multiply a p-vector by a scalar', function () {
+
+      var s = 2.0,
+
+      p = [0.3, 1.2, -2.5];
+
+      var ret = erfa.sxp(s, p);
+
+      (ret[0]).should.be.closeTo(0.6, 0.0);
+      (ret[1]).should.be.closeTo(2.4, 0.0);
+      (ret[2]).should.be.closeTo(-5.0, 0.0);
+
+    });
+  });
+
+  describe('#sxpv()', function () {
+    it('Should multiply a pv-vector by a scalar', function () {
+
+      var s = 2.0,
+
+      pv = [[0.3, 1.2, -2.5], [0.5, 3.2, -0.7]];
+
+      var ret = erfa.sxpv(s, pv);
+
+      (ret[0][0]).should.be.closeTo(0.6, 0.0);
+      (ret[0][1]).should.be.closeTo(2.4, 0.0);
+      (ret[0][2]).should.be.closeTo(-5.0, 0.0);
+
+      (ret[1][0]).should.be.closeTo(1.0, 0.0);
+      (ret[1][1]).should.be.closeTo(6.4, 0.0);
+      (ret[1][2]).should.be.closeTo(-1.4, 0.0);
 
     });
   });
