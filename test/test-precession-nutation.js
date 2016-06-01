@@ -153,7 +153,7 @@ describe('Precession / Nutation', function () {
   });
 
   describe("#c2i06a()", function () {
-    it('', function () {
+    it('Should convert form the celestial-to-intermediate matrix for a given date using the IAU 2006 precession and IAU 2000A nutation models', function () {
 
       var ret = erfa.c2i06a(2400000.5, 53736.0);
 
@@ -172,4 +172,79 @@ describe('Precession / Nutation', function () {
     });
   });
 
+  describe("#c2ibpn()", function () {
+    it('Should form the celestial-to-intermediate matrix for a given date given the bias-precession-nutation matrix. IAU 2000', function () {
+
+      var rbpn = [
+        [9.999962358680738e-1, -2.516417057665452e-3, -1.093569785342370e-3],
+        [2.516462370370876e-3, 9.999968329010883e-1, 4.006159587358310e-5],
+        [1.093465510215479e-3, -4.281337229063151e-5, 9.999994012499173e-1]
+      ];
+
+      var ret = erfa.c2ibpn(2400000.5, 50123.9999, rbpn);
+
+      (ret[0][0]).should.be.closeTo(0.9999994021664089977, 1e-12);
+      (ret[0][1]).should.be.closeTo(-0.3869195948017503664e-8, 1e-12);
+      (ret[0][2]).should.be.closeTo(-0.1093465511383285076e-2, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(0.5068413965715446111e-7, 1e-12);
+      (ret[1][1]).should.be.closeTo(0.9999999990835075686, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.4281334246452708915e-4, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(0.1093465510215479000e-2, 1e-12);
+      (ret[2][1]).should.be.closeTo(-0.4281337229063151000e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999994012499173103, 1e-12);
+
+
+    });
+  });
+
+  describe("#c2ixy()", function () {
+    it('Should Form the celestial to intermediate-frame-of-date matrix for a given date when the CIP X,Y coordinates are known. IAU 2000', function () {
+
+      var x = 0.5791308486706011000e-3,
+          y = 0.4020579816732961219e-4;
+
+      var ret = erfa.c2ixy(2400000.5, 53736, x, y);
+
+      (ret[0][0]).should.be.closeTo(0.9999998323037157138, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.5581526349032241205e-9, 1e-12);
+      (ret[0][2]).should.be.closeTo(-0.5791308491611263745e-3, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.2384257057469842953e-7, 1e-12);
+      (ret[1][1]).should.be.closeTo(0.9999999991917468964, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.4020579110172324363e-4, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(0.5791308486706011000e-3, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.4020579816732961219e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999998314954627590, 1e-12);
+
+
+    });
+  });
+
+
+  describe("#c2ixys()", function () {
+    it('Should form the celestial to intermediate-frame-of-date matrix given the CIP X,Y and the CIO locator s', function () {
+
+      var x =  0.5791308486706011000e-3,
+          y =  0.4020579816732961219e-4,
+          s = -0.1220040848472271978e-7;
+
+      var ret = erfa.c2ixys(x, y, s);
+
+      (ret[0][0]).should.be.closeTo(0.9999998323037157138, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.5581984869168499149e-9, 1e-12);
+      (ret[0][2]).should.be.closeTo(-0.5791308491611282180e-3, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.2384261642670440317e-7, 1e-12);
+      (ret[1][1]).should.be.closeTo(0.9999999991917468964, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.4020579110169668931e-4, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(0.5791308486706011000e-3, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.4020579816732961219e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999998314954627590, 1e-12);
+
+    });
+  });
 });
