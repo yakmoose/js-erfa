@@ -247,4 +247,33 @@ describe('Precession / Nutation', function () {
 
     });
   });
+
+
+  describe("#c2t00a()", function () {
+    it('Should form the celestial to terrestrial matrix given the date, the UT1 and the polar motion, using the IAU 2000A nutation model', function () {
+
+      var tta = 2400000.5,
+          uta = 2400000.5,
+          ttb = 53736.0,
+          utb = 53736.0,
+          xp = 2.55060238e-7,
+          yp = 1.860359247e-6;
+
+      var ret = erfa.c2t00a(tta, ttb, uta, utb, xp, yp);
+
+      (ret[0][0]).should.be.closeTo(-0.1810332128307182668, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.9834769806938457836, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.6555535638688341725e-4, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.9834768134135984552, 1e-12);
+      (ret[1][1]).should.be.closeTo(-0.1810332203649520727, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.5749801116141056317e-3, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(0.5773474014081406921e-3, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.3961832391770163647e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999998325501692289, 1e-12);
+
+    });
+  });
+
 });

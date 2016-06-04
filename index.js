@@ -1342,7 +1342,19 @@
             return ret;
         },
         /** void eraC2t00a(double tta, double ttb, double uta, double utb, double xp, double yp, double rc2t[3][3]); */
+        c2t00a: function (tta, ttb, uta, utb, xp, yp) {
+            var rc2tBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+            LIBERFA._eraC2t00a(tta, ttb, uta, utb, xp, yp, rc2tBuffer);
+
+            var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+
+            LIBERFA._free(rc2tBuffer);
+
+            return ret;
+        },
         /** void eraC2t00b(double tta, double ttb, double uta, double utb, double xp, double yp, double rc2t[3][3]); */
+        
         /** void eraC2t06a(double tta, double ttb, double uta, double utb, double xp, double yp, double rc2t[3][3]); */
         /** void eraC2tcio(double rc2i[3][3], double era, double rpom[3][3], double rc2t[3][3]); */
         /** void eraC2teqx(double rbpn[3][3], double gst, double rpom[3][3], double rc2t[3][3]); */
