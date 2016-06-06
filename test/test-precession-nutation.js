@@ -276,4 +276,313 @@ describe('Precession / Nutation', function () {
     });
   });
 
+
+  describe("#c2t00b()", function () {
+    it('Should form the celestial-to-intermediate matrix for a given date using the IAU 2000B precession-nutation model.', function () {
+
+      var tta = 2400000.5,
+          uta = 2400000.5,
+          ttb = 53736.0,
+          utb = 53736.0,
+          xp = 2.55060238e-7,
+          yp = 1.860359247e-6;
+
+      var ret = erfa.c2t00b(tta, ttb, uta, utb, xp, yp);
+
+      (ret[0][0]).should.be.closeTo(-0.1810332128439678965, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.9834769806913872359, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.6555565082458415611e-4, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.9834768134115435923, 1e-12);
+      (ret[1][1]).should.be.closeTo(-0.1810332203784001946, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.5749793922030017230e-3, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(0.5773467471863534901e-3, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.3961790411549945020e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999998325505635738, 1e-12);
+
+    });
+  });
+
+
+  describe("#c2t06a()", function () {
+    it('Should form the celestial to terrestrial matrix given the date, the UT1 and the polar motion, using the IAU 2006 precession and IAU 2000A', function () {
+
+      var tta = 2400000.5,
+        uta = 2400000.5,
+        ttb = 53736.0,
+        utb = 53736.0,
+        xp = 2.55060238e-7,
+        yp = 1.860359247e-6;
+
+      var ret = erfa.c2t06a(tta, ttb, uta, utb, xp, yp);
+
+      (ret[0][0]).should.be.closeTo(-0.1810332128305897282, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.9834769806938592296, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.6555550962998436505e-4, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.9834768134136214897, 1e-12);
+      (ret[1][1]).should.be.closeTo(-0.1810332203649130832, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.5749800844905594110e-3, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(0.5773474024748545878e-3, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.3961816829632690581e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999998325501747785, 1e-12);
+
+    });
+  });
+
+
+  describe("#c2tcio()", function () {
+    it('Should assemble the celestial to terrestrial matrix from CIO-based components', function () {
+
+      var rc2i = [[0.9999998323037164738, 0.5581526271714303683e-9, -0.5791308477073443903e-3],
+                  [-0.2384266227524722273e-7, 0.9999999991917404296, -0.4020594955030704125e-4],
+                  [0.5791308472168153320e-3, 0.4020595661593994396e-4, 0.9999998314954572365]], 
+          era = 1.75283325530307,
+          rpom = [[0.9999999999999674705, -0.1367174580728847031e-10, 0.2550602379999972723e-6], 
+                  [0.1414624947957029721e-10, 0.9999999999982694954, -0.1860359246998866338e-5], 
+                  [-0.2550602379741215275e-6, 0.1860359247002413923e-5, 0.9999999999982369658]];
+
+
+      var ret = erfa.c2tcio(rc2i, era, rpom);
+
+      (ret[0][0]).should.be.closeTo(-0.1810332128307110439, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.9834769806938470149, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.6555535638685466874e-4, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.9834768134135996657, 1e-12);
+      (ret[1][1]).should.be.closeTo(-0.1810332203649448367, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.5749801116141106528e-3, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(0.5773474014081407076e-3, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.3961832391772658944e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999998325501691969, 1e-12);
+      
+    });
+  });
+//
+
+
+  describe("#c2teqx()", function () {
+    it('Should assemble the celestial to terrestrial matrix from equinox-based components', function () {
+
+      var rbpn = [[0.9999989440476103608, -0.1332881761240011518e-2, -0.5790767434730085097e-3],
+                  [0.1332858254308954453e-2, 0.9999991109044505944, -0.4097782710401555759e-4],
+                  [0.5791308472168153320e-3, 0.4020595661593994396e-4, 0.9999998314954572365]],
+          gst = 1.754166138040730516,
+          rpom = [[0.9999999999999674705, -0.1367174580728847031e-10, 0.2550602379999972723e-6],
+                  [0.1414624947957029721e-10, 0.9999999999982694954, -0.1860359246998866338e-5],
+                  [-0.2550602379741215275e-6, 0.1860359247002413923e-5, 0.9999999999982369658]];
+
+      var ret = erfa.c2teqx(rbpn, gst, rpom);
+
+      (ret[0][0]).should.be.closeTo(-0.1810332128528685730, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.9834769806897685071, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.6555535639982634449e-4, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.9834768134095211257, 1e-12);
+      (ret[1][1]).should.be.closeTo(-0.1810332203871023800, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.5749801116126438962e-3, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(0.5773474014081539467e-3, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.3961832391768640871e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999998325501691969, 1e-12);
+
+    });
+  });
+
+
+  describe("#c2tpe()", function () {
+    it('Should form the celestial to terrestrial matrix given the date, the UT1, the nutation and the polar motion. IAU 2000.', function () {
+
+      var tta = 2400000.5,
+          uta = 2400000.5,
+          ttb = 53736.0,
+          utb = 53736.0,
+          deps = 0.4090789763356509900,
+          dpsi = -0.9630909107115582393e-5,
+          xp = 2.55060238e-7,
+          yp = 1.860359247e-6;
+
+      var ret = erfa.c2tpe(tta, ttb, uta, utb, dpsi, deps, xp, yp);
+
+      (ret[0][0]).should.be.closeTo(-0.1813677995763029394, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.9023482206891683275, 1e-12);
+      (ret[0][2]).should.be.closeTo(-0.3909902938641085751, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.9834147641476804807, 1e-12);
+      (ret[1][1]).should.be.closeTo(-0.1659883635434995121, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.7309763898042819705e-1, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(0.1059685430673215247e-2, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.3977631855605078674, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9174875068792735362, 1e-12);
+
+    });
+  });
+
+  describe("#c2txy()", function () {
+    it('Should form the celestial to terrestrial matrix given the date, the UT1, the CIP coordinates and the polar motion. IAU 2000', function () {
+
+      var tta = 2400000.5,
+          uta = 2400000.5,
+          ttb = 53736.0,
+          utb = 53736.0,
+          x = 0.5791308486706011000e-3,
+          y = 0.4020579816732961219e-4,
+          xp = 2.55060238e-7,
+          yp = 1.860359247e-6;
+
+      var ret = erfa.c2txy(tta, ttb, uta, utb, x, y, xp, yp);
+
+      (ret[0][0]).should.be.closeTo(-0.1810332128306279253, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.9834769806938520084, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.6555551248057665829e-4, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.9834768134136142314, 1e-12);
+      (ret[1][1]).should.be.closeTo(-0.1810332203649529312, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.5749800843594139912e-3, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(0.5773474028619264494e-3, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.3961816546911624260e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999998325501746670, 1e-12);
+
+    });
+  });
+
+  describe("#eo06a()", function () {
+    it('Should slove equation of the origins, IAU 2006 precession and IAU 2000A nutation.', function () {
+
+      var ret = erfa.eo06a(2400000.5, 53736.0);
+
+      (ret).should.be.closeTo(-0.1332882371941833644e-2, 1e-15);
+      
+    });
+  });
+
+
+  describe("#eors()", function () {
+    it('should solve Equation of the origins, given the classical NPB matrix and the quantity', function () {
+
+      var rnpb = [[0.9999989440476103608, -0.1332881761240011518e-2, -0.5790767434730085097e-3],
+                  [0.1332858254308954453e-2, 0.9999991109044505944, -0.4097782710401555759e-4],
+                  [0.5791308472168153320e-3, 0.4020595661593994396e-4, 0.9999998314954572365]],
+          s = -0.1220040848472271978e-7;
+
+      var ret = erfa.eors(rnpb, s);
+
+      (ret).should.be.closeTo(-0.1332882715130744606e-2, 1e-14);
+
+    });
+  });
+
+  describe("#fw2m()", function () {
+    it('Should form rotation matrix given the Fukushima-Williams angles.', function () {
+
+      var gamb = -0.2243387670997992368e-5,
+          phib =  0.4091014602391312982,
+          psi  = -0.9501954178013015092e-3,
+          eps  =  0.4091014316587367472;
+
+      var ret = erfa.fw2m(gamb, phib, psi, eps);
+
+      (ret[0][0]).should.be.closeTo(0.9999995505176007047, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8695404617348192957e-3, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.3779735201865582571e-3, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.8695404723772016038e-3, 1e-12);
+      (ret[1][1]).should.be.closeTo(0.9999996219496027161, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.1361752496887100026e-6, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(-0.3779734957034082790e-3, 1e-12);
+      (ret[2][1]).should.be.closeTo(-0.1924880848087615651e-6, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999999285679971958, 1e-12);
+
+    });
+  });
+
+
+  describe("#fw2xy()", function () {
+    it('Should calculate CIP X,Y given Fukushima-Williams bias-precession-nutation angles', function () {
+
+      var gamb = -0.2243387670997992368e-5,
+          phib =  0.4091014602391312982,
+          psi  = -0.9501954178013015092e-3,
+          eps  =  0.4091014316587367472;
+
+      var ret = erfa.fw2xy(gamb, phib, psi, eps);
+
+      (ret.x).should.be.closeTo(-0.3779734957034082790e-3, 1e-14);
+      (ret.y).should.be.closeTo(-0.1924880848087615651e-6, 1e-14);
+
+    });
+  });
+
+  describe("#num00a()", function () {
+    it('Should form the matrix of nutation for a given date, IAU 2000A model', function () {
+
+      var ret = erfa.num00a(2400000.5, 53736.0);
+
+      (ret[0][0]).should.be.closeTo(0.9999999999536227949, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8836238544090873336e-5, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.3830835237722400669e-5, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.8836082880798569274e-5, 1e-12);
+      (ret[1][1]).should.be.closeTo(0.9999999991354655028, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.4063240865362499850e-4, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(-0.3831194272065995866e-5, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.4063237480216291775e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999999991671660338, 1e-12);
+
+    });
+  });
+
+  describe("#num00b()", function () {
+    it('Should form the matrix of nutation for a given date, IAU 2000B model', function () {
+
+      var ret = erfa.num00b(2400000.5, 53736.0);
+
+      (ret[0][0]).should.be.closeTo(0.9999999999536069682, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8837746144871248011e-5, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.3831488838252202945e-5, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.8837590456632304720e-5, 1e-12);
+      (ret[1][1]).should.be.closeTo(0.9999999991354692733, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.4063198798559591654e-4, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(-0.3831847930134941271e-5, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.4063195412258168380e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999999991671806225, 1e-12);
+
+    });
+  });
+
+  describe("#num06a()", function () {
+    it('Should form the matrix of nutation for a given date, IAU 2006/2000A model', function () {
+
+      var ret = erfa.num06a(2400000.5, 53736.0);
+
+      (ret[0][0]).should.be.closeTo(0.9999999999536227668, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8836241998111535233e-5, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.3830834608415287707e-5, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.8836086334870740138e-5, 1e-12);
+      (ret[1][1]).should.be.closeTo(0.9999999991354657474, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.4063240188248455065e-4, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(-0.3831193642839398128e-5, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.4063236803101479770e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999999991671663114, 1e-12);
+
+    });
+  });
+  
+  //
+  // describe("#num06a()", function () {
+  //   it('Should form the matrix of nutation for a given date, IAU 2006/2000A model', function () {
+  //   });
+  // });
+
 });

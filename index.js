@@ -1354,27 +1354,208 @@
             return ret;
         },
         /** void eraC2t00b(double tta, double ttb, double uta, double utb, double xp, double yp, double rc2t[3][3]); */
-        
+        c2t00b: function (tta, ttb, uta, utb, xp, yp) {
+            var rc2tBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+            LIBERFA._eraC2t00b(tta, ttb, uta, utb, xp, yp, rc2tBuffer);
+
+            var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+
+            LIBERFA._free(rc2tBuffer);
+
+            return ret;
+        },
         /** void eraC2t06a(double tta, double ttb, double uta, double utb, double xp, double yp, double rc2t[3][3]); */
+        c2t06a: function (tta, ttb, uta, utb, xp, yp) {
+          var rc2tBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+          LIBERFA._eraC2t06a(tta, ttb, uta, utb, xp, yp, rc2tBuffer);
+
+          var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+
+          LIBERFA._free(rc2tBuffer);
+
+          return ret;
+
+        },
         /** void eraC2tcio(double rc2i[3][3], double era, double rpom[3][3], double rc2t[3][3]); */
+        c2tcio: function (rc2i, era, rpom) {
+
+          rc2i = SH.flattenVector(rc2i);
+          rpom = SH.flattenVector(rpom);
+
+          var rc2iBuffer = LIBERFA._malloc( rc2i.length * Float64Array.BYTES_PER_ELEMENT),
+              rpomBuffer = LIBERFA._malloc( rpom.length * Float64Array.BYTES_PER_ELEMENT),
+              rc2tBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+          writeFloat64Buffer(rc2iBuffer, rc2i);
+          writeFloat64Buffer(rpomBuffer, rpom);
+
+          LIBERFA._eraC2tcio(rc2iBuffer, era, rpomBuffer, rc2tBuffer);
+
+          var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+
+          LIBERFA._free(rc2iBuffer);
+          LIBERFA._free(rpomBuffer);
+          LIBERFA._free(rc2tBuffer);
+
+          return ret;
+
+        },
         /** void eraC2teqx(double rbpn[3][3], double gst, double rpom[3][3], double rc2t[3][3]); */
+        c2teqx: function (rbpn, gst, rpom) {
+
+          rbpn = SH.flattenVector(rbpn);
+          rpom = SH.flattenVector(rpom);
+
+          var rbpnBuffer = LIBERFA._malloc( rbpn.length * Float64Array.BYTES_PER_ELEMENT),
+              rpomBuffer = LIBERFA._malloc( rpom.length * Float64Array.BYTES_PER_ELEMENT),
+              rc2tBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+          writeFloat64Buffer(rbpnBuffer, rbpn);
+          writeFloat64Buffer(rpomBuffer, rpom);
+
+          LIBERFA._eraC2teqx(rbpnBuffer, gst, rpomBuffer, rc2tBuffer);
+
+          var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+
+          LIBERFA._free(rbpnBuffer);
+          LIBERFA._free(rpomBuffer);
+          LIBERFA._free(rc2tBuffer);
+
+          return ret;
+        },
         /** void eraC2tpe(double tta, double ttb, double uta, double utb, double dpsi, double deps, double xp, double yp, double rc2t[3][3]); */
+        c2tpe: function (tta, ttb, uta, utb, dpsi, deps, xp, yp) {
+
+          var rc2tBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+          LIBERFA._eraC2tpe(tta, ttb, uta, utb, dpsi, deps, xp, yp, rc2tBuffer);
+
+          var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+
+          LIBERFA._free(rc2tBuffer);
+
+          return ret;
+
+        },
         /** void eraC2txy(double tta, double ttb, double uta, double utb, double x, double y, double xp, double yp, double rc2t[3][3]); */
+        c2txy: function (tta, ttb, uta, utb, x, y, xp, yp) {
+
+          var rc2tBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+          LIBERFA._eraC2txy(tta, ttb, uta, utb, x, y, xp, yp, rc2tBuffer);
+
+          var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+
+          LIBERFA._free(rc2tBuffer);
+
+          return ret;
+        },
         /** double eraEo06a(double date1, double date2); */
+        eo06a: LIBERFA.cwrap('eraEo06a', 'number', ['number', 'number']),
         /** double eraEors(double rnpb[3][3], double s); */
+        eors: function (rnpb, s) {
+
+          rnpb = SH.flattenVector(rnpb);
+
+          var rnpbBuffer = LIBERFA._malloc( rnpb.length * Float64Array.BYTES_PER_ELEMENT);
+
+          writeFloat64Buffer(rnpbBuffer, rnpb);
+
+          var ret = LIBERFA._eraEors(rnpbBuffer, s);
+
+          LIBERFA._free(rnpbBuffer);
+
+          return ret;
+        },
         /** void eraFw2m(double gamb, double phib, double psi, double eps, double r[3][3]); */
+        fw2m: function (gamb, phib, psi, eps) {
+          var rBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+          LIBERFA._eraFw2m(gamb, phib, psi, eps, rBuffer);
+
+          var ret = SH.chunkArray(Array.from(readFloat64Buffer(rBuffer, 9)),3);
+
+          LIBERFA._free(rBuffer);
+
+          return ret;
+        },
         /** void eraFw2xy(double gamb, double phib, double psi, double eps, double *x, double *y); */
+        fw2xy: function (gamb, phib, psi, eps) {
+
+          var xBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+              yBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT);
+
+
+          LIBERFA._eraFw2xy(gamb, phib, psi, eps, xBuffer, yBuffer);
+
+          var ret = {
+            x: LIBERFA.HEAPF64[xBuffer >> 3],
+            y: LIBERFA.HEAPF64[yBuffer >> 3]
+          };
+
+
+          LIBERFA._free(xBuffer);
+          LIBERFA._free(yBuffer);
+
+          return ret;
+        },
+
         /** void eraNum00a(double date1, double date2, double rmatn[3][3]); */
+        num00a: function (date1, date2) {
+
+          var rmatnBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+          LIBERFA._eraNum00a(date1, date2, rmatnBuffer);
+
+          var ret = SH.chunkArray(Array.from(readFloat64Buffer(rmatnBuffer, 9)),3);
+
+          LIBERFA._free(rmatnBuffer);
+
+          return ret;
+
+        },
         /** void eraNum00b(double date1, double date2, double rmatn[3][3]); */
+        num00b: function (date1, date2) {
+          var rmatnBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+          LIBERFA._eraNum00b(date1, date2, rmatnBuffer);
+
+          var ret = SH.chunkArray(Array.from(readFloat64Buffer(rmatnBuffer, 9)),3);
+
+          LIBERFA._free(rmatnBuffer);
+
+          return ret;
+        },
         /** void eraNum06a(double date1, double date2, double rmatn[3][3]); */
+        num06a: function (date1, date2) {
+          var rmatnBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+          LIBERFA._eraNum06a(date1, date2, rmatnBuffer);
+
+          var ret = SH.chunkArray(Array.from(readFloat64Buffer(rmatnBuffer, 9)),3);
+
+          LIBERFA._free(rmatnBuffer);
+
+          return ret;
+        },
+
         /** void eraNumat(double epsa, double dpsi, double deps, double rmatn[3][3]); */
+        numat: function (epsa, dpsi, deps) {
+
+        },
+      
         /** void eraNut00a(double date1, double date2, double *dpsi, double *deps); */
         /** void eraNut00b(double date1, double date2, double *dpsi, double *deps); */
         /** void eraNut06a(double date1, double date2, double *dpsi, double *deps); */
         /** void eraNut80(double date1, double date2, double *dpsi, double *deps); */
+
         /** void eraNutm80(double date1, double date2, double rmatn[3][3]); */
+
         /** double eraObl06(double date1, double date2); */
         /** double eraObl80(double date1, double date2); */
+
         /** void eraP06e(double date1, double date2, double *eps0, double *psia, double *oma, double *bpa, double *bqa, double *pia, double *bpia, double *epsa, double *chia, double *za, double *zetaa, double *thetaa, double *pa, double *gam, double *phi, double *psi); */
         /** void eraPb06(double date1, double date2, double *bzeta, double *bz, double *btheta); */
         /** void eraPfw06(double date1, double date2, double *gamb, double *phib, double *psib, double *epsa); */
@@ -1386,20 +1567,26 @@
         /** void eraPn00b(double date1, double date2, double *dpsi, double *deps, double *epsa, double rb[3][3], double rp[3][3], double rbp[3][3], double rn[3][3], double rbpn[3][3]); */
         /** void eraPn06(double date1, double date2, double dpsi, double deps, double *epsa, double rb[3][3], double rp[3][3], double rbp[3][3], double rn[3][3], double rbpn[3][3]); */
         /** void eraPn06a(double date1, double date2, double *dpsi, double *deps, double *epsa, double rb[3][3], double rp[3][3], double rbp[3][3], double rn[3][3], double rbpn[3][3]); */
+
         /** void eraPnm00a(double date1, double date2, double rbpn[3][3]); */
         /** void eraPnm00b(double date1, double date2, double rbpn[3][3]); */
         /** void eraPnm06a(double date1, double date2, double rnpb[3][3]); */
         /** void eraPnm80(double date1, double date2, double rmatpn[3][3]); */
+
         /** void eraPom00(double xp, double yp, double sp, double rpom[3][3]); */
+
         /** void eraPr00(double date1, double date2, double *dpsipr, double *depspr); */
         /** void eraPrec76(double date01, double date02, double date11, double date12, double *zeta, double *z, double *theta); */
+
         /** double eraS00(double date1, double date2, double x, double y); */
         /** double eraS00a(double date1, double date2); */
         /** double eraS00b(double date1, double date2); */
         /** double eraS06(double date1, double date2, double x, double y); */
         /** double eraS06a(double date1, double date2); */
+
         /** double eraSp00(double date1, double date2); */
         /** void eraXy06(double date1, double date2, double *x, double *y); */
+
         /** void eraXys00a(double date1, double date2, double *x, double *y, double *s); */
         /** void eraXys00b(double date1, double date2, double *x, double *y, double *s); */
         /** void eraXys06a(double date1, double date2,  double *x, double *y, double *s); */
