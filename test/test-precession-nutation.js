@@ -580,9 +580,172 @@ describe('Precession / Nutation', function () {
   });
   
   //
-  // describe("#num06a()", function () {
-  //   it('Should form the matrix of nutation for a given date, IAU 2006/2000A model', function () {
-  //   });
-  // });
+  describe("#numat()", function () {
+    it('Should form the matrix of nutation.', function () {
+
+      var epsa =  0.4090789763356509900,
+          dpsi = -0.9630909107115582393e-5,
+          deps =  0.4063239174001678826e-4;
+
+      var ret = erfa.numat(epsa, dpsi, deps);
+
+      (ret[0][0]).should.be.closeTo(0.9999999999536227949, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8836239320236250577e-5, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.3830833447458251908e-5, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.8836083657016688588e-5, 1e-12);
+      (ret[1][1]).should.be.closeTo(0.9999999991354654959, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.4063240865361857698e-4, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(-0.3831192481833385226e-5, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.4063237480216934159e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999999991671660407, 1e-12);
+
+    });
+  });
+
+  describe("#nut00a()", function () {
+    it('Should form Nutation, IAU 2000A model (MHB2000 luni-solar and planetary nutation with free core nutation omitted)', function () {
+
+      var ret = erfa.nut00a(2400000.5, 53736.0);
+
+      (ret.dpsi).should.be.closeTo(-0.9630909107115518431e-5, 1e-13);
+      (ret.deps).should.be.closeTo(0.4063239174001678710e-4, 1e-13);
+
+    });
+  });
+
+  describe("#nut00b()", function () {
+    it('Should form nutation, IAU 2000B model', function () {
+
+      var ret = erfa.nut00b(2400000.5, 53736.0);
+
+      (ret.dpsi).should.be.closeTo(-0.9632552291148362783e-5, 1e-13);
+      (ret.deps).should.be.closeTo(0.4063197106621159367e-4, 1e-13);
+
+    });
+  });
+
+  describe("#nut06a()", function () {
+    it('should form IAU 2000A nutation with adjustments to match the IAU 2006 precession', function () {
+
+      var ret = erfa.nut06a(2400000.5, 53736.0);
+
+      (ret.dpsi).should.be.closeTo(-0.9630912025820308797e-5, 1e-13);
+      (ret.deps).should.be.closeTo(0.4063238496887249798e-4, 1e-13);
+
+    });
+  });
+
+  describe("#nut80()", function () {
+    it('should form nutation, IAU 1980 model', function () {
+
+      var ret = erfa.nut80(2400000.5, 53736.0);
+
+      (ret.dpsi).should.be.closeTo(-0.9643658353226563966e-5, 1e-13);
+      (ret.deps).should.be.closeTo(0.4060051006879713322e-4, 1e-13);
+
+    });
+  });
+
+  describe("#nutm80()", function () {
+    it('Should form the matrix of nutation for a given date, IAU 1980 model.', function () {
+
+      var ret = erfa.nutm80(2400000.5, 53736.0);
+
+      (ret[0][0]).should.be.closeTo(0.9999999999534999268, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8847935789636432161e-5, 1e-12);
+      (ret[0][2]).should.be.closeTo(0.3835906502164019142e-5, 1e-12);
+
+      (ret[1][0]).should.be.closeTo(-0.8847780042583435924e-5, 1e-12);
+      (ret[1][1]).should.be.closeTo(0.9999999991366569963, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.4060052702727130809e-4, 1e-12);
+
+      (ret[2][0]).should.be.closeTo(-0.3836265729708478796e-5, 1e-12);
+      (ret[2][1]).should.be.closeTo(0.4060049308612638555e-4, 1e-12);
+      (ret[2][2]).should.be.closeTo(0.9999999991684415129, 1e-12);
+
+    });
+  });
+
+  describe("#Obl06()", function () {
+    it('Should calculate mean obliquity of the ecliptic, IAU 2006 precession model', function () {
+
+      var ret = erfa.Obl06(2400000.5, 54388.0);
+
+      ret.should.be.closeTo(0.4090749229387258204, 1e-14);
+
+    });
+  });
+
+  describe("#Obl80()", function () {
+    it('Should calculate mean obliquity of the ecliptic, IAU 2006 precession model', function () {
+
+      var ret = erfa.Obl80(2400000.5, 54388.0);
+
+      ret.should.be.closeTo(0.4090751347643816218, 1e-14);
+
+    });
+  });
+
+
+  describe("#s00()", function () {
+    it('Should calculate The CIO locator s, positioning the Celestial Intermediate Origin on the equator of the Celestial Intermediate Pole, given the CIP\'s X,Y coordinates', function () {
+
+      var ret = erfa.s00(2400000.5, 53736.0, 0.5791308486706011000e-3, 0.4020579816732961219e-4);
+
+      ret.should.be.closeTo(-0.1220036263270905693e-7, 1e-18);
+
+    });
+  });
+
+  describe("#s00a()", function () {
+    it('Should calculate the CIO locator s, positioning the Celestial Intermediate Origin on the equator of the Celestial Intermediate Pole, using the IAU 2000A precession-nutation model.', function () {
+
+      var ret = erfa.s00a(2400000.5, 52541.0);
+
+      ret.should.be.closeTo(-0.1340684448919163584e-7, 1e-18);
+
+    });
+  });
+
+  describe("#s00b()", function () {
+    it('Should calculate the CIO locator s, positioning the Celestial Intermediate Origin on the equator of the Celestial Intermediate Pole, using the IAU 2000B precession-nutation model.', function () {
+
+      var ret = erfa.s00b(2400000.5, 52541.0);
+
+      ret.should.be.closeTo(-0.1340695782951026584e-7, 1e-18);
+
+    });
+  });
+
+  describe("#s06()", function () {
+    it('Should calculate The CIO locator s, positioning the Celestial Intermediate Origin on the equator of the Celestial Intermediate Pole, given the CIP\'s X,Y coordinates.  Compatible with IAU 2006/2000A precession-nutation.', function () {
+
+      var ret = erfa.s06(2400000.5, 53736.0, 0.5791308486706011000e-3, 0.4020579816732961219e-4);
+
+      ret.should.be.closeTo(-0.1220032213076463117e-7, 1e-18);
+    });
+  });
+
+  describe("#s06a()", function () {
+    it('Should calculate The CIO locator s, positioning the Celestial Intermediate Origin on the equator of the Celestial Intermediate Pole, using the IAU 2006 precession and IAU 2000A nutation models.', function () {
+
+      var ret = erfa.s06a(2400000.5, 52541.0);
+
+      ret.should.be.closeTo(-0.1340680437291812383e-7, 1e-18);
+
+    });
+  });
+
+  describe("#sp00()", function () {
+    it('Should calculate The TIO locator s\', positioning the Terrestrial Intermediate Origin on the equator of the Celestial Intermediate Pole.', function () {
+
+      var ret = erfa.sp00(2400000.5, 52541.0);
+
+      ret.should.be.closeTo(-0.6216698469981019309e-11, 1e-12);
+
+    });
+  });
 
 });
