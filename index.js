@@ -1641,65 +1641,6 @@
 
         /** void eraP06e(double date1, double date2, double *eps0, double *psia, double *oma, double *bpa, double *bqa, double *pia, double *bpia, double *epsa, double *chia, double *za, double *zetaa, double *thetaa, double *pa, double *gam, double *phi, double *psi); */
         p06e: function (date1, date2){
-/*
-            var eps0Buffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                psiaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                omaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                bpaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                bqaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                piaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                bpiaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                epsaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                chiaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                zaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                zetaaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                thetaaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                paBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                gamBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                phiBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
-                psiBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT);
-
-            LIBERFA._eraP06e(date1, date2, eps0Buffer, psiaBuffer, omaBuffer, bpaBuffer, bqaBuffer, piaBuffer, bpiaBuffer, epsaBuffer, chiaBuffer, zaBuffer, zetaaBuffer, thetaaBuffer, paBuffer, gamBuffer, phiBuffer, psiBuffer);
-
-            var ret = {
-                eps0: LIBERFA.HEAPF64[eps0Buffer >> 3],
-                psia: LIBERFA.HEAPF64[psiaBuffer >> 3],
-                oma: LIBERFA.HEAPF64[omaBuffer >> 3],
-                bpa: LIBERFA.HEAPF64[bpaBuffer >> 3],
-                bqa: LIBERFA.HEAPF64[bqaBuffer >> 3],
-                pia: LIBERFA.HEAPF64[piaBuffer >> 3],
-                bpia: LIBERFA.HEAPF64[bpiaBuffer >> 3],
-                epsa: LIBERFA.HEAPF64[epsaBuffer >> 3],
-                chia: LIBERFA.HEAPF64[chiaBuffer >> 3],
-                za: LIBERFA.HEAPF64[zaBuffer >> 3],
-                zetaa: LIBERFA.HEAPF64[zetaaBuffer >> 3],
-                thetaa: LIBERFA.HEAPF64[thetaaBuffer >> 3],
-                pa: LIBERFA.HEAPF64[paBuffer >> 3],
-                gam: LIBERFA.HEAPF64[gamBuffer >> 3],
-                phi: LIBERFA.HEAPF64[phiBuffer >> 3],
-                psi: LIBERFA.HEAPF64[psiBuffer >> 3]
-            };
-
-            LIBERFA._free(eps0Buffer);
-            LIBERFA._free(psiaBuffer);
-            LIBERFA._free(omaBuffer);
-            LIBERFA._free(bpaBuffer);
-            LIBERFA._free(bqaBuffer);
-            LIBERFA._free(piaBuffer);
-            LIBERFA._free(bpiaBuffer);
-            LIBERFA._free(epsaBuffer);
-            LIBERFA._free(chiaBuffer);
-            LIBERFA._free(zaBuffer);
-            LIBERFA._free(zetaaBuffer);
-            LIBERFA._free(thetaaBuffer);
-            LIBERFA._free(paBuffer);
-            LIBERFA._free(gamBuffer);
-            LIBERFA._free(phiBuffer);
-            LIBERFA._free(psiBuffer);
-
-            return ret;
-            */
-
 
             /* Interval between fundamental date J2000.0 and given date (JC). */
             var t = ((date1 - CONSTANTS.ERFA_DJ00) + date2) / CONSTANTS.ERFA_DJC,
