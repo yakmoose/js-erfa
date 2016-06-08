@@ -1641,7 +1641,7 @@
 
         /** void eraP06e(double date1, double date2, double *eps0, double *psia, double *oma, double *bpa, double *bqa, double *pia, double *bpia, double *epsa, double *chia, double *za, double *zetaa, double *thetaa, double *pa, double *gam, double *phi, double *psi); */
         p06e: function (date1, date2){
-
+/*
             var eps0Buffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
                 psiaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
                 omaBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
@@ -1698,7 +1698,149 @@
             LIBERFA._free(psiBuffer);
 
             return ret;
+            */
 
+
+            /* Interval between fundamental date J2000.0 and given date (JC). */
+            var t = ((date1 - CONSTANTS.ERFA_DJ00) + date2) / CONSTANTS.ERFA_DJC,
+
+            /* Obliquity at J2000.0. */
+            eps0 = 84381.406 * CONSTANTS.ERFA_DAS2R,
+
+            /* Luni-solar precession. */
+            psia = ( 5038.481507     +
+              (   -1.0790069    +
+              (   -0.00114045   +
+              (    0.000132851  +
+              (   -0.0000000951 )
+              * t) * t) * t) * t) * t * CONSTANTS.ERFA_DAS2R,
+
+            /* Inclination of mean equator with respect to the J2000.0 ecliptic. */
+            oma = eps0 + ( -0.025754     +
+            (  0.0512623    +
+            ( -0.00772503   +
+            ( -0.000000467  +
+            (  0.0000003337 )
+            * t) * t) * t) * t) * t * CONSTANTS.ERFA_DAS2R,
+
+            /* Ecliptic pole x, J2000.0 ecliptic triad. */
+            bpa = (  4.199094     +
+              (  0.1939873    +
+              ( -0.00022466   +
+              ( -0.000000912  +
+              (  0.0000000120 )
+              * t) * t) * t) * t) * t * CONSTANTS.ERFA_DAS2R,
+
+            /* Ecliptic pole -y, J2000.0 ecliptic triad. */
+            bqa = ( -46.811015     +
+              (   0.0510283    +
+              (   0.00052413   +
+              (  -0.000000646  +
+              (  -0.0000000172 )
+              * t) * t) * t) * t) * t * CONSTANTS.ERFA_DAS2R,
+
+            /* Angle between moving and J2000.0 ecliptics. */
+            pia = ( 46.998973     +
+              ( -0.0334926    +
+              ( -0.00012559   +
+              (  0.000000113  +
+              ( -0.0000000022 )
+              * t) * t) * t) * t) * t * CONSTANTS.ERFA_DAS2R,
+
+            /* Longitude of ascending node of the moving ecliptic. */
+            bpia = ( 629546.7936      +
+              (   -867.95758     +
+              (      0.157992    +
+              (     -0.0005371   +
+              (     -0.00004797  +
+              (      0.000000072 )
+              * t) * t) * t) * t) * t) * CONSTANTS.ERFA_DAS2R,
+
+            /* Mean obliquity of the ecliptic. */
+            epsa = this.obl06(date1, date2),
+
+            /* Planetary precession. */
+            chia = ( 10.556403     +
+              ( -2.3814292    +
+              ( -0.00121197   +
+              (  0.000170663  +
+              ( -0.0000000560 )
+              * t) * t) * t) * t) * t * CONSTANTS.ERFA_DAS2R,
+
+            /* Equatorial precession: minus the third of the 323 Euler angles. */
+            za = (   -2.650545     +
+              ( 2306.077181     +
+              (    1.0927348    +
+              (    0.01826837   +
+              (   -0.000028596  +
+              (   -0.0000002904 )
+              * t) * t) * t) * t) * t) * CONSTANTS.ERFA_DAS2R,
+
+            /* Equatorial precession: minus the first of the 323 Euler angles. */
+            zetaa = (    2.650545     +
+              ( 2306.083227     +
+              (    0.2988499    +
+              (    0.01801828   +
+              (   -0.000005971  +
+              (   -0.0000003173 )
+              * t) * t) * t) * t) * t) * CONSTANTS.ERFA_DAS2R,
+
+            /* Equatorial precession: second of the 323 Euler angles. */
+            thetaa = ( 2004.191903     +
+              (   -0.4294934    +
+              (   -0.04182264   +
+              (   -0.000007089  +
+              (   -0.0000001274 )
+              * t) * t) * t) * t) * t * CONSTANTS.ERFA_DAS2R,
+
+            /* General precession. */
+            pa = ( 5028.796195     +
+              (    1.1054348    +
+              (    0.00007964   +
+              (   -0.000023857  +
+              (    0.0000000383 )
+              * t) * t) * t) * t) * t * CONSTANTS.ERFA_DAS2R,
+
+            /* Fukushima-Williams angles for precession. */
+            gam = ( 10.556403     +
+              (  0.4932044    +
+              ( -0.00031238   +
+              ( -0.000002788  +
+              (  0.0000000260 )
+              * t) * t) * t) * t) * t * CONSTANTS.ERFA_DAS2R,
+
+            phi = eps0 + ( -46.811015     +
+            (   0.0511269    +
+            (   0.00053289   +
+            (  -0.000000440  +
+            (  -0.0000000176 )
+            * t) * t) * t) * t) * t * CONSTANTS.ERFA_DAS2R,
+
+            psi = ( 5038.481507     +
+              (    1.5584176    +
+              (   -0.00018522   +
+              (   -0.000026452  +
+              (   -0.0000000148 )
+              * t) * t) * t) * t) * t * CONSTANTS.ERFA_DAS2R;
+
+            return {
+                eps0: eps0,
+                psia: psia,
+                oma: oma,
+                bpa: bpa,
+                bqa: bqa,
+                pia: pia,
+                bpia: bpia,
+                epsa: epsa,
+                chia: chia,
+                za: za,
+                zetaa: zetaa,
+                thetaa: thetaa,
+                pa: pa,
+                gam: gam,
+                phi: phi,
+                psi: psi
+            }
         },
         /** void eraPb06(double date1, double date2, double *bzeta, double *bz, double *btheta); */
         /** void eraPfw06(double date1, double date2, double *gamb, double *phib, double *psib, double *epsa); */
