@@ -1638,7 +1638,6 @@
         obl06: LIBERFA.cwrap('eraObl06', 'number', ['number', 'number']),
         /** double eraObl80(double date1, double date2); */
         obl80: LIBERFA.cwrap('eraObl80', 'number', ['number', 'number']),
-
         /** void eraP06e(double date1, double date2, double *eps0, double *psia, double *oma, double *bpa, double *bqa, double *pia, double *bpia, double *epsa, double *chia, double *za, double *zetaa, double *thetaa, double *pa, double *gam, double *phi, double *psi); */
         p06e: function (date1, date2){
 

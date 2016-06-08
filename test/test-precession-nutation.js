@@ -999,8 +999,7 @@ describe('Precession / Nutation', function () {
       (ret.gam).should.be.closeTo(0.1398077115963754987e-5, 1e-14);
       (ret.phi).should.be.closeTo(0.4090864090837462602, 1e-14);
       (ret.psi).should.be.closeTo(0.6664464807480920325e-3, 1e-14);
-
-
+      
     });
   });
 
