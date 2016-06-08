@@ -378,7 +378,6 @@
         },
 
         //astrometry
-
         /** void eraAb(double pnat[3], double v[3], double s, double bm1, double ppr[3]); */
         ab: function (pnat, v, s, bm1) {
             var pnatBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
@@ -568,7 +567,6 @@
 
             return  new ASTROM(ret);//return the one we were passed in??
         },
-
         /** void eraAper13(double ut11, double ut12, eraASTROM *astrom); */
         aper13: function (ut11, ut12, astrom) {
             var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
@@ -709,7 +707,6 @@
 
             return ret;
         },
-
         /** int eraAtco13(double rc, double dc, double pr, double pd, double px, double rv, double utc1, double utc2, double dut1, double elong, double phi, double hm, double xp, double yp, double phpa, double tc, double rh, double wl, double *aob, double *zob, double *hob, double *dob, double *rob, double *eo); */
         atco13: function (rc, dc, pr, pd, px, rv, utc1, utc2, dut1, elong, phi, hm, xp, yp, phpa, tc, rh, wl) {
 
@@ -747,7 +744,6 @@
             return ret;
 
         },
-
         /** void eraAtic13(double ri, double di, double date1, double date2, double *rc, double *dc, double *eo); */
         atic13: function (ri, di, date1, date2 ){
             var riBuffer = LIBERFA._malloc(1  * Float64Array.BYTES_PER_ELEMENT),
@@ -1639,16 +1635,51 @@
             return ret;
         },
         /** double eraObl06(double date1, double date2); */
-        Obl06: LIBERFA.cwrap('eraObl06', 'number', ['number', 'number']),
+        obl06: LIBERFA.cwrap('eraObl06', 'number', ['number', 'number']),
         /** double eraObl80(double date1, double date2); */
-        Obl80: LIBERFA.cwrap('eraObl80', 'number', ['number', 'number']),
+        obl80: LIBERFA.cwrap('eraObl80', 'number', ['number', 'number']),
 
         /** void eraP06e(double date1, double date2, double *eps0, double *psia, double *oma, double *bpa, double *bqa, double *pia, double *bpia, double *epsa, double *chia, double *za, double *zetaa, double *thetaa, double *pa, double *gam, double *phi, double *psi); */
         /** void eraPb06(double date1, double date2, double *bzeta, double *bz, double *btheta); */
         /** void eraPfw06(double date1, double date2, double *gamb, double *phib, double *psib, double *epsa); */
+
         /** void eraPmat00(double date1, double date2, double rbp[3][3]); */
+        pmat00: function (date1, date2) {
+            var rbpBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+            LIBERFA._eraPmat00(date1, date2, rbpBuffer);
+
+            var ret = SH.chunkArray(Array.from(readFloat64Buffer(rbpBuffer, 9)),3);
+
+            LIBERFA._free(rbpBuffer);
+
+            return ret;
+        },
         /** void eraPmat06(double date1, double date2, double rbp[3][3]); */
+        pmat06: function (date1, date2) {
+            var rbpBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+            LIBERFA._eraPmat06(date1, date2, rbpBuffer);
+
+            var ret = SH.chunkArray(Array.from(readFloat64Buffer(rbpBuffer, 9)),3);
+
+            LIBERFA._free(rbpBuffer);
+
+            return ret;
+        },
         /** void eraPmat76(double date1, double date2, double rmatp[3][3]); */
+        pmat76: function (date1, date2) {
+            var rmatpBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
+
+            LIBERFA._eraPmat76(date1, date2, rmatpBuffer);
+
+            var ret = SH.chunkArray(Array.from(readFloat64Buffer(rmatpBuffer, 9)),3);
+
+            LIBERFA._free(rmatpBuffer);
+
+            return ret;
+        },
+
         /** void eraPn00(double date1, double date2, double dpsi, double deps, double *epsa, double rb[3][3], double rp[3][3], double rbp[3][3], double rn[3][3], double rbpn[3][3]); */
         /** void eraPn00a(double date1, double date2, double *dpsi, double *deps, double *epsa, double rb[3][3], double rp[3][3], double rbp[3][3], double rn[3][3], double rbpn[3][3]); */
         /** void eraPn00b(double date1, double date2, double *dpsi, double *deps, double *epsa, double rb[3][3], double rp[3][3], double rbp[3][3], double rn[3][3], double rbpn[3][3]); */
@@ -1658,6 +1689,7 @@
         /** void eraPnm00a(double date1, double date2, double rbpn[3][3]); */
         /** void eraPnm00b(double date1, double date2, double rbpn[3][3]); */
         /** void eraPnm06a(double date1, double date2, double rnpb[3][3]); */
+
         /** void eraPnm80(double date1, double date2, double rmatpn[3][3]); */
 
         /** void eraPom00(double xp, double yp, double sp, double rpom[3][3]); */
@@ -1677,17 +1709,89 @@
         s06a: LIBERFA.cwrap('eraS06a', 'number', ['number', 'number']),
         /** double eraSp00(double date1, double date2); */
         sp00: LIBERFA.cwrap('eraSp00', 'number', ['number', 'number']),
-
         /** void eraXy06(double date1, double date2, double *x, double *y); */
+        xy06: function (date1, date2) {
+            var xBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                yBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT);
 
+
+            LIBERFA._eraXy06(date1, date2, xBuffer, yBuffer);
+
+            var ret = {
+                x: LIBERFA.HEAPF64[xBuffer >> 3],
+                y: LIBERFA.HEAPF64[yBuffer >> 3]
+            };
+
+            LIBERFA._free(xBuffer);
+            LIBERFA._free(yBuffer);
+
+            return ret;
+        },
         /** void eraXys00a(double date1, double date2, double *x, double *y, double *s); */
-        xys00a: function (date1, date2) {},
-        /** void eraXys00b(double date1, double date2, double *x, double *y, double *s); */
-        xys00b: function (date1, date2) {},
-        /** void eraXys06a(double date1, double date2,  double *x, double *y, double *s); */
-        xys06a: function (date1, date2) {},
+        xys00a: function (date1, date2) {
+            var xBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                yBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                sBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT);
 
-        
+
+            LIBERFA._eraXys00a(date1, date2, xBuffer, yBuffer, sBuffer);
+
+            var ret = {
+                x: LIBERFA.HEAPF64[xBuffer >> 3],
+                y: LIBERFA.HEAPF64[yBuffer >> 3],
+                s: LIBERFA.HEAPF64[sBuffer >> 3]
+            };
+
+            LIBERFA._free(xBuffer);
+            LIBERFA._free(yBuffer);
+            LIBERFA._free(sBuffer);
+
+            return ret;
+        },
+        /** void eraXys00b(double date1, double date2, double *x, double *y, double *s); */
+        xys00b: function (date1, date2) {
+            var xBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                yBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                sBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT);
+
+
+            LIBERFA._eraXys00b(date1, date2, xBuffer, yBuffer, sBuffer);
+
+            var ret = {
+                x: LIBERFA.HEAPF64[xBuffer >> 3],
+                y: LIBERFA.HEAPF64[yBuffer >> 3],
+                s: LIBERFA.HEAPF64[sBuffer >> 3]
+            };
+
+            LIBERFA._free(xBuffer);
+            LIBERFA._free(yBuffer);
+            LIBERFA._free(sBuffer);
+
+            return ret;
+        },
+        /** void eraXys06a(double date1, double date2,  double *x, double *y, double *s); */
+        xys06a: function (date1, date2) {
+            var xBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                yBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
+                sBuffer =  LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT);
+
+
+            LIBERFA._eraXys06a(date1, date2, xBuffer, yBuffer, sBuffer);
+
+            var ret = {
+                x: LIBERFA.HEAPF64[xBuffer >> 3],
+                y: LIBERFA.HEAPF64[yBuffer >> 3],
+                s: LIBERFA.HEAPF64[sBuffer >> 3]
+            };
+
+            LIBERFA._free(xBuffer);
+            LIBERFA._free(yBuffer);
+            LIBERFA._free(sBuffer);
+
+            return ret;
+        },
+
+
         //Rotation and Time
         /** double eraEra00(double dj1, double dj2); */
         era00: LIBERFA.cwrap('eraEra00','number',['number','number']),

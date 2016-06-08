@@ -671,7 +671,7 @@ describe('Precession / Nutation', function () {
   describe("#Obl06()", function () {
     it('Should calculate mean obliquity of the ecliptic, IAU 2006 precession model', function () {
 
-      var ret = erfa.Obl06(2400000.5, 54388.0);
+      var ret = erfa.obl06(2400000.5, 54388.0);
 
       ret.should.be.closeTo(0.4090749229387258204, 1e-14);
 
@@ -681,7 +681,7 @@ describe('Precession / Nutation', function () {
   describe("#Obl80()", function () {
     it('Should calculate mean obliquity of the ecliptic, IAU 2006 precession model', function () {
 
-      var ret = erfa.Obl80(2400000.5, 54388.0);
+      var ret = erfa.obl80(2400000.5, 54388.0);
 
       ret.should.be.closeTo(0.4090751347643816218, 1e-14);
 
@@ -748,4 +748,114 @@ describe('Precession / Nutation', function () {
     });
   });
 
+
+  describe("#xys00a()", function () {
+    it('Should For a given TT date, compute the X,Y coordinates of the Celestial Intermediate Pole and the CIO locator s, using the IAU 2000A precession-nutation model', function () {
+
+      var ret = erfa.xys00a(2400000.5, 53736.0);
+
+      (ret.x).should.be.closeTo(0.5791308472168152904e-3, 1e-14);
+      (ret.y).should.be.closeTo(0.4020595661591500259e-4, 1e-15);
+      (ret.s).should.be.closeTo(-0.1220040848471549623e-7, 1e-18);
+
+    });
+  });
+
+  describe("#xys00b()", function () {
+    it('Should For a given TT date, compute the X,Y coordinates of the Celestial Intermediate Pole and the CIO locator s, using the IAU 2000B precession-nutation model.', function () {
+
+      var ret = erfa.xys00b(2400000.5, 53736.0);
+
+      (ret.x).should.be.closeTo(0.5791301929950208873e-3, 1e-14);
+      (ret.y).should.be.closeTo(0.4020553681373720832e-4, 1e-15);
+      (ret.s).should.be.closeTo(-0.1220027377285083189e-7, 1e-18);
+
+    });
+  });
+
+  describe("#xys06a()", function () {
+    it('Should For a given TT date, compute the X,Y coordinates of the Celestial Intermediate Pole and the CIO locator s, using the IAU 2006 precession and IAU 2000A nutation models.', function () {
+
+      var ret = erfa.xys06a(2400000.5, 53736.0);
+
+      (ret.x).should.be.closeTo(0.5791308482835292617e-3, 1e-14);
+      (ret.y).should.be.closeTo(0.4020580099454020310e-4, 1e-15);
+      (ret.s).should.be.closeTo(-0.1220032294164579896e-7, 1e-18);
+
+    });
+  });
+
+  describe("#xy06()", function () {
+    it('Should find X,Y coordinates of celestial intermediate pole from series based on IAU 2006 precession and IAU 2000A nutation', function () {
+
+      var ret = erfa.xy06(2400000.5, 53736.0);
+
+      (ret.x).should.be.closeTo(0.5791308486706010975e-3, 1e-15);
+      (ret.y).should.be.closeTo(0.4020579816732958141e-4, 1e-16);
+
+    });
+  });
+
+  describe("#pmat00()", function () {
+    it('Should Precession matrix (including frame bias) from GCRS to a specified date, IAU 2000 model.', function () {
+
+      var ret = erfa.pmat00(2400000.5, 50123.9999);
+
+      (ret[0][0]).should.be.closeTo(0.9999995505175087260, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8695405883617884705e-3, 1e-14);
+      (ret[0][2]).should.be.closeTo(0.3779734722239007105e-3, 1e-14);
+
+      (ret[1][0]).should.be.closeTo(-0.8695405990410863719e-3, 1e-14);
+      (ret[1][1]).should.be.closeTo(0.9999996219494925900, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.1360775820404982209e-6, 1e-14);
+
+      (ret[2][0]).should.be.closeTo(-0.3779734476558184991e-3, 1e-14);
+      (ret[2][1]).should.be.closeTo(-0.1925857585832024058e-6, 1e-14);
+      (ret[2][2]).should.be.closeTo(0.9999999285680153377, 1e-12);
+
+
+    });
+  });
+
+  describe("#pmat06()", function () {
+    it('Should form precession matrix (including frame bias) from GCRS to a specified date, IAU 2006 model', function () {
+
+      var ret = erfa.pmat06(2400000.5, 50123.9999);
+
+      (ret[0][0]).should.be.closeTo(0.9999995505176007047, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8695404617348208406e-3, 1e-14);
+      (ret[0][2]).should.be.closeTo(0.3779735201865589104e-3, 1e-14);
+
+      (ret[1][0]).should.be.closeTo(-0.8695404723772031414e-3, 1e-14);
+      (ret[1][1]).should.be.closeTo(0.9999996219496027161, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.1361752497080270143e-6, 1e-14);
+
+      (ret[2][0]).should.be.closeTo(-0.3779734957034089490e-3, 1e-14);
+      (ret[2][1]).should.be.closeTo(-0.1924880847894457113e-6, 1e-14);
+      (ret[2][2]).should.be.closeTo(0.9999999285679971958, 1e-12);
+
+
+    });
+  });
+
+  describe("#pmat76()", function () {
+    it('Should form precession matrix from J2000.0 to a specified date, IAU 1976 model.', function () {
+
+      var ret = erfa.pmat76(2400000.5, 50123.9999);
+
+      (ret[0][0]).should.be.closeTo(0.9999995504328350733, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8696632209480960785e-3, 1e-14);
+      (ret[0][2]).should.be.closeTo(0.3779153474959888345e-3, 1e-14);
+
+      (ret[1][0]).should.be.closeTo(-0.8696632209485112192e-3, 1e-14);
+      (ret[1][1]).should.be.closeTo(0.9999996218428560614, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.1643284776111886407e-6, 1e-14);
+
+      (ret[2][0]).should.be.closeTo(-0.3779153474950335077e-3, 1e-14);
+      (ret[2][1]).should.be.closeTo(-0.1643306746147366896e-6, 1e-14);
+      (ret[2][2]).should.be.closeTo(0.9999999285899790119, 1e-12);
+
+
+    });
+  });  
 });
