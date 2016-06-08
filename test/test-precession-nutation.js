@@ -855,7 +855,154 @@ describe('Precession / Nutation', function () {
       (ret[2][1]).should.be.closeTo(-0.1643306746147366896e-6, 1e-14);
       (ret[2][2]).should.be.closeTo(0.9999999285899790119, 1e-12);
 
+    });
+  });
+
+
+  describe("#pnm00a()", function () {
+    it('Should form the matrix of precession-nutation for a given date (including frame bias), equinox-based, IAU 2000A model', function () {
+
+      var ret = erfa.pnm00a(2400000.5, 50123.9999);
+
+      (ret[0][0]).should.be.closeTo(0.9999995832793134257, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8372384254137809439e-3, 1e-14);
+      (ret[0][2]).should.be.closeTo(0.3639684306407150645e-3, 1e-14);
+
+      (ret[1][0]).should.be.closeTo(-0.8372535226570394543e-3, 1e-14);
+      (ret[1][1]).should.be.closeTo(0.9999996486491582471, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.4132915262664072381e-4, 1e-14);
+
+      (ret[2][0]).should.be.closeTo(-0.3639337004054317729e-3, 1e-14);
+      (ret[2][1]).should.be.closeTo(-0.4163386925461775873e-4, 1e-14);
+      (ret[2][2]).should.be.closeTo(0.9999999329094390695, 1e-12);
 
     });
-  });  
+  });
+
+  describe("#pnm00b()", function () {
+    it('Should form the matrix of precession-nutation for a given date (including frame bias), equinox-based, IAU 2000B model', function () {
+
+      var ret = erfa.pnm00b(2400000.5, 50123.9999);
+
+      (ret[0][0]).should.be.closeTo(0.9999995832776208280, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8372401264429654837e-3, 1e-14);
+      (ret[0][2]).should.be.closeTo(0.3639691681450271771e-3, 1e-14);
+
+      (ret[1][0]).should.be.closeTo(-0.8372552234147137424e-3, 1e-14);
+      (ret[1][1]).should.be.closeTo(0.9999996486477686123, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.4132832190946052890e-4, 1e-14);
+
+      (ret[2][0]).should.be.closeTo(-0.3639344385341866407e-3, 1e-14);
+      (ret[2][1]).should.be.closeTo(-0.4163303977421522785e-4, 1e-14);
+      (ret[2][2]).should.be.closeTo(0.9999999329092049734, 1e-12);
+
+
+    });
+  });
+
+  describe("#pnm06a()", function () {
+    it('Should form the matrix of precession-nutation for a given date (including frame bias), IAU 2006 precession and IAU 2000A nutation models', function () {
+
+      var ret = erfa.pnm06a(2400000.5, 50123.9999);
+
+      (ret[0][0]).should.be.closeTo(0.9999995832794205484, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8372382772630962111e-3, 1e-14);
+      (ret[0][2]).should.be.closeTo(0.3639684771140623099e-3, 1e-14);
+
+      (ret[1][0]).should.be.closeTo(-0.8372533744743683605e-3, 1e-14);
+      (ret[1][1]).should.be.closeTo(0.9999996486492861646, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.4132905944611019498e-4, 1e-14);
+
+      (ret[2][0]).should.be.closeTo(-0.3639337469629464969e-3, 1e-14);
+      (ret[2][1]).should.be.closeTo(-0.4163377605910663999e-4, 1e-14);
+      (ret[2][2]).should.be.closeTo(0.9999999329094260057, 1e-12);
+
+
+    });
+  });
+
+  describe("#pnm80()", function () {
+    it('Should form the matrix of precession/nutation for a given date, IAU 1976 precession model, IAU 1980 nutation model', function () {
+
+      var ret = erfa.pnm80(2400000.5, 50123.9999);
+
+      (ret[0][0]).should.be.closeTo(0.9999995831934611169, 1e-12);
+      (ret[0][1]).should.be.closeTo(0.8373654045728124011e-3, 1e-14);
+      (ret[0][2]).should.be.closeTo(0.3639121916933106191e-3, 1e-14);
+
+      (ret[1][0]).should.be.closeTo(-0.8373804896118301316e-3, 1e-14);
+      (ret[1][1]).should.be.closeTo(0.9999996485439674092, 1e-12);
+      (ret[1][2]).should.be.closeTo(0.4130202510421549752e-4, 1e-14);
+
+      (ret[2][0]).should.be.closeTo(-0.3638774789072144473e-3, 1e-14);
+      (ret[2][1]).should.be.closeTo(-0.4160674085851722359e-4, 1e-14);
+      (ret[2][2]).should.be.closeTo(0.9999999329310274805, 1e-12);
+
+    });
+  });
+
+
+  describe("#pom00()", function () {
+    it('Should form the matrix of polar motion for a given date, IAU 2000.', function () {
+
+      var xp =  2.55060238e-7,
+          yp =  1.860359247e-6,
+          sp = -0.1367174580728891460e-10;
+
+      var ret = erfa.pom00(xp, yp, sp);
+
+      (ret[0][0]).should.be.closeTo(0.9999999999999674721, 1e-12);
+      (ret[0][1]).should.be.closeTo(-0.1367174580728846989e-10, 1e-16);
+      (ret[0][2]).should.be.closeTo(0.2550602379999972345e-6, 1e-16);
+
+      (ret[1][0]).should.be.closeTo(0.1414624947957029801e-10, 1e-16);
+      (ret[1][1]).should.be.closeTo(0.9999999999982695317, 1e-12);
+      (ret[1][2]).should.be.closeTo(-0.1860359246998866389e-5, 1e-16);
+
+      (ret[2][0]).should.be.closeTo(-0.2550602379741215021e-6, 1e-16);
+      (ret[2][1]).should.be.closeTo(0.1860359247002414021e-5, 1e-16);
+      (ret[2][2]).should.be.closeTo(0.9999999999982370039, 1e-12);
+
+
+    });
+  });
+
+  describe("#pr00()", function () {
+    it('Should return Precession-rate part of the IAU 2000 precession-nutation models (part of MHB2000).', function () {
+
+      var ret = erfa.pr00(2400000.5, 53736);
+
+      (ret.dpsipr).should.be.closeTo(-0.8716465172668347629e-7, 1e-22);
+      (ret.depspr).should.be.closeTo(-0.7342018386722813087e-8, 1e-22);
+
+    });
+  });
+
+  describe("#p06e()", function () {
+    it('Should return precession angles, IAU 2006, equinox based.', function () {
+
+      var ret = erfa.p06e(2400000.5, 52541.0);
+
+      (ret.eps0).should.be.closeTo(0.4090926006005828715, 1e-14);
+      (ret.psia).should.be.closeTo(0.6664369630191613431e-3, 1e-14);
+      (ret.oma).should.be.closeTo(0.4090925973783255982, 1e-14);
+      (ret.bpa).should.be.closeTo(0.5561149371265209445e-6, 1e-14);
+      (ret.bqa).should.be.closeTo(-0.6191517193290621270e-5, 1e-14);
+      (ret.pia).should.be.closeTo(0.6216441751884382923e-5, 1e-14);
+      (ret.bpia).should.be.closeTo(3.052014180023779882, 1e-14);
+      (ret.epsa).should.be.closeTo(0.4090864054922431688, 1e-14);
+      (ret.chia).should.be.closeTo(0.1387703379530915364e-5, 1e-14);
+      (ret.za).should.be.closeTo(0.2921789846651790546e-3, 1e-14);
+      (ret.zetaa).should.be.closeTo(0.3178773290332009310e-3, 1e-14);
+      (ret.thetaa).should.be.closeTo(0.2650932701657497181e-3, 1e-14);
+      (ret.pa).should.be.closeTo(0.6651637681381016344e-3, 1e-14);
+      (ret.gam).should.be.closeTo(0.1398077115963754987e-5, 1e-14);
+      (ret.phi).should.be.closeTo(0.4090864090837462602, 1e-14);
+      (ret.psi).should.be.closeTo(0.6664464807480920325e-3, 1e-14);
+
+
+    });
+  });
+
+
 });
