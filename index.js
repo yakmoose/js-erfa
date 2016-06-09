@@ -25,28 +25,11 @@
         geodeticGeocentric = require('./src/geodetic-geocentric'),
         timescales = require('./src/timescales'),
         angleOperations = require('./src/angle-operations'),
+        buildRotations = require('./src/build-rotations'),
         HH = require('./src/heap-helper'),
         ASTROM = require('./src/astrom'),
         LDBODY = require('./src/ldbody');
 
-    //simple wrappers that handle various heap/pointer shenanigans
-    var
-
-
-        /** helper to wrap rotations */
-        rxyz = function (angle, axis, matrix) {
-            var matrixBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT);
-            
-            writeFloat64Buffer(matrixBuffer, SH.flattenVector(matrix));
-            
-            LIBERFA['_eraR' + axis](angle,  matrixBuffer);
-            
-            var retMatrix = readFloat64Buffer(matrixBuffer, 3 * 3);
-
-            LIBERFA._free(matrixBuffer);
-
-            return SH.chunkArray(Array.from(retMatrix), 3);
-        };
 
     var writeFloat64Buffer = HH.writeFloat64Buffer,
         readFloat64Buffer = HH.readFloat64Buffer;
@@ -61,19 +44,6 @@
 
 
 
-        //BuildRotations
-        /** void eraRx(double phi, double r[3][3]); */
-        rx: function (phi, r) {
-            return rxyz(phi, 'x', r);
-        },
-        /** void eraRy(double theta, double r[3][3]); */
-        ry: function (theta, r) {
-            return rxyz(theta, 'y', r);
-        },
-        /** void eraRz(double psi, double r[3][3]);*/
-        rz: function (psi, r) {
-            return rxyz(psi, 'z', r);
-        },
 
         //CopyExtendExtract
         /** void eraCp(double p[3], double c[3]); */
@@ -716,6 +686,6 @@
     module.exports = Object.assign(erfa,
       calendar, astrometry, ephemerides, fundamentalArguments,
       precessionNutation, rotationTime, spaceMotion, starCatalogs,
-      galacticCoordinates, geodeticGeocentric, timescales, angleOperations
+      galacticCoordinates, geodeticGeocentric, timescales, angleOperations, buildRotations
     );
 })();
