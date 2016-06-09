@@ -3,7 +3,7 @@
 var chai = require('chai'),
     should = chai.should(),
     erfa = require('../index'),
-    ERFA_CONSTANTS = require('../lib/constants');
+    ERFA_CONSTANTS = require('../src/constants');
 
 describe('Geodetic Geocentric', function () {
 

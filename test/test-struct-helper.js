@@ -2,7 +2,7 @@
 
 var chai = require('chai'),
     should = chai.should(),
-    SH = require('../lib/struct-helper');
+    SH = require('../src/struct-helper');
 
 describe('Struct helpers', function () {
 
