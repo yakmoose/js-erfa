@@ -3,6 +3,7 @@
 
   var LIBERFA = require('../lib/liberfa');
 
+  // Astronomy/Calendars
   var calendars = {
     /** int eraCal2jd(int iy, int im, int id, double *djm0, double *djm); */
     cal2jd: function(iy, im, id) {
