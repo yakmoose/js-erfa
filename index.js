@@ -28,6 +28,8 @@
         vectorBuildRotations = require('./src/vector-build-rotations'),
         vectorCopyExtendExtract = require('./src/vector-copy-extend-extract'),
         vectorInitialisation = require('./src/vector-initialisation'),
+        vectorRotation = require('./src/vector-rotations'),
+        sphericalCartesian = require('./src/spherical-cartesian'),
         HH = require('./src/heap-helper'),
         ASTROM = require('./src/astrom'),
         LDBODY = require('./src/ldbody');
@@ -45,197 +47,9 @@
 
         
 
-        //RotationVectors
-        /** void eraRm2v(double r[3][3], double w[3]); */
-        rm2v: function (r) {
-            var rBuffer = LIBERFA._malloc(9 * Float64Array.BYTES_PER_ELEMENT),
-              wBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
-
-            writeFloat64Buffer(rBuffer, SH.flattenVector(r));
-
-            LIBERFA._eraRm2v(rBuffer, wBuffer);
-
-            var ret = readFloat64Buffer(wBuffer, 6);
-
-            LIBERFA._free(rBuffer);
-            LIBERFA._free(wBuffer);
-
-            return ret;
-        },
-        /** void eraRv2m(double w[3], double r[3][3]); */
-        rv2m: function (w) {
-            var wBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-              rBuffer = LIBERFA._malloc(9 * Float64Array.BYTES_PER_ELEMENT);
-
-            writeFloat64Buffer(wBuffer, SH.flattenVector(w));
-
-            LIBERFA._eraRv2m(wBuffer, rBuffer);
-
-            var ret = SH.chunkArray(Array.from(readFloat64Buffer(rBuffer, 9)), 3);
-
-            LIBERFA._free(wBuffer);
-            LIBERFA._free(rBuffer);
-
-            return ret;
-        },
-        //SeparationAndAngle
-        /** double eraPap(double a[3], double b[3]); */
-        pap: function (a, b) {
-          var aBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-              bBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
-
-          writeFloat64Buffer(aBuffer, SH.flattenVector(a));
-          writeFloat64Buffer(bBuffer, SH.flattenVector(b));
-
-          var ret = LIBERFA._eraPap(aBuffer, bBuffer);
-
-          LIBERFA._free(aBuffer);
-          LIBERFA._free(bBuffer);
-
-          return ret;
-        },
-        /** double eraPas(double al, double ap, double bl, double bp);*/
-        //pas: function (al, ap, bl, bp) {},
-        pas: LIBERFA.cwrap('eraPas', 'number', ['number','number','number','number']),
-        /** double eraSepp(double a[3], double b[3]);*/
-        sepp: function (a, b) {
-          var aBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-            bBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
-
-          writeFloat64Buffer(aBuffer, SH.flattenVector(a));
-          writeFloat64Buffer(bBuffer, SH.flattenVector(b));
-
-          var ret = LIBERFA._eraSepp(aBuffer, bBuffer);
-
-          LIBERFA._free(aBuffer);
-          LIBERFA._free(bBuffer);
-
-          return ret;
-        },
-        /** double eraSeps(double al, double ap, double bl, double bp);*/
-        //seps: function (al, ap, bl, bp) {}
-        seps: LIBERFA.cwrap('eraSeps', 'number', ['number','number','number','number']),
-
-        //SphericalCartesian
-        /** void eraC2s(double p[3], double *theta, double *phi); */
-        c2s: function (p) {
-          var pBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-              thetaBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-              phiBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
-
-          writeFloat64Buffer(pBuffer, SH.flattenVector(p));
-
-          LIBERFA._eraC2s(pBuffer, thetaBuffer, phiBuffer);
-
-          var ret = {
-            theta: LIBERFA.HEAPF64[thetaBuffer >> 3],
-            phi: LIBERFA.HEAPF64[phiBuffer >> 3]
-          };
-
-          LIBERFA._free(pBuffer);
-          LIBERFA._free(thetaBuffer);
-          LIBERFA._free(phiBuffer);
-
-          return ret;
-        },
-        /** void eraP2s(double p[3], double *theta, double *phi, double *r); */
-        p2s: function (p) {
-
-          var pBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-            thetaBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-            phiBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-            rBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
-
-          writeFloat64Buffer(pBuffer, SH.flattenVector(p));
-
-          LIBERFA._eraP2s(pBuffer, thetaBuffer, phiBuffer, rBuffer);
-
-          var ret = {
-            theta: LIBERFA.HEAPF64[thetaBuffer >> 3],
-            phi: LIBERFA.HEAPF64[phiBuffer >> 3],
-            r: LIBERFA.HEAPF64[rBuffer >> 3]
-          };
-
-          LIBERFA._free(pBuffer);
-          LIBERFA._free(thetaBuffer);
-          LIBERFA._free(phiBuffer);
-          LIBERFA._free(rBuffer);
-
-          return ret;
-        },
-        /** void eraPv2s(double pv[2][3], double *theta, double *phi, double *r, double *td, double *pd, double *rd); */
-        pv2s: function (p) {
-          var pvBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
-            thetaBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-            phiBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-            rBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-            tdBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-            pdBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
-            rdBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
-
-          writeFloat64Buffer(pvBuffer, SH.flattenVector(p));
-
-          LIBERFA._eraPv2s(pvBuffer, thetaBuffer, phiBuffer, rBuffer, tdBuffer, pdBuffer, rdBuffer);
-
-          var ret = {
-            theta: LIBERFA.HEAPF64[thetaBuffer >> 3],
-            phi: LIBERFA.HEAPF64[phiBuffer >> 3],
-            r: LIBERFA.HEAPF64[rBuffer >> 3],
-            td: LIBERFA.HEAPF64[tdBuffer >> 3],
-            pd: LIBERFA.HEAPF64[pdBuffer >> 3],
-            rd: LIBERFA.HEAPF64[rdBuffer >> 3]
-          };
-
-          LIBERFA._free(pvBuffer);
-          LIBERFA._free(thetaBuffer);
-          LIBERFA._free(phiBuffer);
-          LIBERFA._free(rBuffer);
-          LIBERFA._free(tdBuffer);
-          LIBERFA._free(pdBuffer);
-          LIBERFA._free(rdBuffer);
-
-          return ret;
-        },
-        /** void eraS2c(double theta, double phi, double c[3]); */
-        s2c: function (theta, phi) {
-
-          var cBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
 
-          LIBERFA._eraS2c(theta, phi, cBuffer);
 
-          var ret = readFloat64Buffer(cBuffer, 3);
-
-          LIBERFA._free(cBuffer);
-
-          return ret;
-        },
-        /** void eraS2p(double theta, double phi, double r, double p[3]); */
-        s2p: function (theta, phi, r) {
-          var pBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
-
-
-          LIBERFA._eraS2p(theta, phi, r, pBuffer);
-
-          var ret = readFloat64Buffer(pBuffer, 3);
-
-          LIBERFA._free(pBuffer);
-
-          return ret;
-        },
-        /** void eraS2pv(double theta, double phi, double r, double td, double pd, double rd, double pv[2][3]); */
-        s2pv: function (theta, phi, r, td, pd, rd) {
-          var pvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
-
-
-          LIBERFA._eraS2pv(theta, phi, r, td, pd, rd, pvBuffer);
-
-          var ret = SH.chunkArray(Array.from(readFloat64Buffer(pvBuffer, 6)), 3);
-
-          LIBERFA._free(pvBuffer);
-
-          return ret;
-        },
 
         //VectorOps
         /** double eraPdp(double a[3], double b[3]); */
@@ -478,7 +292,6 @@
 
             return ret;
         },
-
         /** void eraS2xpv(double s1, double s2, double pv[2][3], double spv[2][3]); */
         s2xpv: function (s1, s2, pv) {
 
@@ -514,6 +327,6 @@
       calendar, astrometry, ephemerides, fundamentalArguments,
       precessionNutation, rotationTime, spaceMotion, starCatalogs,
       galacticCoordinates, geodeticGeocentric, timescales, angleOperations, vectorBuildRotations,
-      vectorCopyExtendExtract, vectorInitialisation
+      vectorCopyExtendExtract, vectorInitialisation, vectorRotation, sphericalCartesian
     );
 })();
