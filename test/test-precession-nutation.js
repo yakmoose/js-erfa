@@ -1003,5 +1003,340 @@ describe('Precession / Nutation', function () {
     });
   });
 
+  describe("#pb06()", function () {
+    it('Should This function forms three Euler angles which implement general precession from epoch J2000.0, using the IAU 2006 model. Frame bias (the offset between ICRS and mean J2000.0) is included.', function () {
+
+      var ret = erfa.pb06(2400000.5, 50123.9999);
+
+      (ret.bzeta).should.be.closeTo(-0.5092634016326478238e-3, 1e-12);
+      (ret.bz).should.be.closeTo(-0.3602772060566044413e-3, 1e-12);
+      (ret.btheta).should.be.closeTo(-0.3779735537167811177e-3, 1e-12);
+
+    });
+  });
+
+  describe("#pfw06()", function () {
+    it('should form precession angles, IAU 2006 (Fukushima-Williams 4-angle formulation).', function () {
+
+      var ret = erfa.pfw06(2400000.5, 50123.9999);
+
+      (ret.gamb).should.be.closeTo(-0.2243387670997995690e-5, 1e-16);
+      (ret.phib).should.be.closeTo(0.4091014602391312808, 1e-12);
+      (ret.psib).should.be.closeTo(-0.9501954178013031895e-3, 1e-14);
+      (ret.epsa).should.be.closeTo(0.4091014316587367491, 1e-12);
+
+    });
+  });
+
+  describe("#pn00()", function () {
+    it('Should perform precession-nutation, IAU 2000 model:  a multi-purpose function, supporting classical (equinox-based) use directly and CIO-baseduse indirectly.', function () {
+
+
+
+      var dpsi = -0.9632552291149335877e-5,
+          deps =  0.4063197106621141414e-4;
+
+      var ret = erfa.pn00(2400000.5, 53736.0, dpsi, deps);
+
+        (ret.epsa).should.be.closeTo(0.4090791789404229916, 1e-12);
+
+        (ret.rb[0][0]).should.be.closeTo(0.9999999999999942498, 1e-12);
+        (ret.rb[0][1]).should.be.closeTo(-0.7078279744199196626e-7, 1e-18);
+        (ret.rb[0][2]).should.be.closeTo(0.8056217146976134152e-7, 1e-18);
+
+        (ret.rb[1][0]).should.be.closeTo(0.7078279477857337206e-7, 1e-18);
+        (ret.rb[1][1]).should.be.closeTo(0.9999999999999969484, 1e-12);
+        (ret.rb[1][2]).should.be.closeTo(0.3306041454222136517e-7, 1e-18);
+
+        (ret.rb[2][0]).should.be.closeTo(-0.8056217380986972157e-7, 1e-18);
+        (ret.rb[2][1]).should.be.closeTo(-0.3306040883980552500e-7, 1e-18);
+        (ret.rb[2][2]).should.be.closeTo(0.9999999999999962084, 1e-12);
+
+        (ret.rp[0][0]).should.be.closeTo(0.9999989300532289018, 1e-12);
+        (ret.rp[0][1]).should.be.closeTo(-0.1341647226791824349e-2, 1e-14);
+        (ret.rp[0][2]).should.be.closeTo(-0.5829880927190296547e-3, 1e-14);
+
+        (ret.rp[1][0]).should.be.closeTo(0.1341647231069759008e-2, 1e-14);
+        (ret.rp[1][1]).should.be.closeTo(0.9999990999908750433, 1e-12);
+        (ret.rp[1][2]).should.be.closeTo(-0.3837444441583715468e-6, 1e-14);
+
+        (ret.rp[2][0]).should.be.closeTo(0.5829880828740957684e-3, 1e-14);
+        (ret.rp[2][1]).should.be.closeTo(-0.3984203267708834759e-6, 1e-14);
+        (ret.rp[2][2]).should.be.closeTo(0.9999998300623538046, 1e-12);
+
+        (ret.rbp[0][0]).should.be.closeTo(0.9999989300052243993, 1e-12);
+        (ret.rbp[0][1]).should.be.closeTo(-0.1341717990239703727e-2, 1e-14);
+        (ret.rbp[0][2]).should.be.closeTo(-0.5829075749891684053e-3, 1e-14);
+
+        (ret.rbp[1][0]).should.be.closeTo(0.1341718013831739992e-2, 1e-14);
+        (ret.rbp[1][1]).should.be.closeTo(0.9999990998959191343, 1e-12);
+        (ret.rbp[1][2]).should.be.closeTo(-0.3505759733565421170e-6, 1e-14);
+
+        (ret.rbp[2][0]).should.be.closeTo(0.5829075206857717883e-3, 1e-14);
+        (ret.rbp[2][1]).should.be.closeTo(-0.4315219955198608970e-6, 1e-14);
+        (ret.rbp[2][2]).should.be.closeTo(0.9999998301093036269, 1e-12);
+
+        (ret.rn[0][0]).should.be.closeTo(0.9999999999536069682, 1e-12);
+        (ret.rn[0][1]).should.be.closeTo(0.8837746144872140812e-5, 1e-16);
+        (ret.rn[0][2]).should.be.closeTo(0.3831488838252590008e-5, 1e-16);
+
+        (ret.rn[1][0]).should.be.closeTo(-0.8837590456633197506e-5, 1e-16);
+        (ret.rn[1][1]).should.be.closeTo(0.9999999991354692733, 1e-12);
+        (ret.rn[1][2]).should.be.closeTo(-0.4063198798559573702e-4, 1e-16);
+
+        (ret.rn[2][0]).should.be.closeTo(-0.3831847930135328368e-5, 1e-16);
+        (ret.rn[2][1]).should.be.closeTo(0.4063195412258150427e-4, 1e-16);
+        (ret.rn[2][2]).should.be.closeTo(0.9999999991671806225, 1e-12);
+
+        (ret.rbpn[0][0]).should.be.closeTo(0.9999989440499982806, 1e-12);
+        (ret.rbpn[0][1]).should.be.closeTo(-0.1332880253640848301e-2, 1e-14);
+        (ret.rbpn[0][2]).should.be.closeTo(-0.5790760898731087295e-3, 1e-14);
+
+        (ret.rbpn[1][0]).should.be.closeTo(0.1332856746979948745e-2, 1e-14);
+        (ret.rbpn[1][1]).should.be.closeTo(0.9999991109064768883, 1e-12);
+        (ret.rbpn[1][2]).should.be.closeTo(-0.4097740555723063806e-4, 1e-14);
+
+        (ret.rbpn[2][0]).should.be.closeTo(0.5791301929950205000e-3, 1e-14);
+        (ret.rbpn[2][1]).should.be.closeTo(0.4020553681373702931e-4, 1e-14);
+        (ret.rbpn[2][2]).should.be.closeTo(0.9999998314958529887, 1e-12);
+
+    });
+  });
+
+
+  describe("#pn00a()", function () {
+    it('Should perform precession-nutation, IAU 2000A model:  a multi-purpose function, supporting classical (equinox-based) use directly and CIO-baseduse indirectly.', function () {
+
+      var ret = erfa.pn00a(2400000.5, 53736.0);
+
+      (ret.dpsi).should.be.closeTo(-0.9630909107115518431e-5, 1e-12);
+      (ret.deps).should.be.closeTo(0.4063239174001678710e-4, 1e-12);
+      (ret.epsa).should.be.closeTo(0.4090791789404229916, 1e-12);
+
+      (ret.rb[0][0]).should.be.closeTo(0.9999999999999942498, 1e-12);
+      (ret.rb[0][1]).should.be.closeTo(-0.7078279744199196626e-7, 1e-16);
+      (ret.rb[0][2]).should.be.closeTo(0.8056217146976134152e-7, 1e-16);
+
+      (ret.rb[1][0]).should.be.closeTo(0.7078279477857337206e-7, 1e-16);
+      (ret.rb[1][1]).should.be.closeTo(0.9999999999999969484, 1e-12);
+      (ret.rb[1][2]).should.be.closeTo(0.3306041454222136517e-7, 1e-16);
+
+      (ret.rb[2][0]).should.be.closeTo(-0.8056217380986972157e-7, 1e-16);
+      (ret.rb[2][1]).should.be.closeTo(-0.3306040883980552500e-7, 1e-16);
+      (ret.rb[2][2]).should.be.closeTo(0.9999999999999962084, 1e-12);
+
+      (ret.rp[0][0]).should.be.closeTo(0.9999989300532289018, 1e-12);
+      (ret.rp[0][1]).should.be.closeTo(-0.1341647226791824349e-2, 1e-14);
+      (ret.rp[0][2]).should.be.closeTo(-0.5829880927190296547e-3, 1e-14);
+
+      (ret.rp[1][0]).should.be.closeTo(0.1341647231069759008e-2, 1e-14);
+      (ret.rp[1][1]).should.be.closeTo(0.9999990999908750433, 1e-12);
+      (ret.rp[1][2]).should.be.closeTo(-0.3837444441583715468e-6, 1e-14);
+
+      (ret.rp[2][0]).should.be.closeTo(0.5829880828740957684e-3, 1e-14);
+      (ret.rp[2][1]).should.be.closeTo(-0.3984203267708834759e-6, 1e-14);
+      (ret.rp[2][2]).should.be.closeTo(0.9999998300623538046, 1e-12);
+
+      (ret.rbp[0][0]).should.be.closeTo(0.9999989300052243993, 1e-12);
+      (ret.rbp[0][1]).should.be.closeTo(-0.1341717990239703727e-2, 1e-14);
+      (ret.rbp[0][2]).should.be.closeTo(-0.5829075749891684053e-3, 1e-14);
+
+      (ret.rbp[1][0]).should.be.closeTo(0.1341718013831739992e-2, 1e-14);
+      (ret.rbp[1][1]).should.be.closeTo(0.9999990998959191343, 1e-12);
+      (ret.rbp[1][2]).should.be.closeTo(-0.3505759733565421170e-6, 1e-14);
+
+      (ret.rbp[2][0]).should.be.closeTo(0.5829075206857717883e-3, 1e-14);
+      (ret.rbp[2][1]).should.be.closeTo(-0.4315219955198608970e-6, 1e-14);
+      (ret.rbp[2][2]).should.be.closeTo(0.9999998301093036269, 1e-12);
+
+      (ret.rn[0][0]).should.be.closeTo(0.9999999999536227949, 1e-12);
+      (ret.rn[0][1]).should.be.closeTo(0.8836238544090873336e-5, 1e-14);
+      (ret.rn[0][2]).should.be.closeTo(0.3830835237722400669e-5, 1e-14);
+
+      (ret.rn[1][0]).should.be.closeTo(-0.8836082880798569274e-5, 1e-14);
+      (ret.rn[1][1]).should.be.closeTo(0.9999999991354655028, 1e-12);
+      (ret.rn[1][2]).should.be.closeTo(-0.4063240865362499850e-4, 1e-14);
+
+      (ret.rn[2][0]).should.be.closeTo(-0.3831194272065995866e-5, 1e-14);
+      (ret.rn[2][1]).should.be.closeTo(0.4063237480216291775e-4, 1e-14);
+      (ret.rn[2][2]).should.be.closeTo(0.9999999991671660338, 1e-12);
+
+      (ret.rbpn[0][0]).should.be.closeTo(0.9999989440476103435, 1e-12);
+      (ret.rbpn[0][1]).should.be.closeTo(-0.1332881761240011763e-2, 1e-14);
+      (ret.rbpn[0][2]).should.be.closeTo(-0.5790767434730085751e-3, 1e-14);
+
+      (ret.rbpn[1][0]).should.be.closeTo(0.1332858254308954658e-2, 1e-14);
+      (ret.rbpn[1][1]).should.be.closeTo(0.9999991109044505577, 1e-12);
+      (ret.rbpn[1][2]).should.be.closeTo(-0.4097782710396580452e-4, 1e-14);
+
+      (ret.rbpn[2][0]).should.be.closeTo(0.5791308472168152904e-3, 1e-14);
+      (ret.rbpn[2][1]).should.be.closeTo(0.4020595661591500259e-4, 1e-14);
+      (ret.rbpn[2][2]).should.be.closeTo(0.9999998314954572304, 1e-12);
+
+    });
+  });
+
+  describe("#pn00b()", function () {
+    it('Should perform precession-nutation, IAU 2000B model:  a multi-purpose function, supporting classical (equinox-based) use directly and CIO-baseduse indirectly.', function () {
+
+      var ret = erfa.pn00b(2400000.5, 53736.0);
+
+      (ret.dpsi).should.be.closeTo(-0.9632552291148362783e-5, 1e-12);
+      (ret.deps).should.be.closeTo(0.4063197106621159367e-4, 1e-12);
+      (ret.epsa).should.be.closeTo(0.4090791789404229916, 1e-12);
+
+      (ret.rb[0][0]).should.be.closeTo(0.9999999999999942498, 1e-12);
+      (ret.rb[0][1]).should.be.closeTo(-0.7078279744199196626e-7, 1e-16);
+      (ret.rb[0][2]).should.be.closeTo(0.8056217146976134152e-7, 1e-16);
+
+      (ret.rb[1][0]).should.be.closeTo(0.7078279477857337206e-7, 1e-16);
+      (ret.rb[1][1]).should.be.closeTo(0.9999999999999969484, 1e-12);
+      (ret.rb[1][2]).should.be.closeTo(0.3306041454222136517e-7, 1e-16);
+
+      (ret.rb[2][0]).should.be.closeTo(-0.8056217380986972157e-7, 1e-16);
+      (ret.rb[2][1]).should.be.closeTo(-0.3306040883980552500e-7, 1e-16);
+      (ret.rb[2][2]).should.be.closeTo(0.9999999999999962084, 1e-12);
+
+      (ret.rp[0][0]).should.be.closeTo(0.9999989300532289018, 1e-12);
+      (ret.rp[0][1]).should.be.closeTo(-0.1341647226791824349e-2, 1e-14);
+      (ret.rp[0][2]).should.be.closeTo(-0.5829880927190296547e-3, 1e-14);
+
+      (ret.rp[1][0]).should.be.closeTo(0.1341647231069759008e-2, 1e-14);
+      (ret.rp[1][1]).should.be.closeTo(0.9999990999908750433, 1e-12);
+      (ret.rp[1][2]).should.be.closeTo(-0.3837444441583715468e-6, 1e-14);
+
+      (ret.rp[2][0]).should.be.closeTo(0.5829880828740957684e-3, 1e-14);
+      (ret.rp[2][1]).should.be.closeTo(-0.3984203267708834759e-6, 1e-14);
+      (ret.rp[2][2]).should.be.closeTo(0.9999998300623538046, 1e-12);
+
+      (ret.rbp[0][0]).should.be.closeTo(0.9999989300052243993, 1e-12);
+      (ret.rbp[0][1]).should.be.closeTo(-0.1341717990239703727e-2, 1e-14);
+      (ret.rbp[0][2]).should.be.closeTo(-0.5829075749891684053e-3, 1e-14);
+
+      (ret.rbp[1][0]).should.be.closeTo(0.1341718013831739992e-2, 1e-14);
+      (ret.rbp[1][1]).should.be.closeTo(0.9999990998959191343, 1e-12);
+      (ret.rbp[1][2]).should.be.closeTo(-0.3505759733565421170e-6, 1e-14);
+
+      (ret.rbp[2][0]).should.be.closeTo(0.5829075206857717883e-3, 1e-14);
+      (ret.rbp[2][1]).should.be.closeTo(-0.4315219955198608970e-6, 1e-14);
+      (ret.rbp[2][2]).should.be.closeTo(0.9999998301093036269, 1e-12);
+
+      (ret.rn[0][0]).should.be.closeTo(0.9999999999536069682, 1e-12);
+      (ret.rn[0][1]).should.be.closeTo(0.8837746144871248011e-5, 1e-14);
+      (ret.rn[0][2]).should.be.closeTo(0.3831488838252202945e-5, 1e-14);
+
+      (ret.rn[1][0]).should.be.closeTo(-0.8837590456632304720e-5, 1e-14);
+      (ret.rn[1][1]).should.be.closeTo(0.9999999991354692733, 1e-12);
+      (ret.rn[1][2]).should.be.closeTo(-0.4063198798559591654e-4, 1e-14);
+
+      (ret.rn[2][0]).should.be.closeTo(-0.3831847930134941271e-5, 1e-14);
+      (ret.rn[2][1]).should.be.closeTo(0.4063195412258168380e-4, 1e-14);
+      (ret.rn[2][2]).should.be.closeTo(0.9999999991671806225, 1e-12);
+
+      (ret.rbpn[0][0]).should.be.closeTo(0.9999989440499982806, 1e-12);
+      (ret.rbpn[0][1]).should.be.closeTo(-0.1332880253640849194e-2, 1e-14);
+      (ret.rbpn[0][2]).should.be.closeTo(-0.5790760898731091166e-3, 1e-14);
+
+      (ret.rbpn[1][0]).should.be.closeTo(0.1332856746979949638e-2, 1e-14);
+      (ret.rbpn[1][1]).should.be.closeTo(0.9999991109064768883, 1e-12);
+      (ret.rbpn[1][2]).should.be.closeTo(-0.4097740555723081811e-4, 1e-14);
+
+      (ret.rbpn[2][0]).should.be.closeTo(0.5791301929950208873e-3, 1e-14);
+      (ret.rbpn[2][1]).should.be.closeTo(0.4020553681373720832e-4, 1e-14);
+      (ret.rbpn[2][2]).should.be.closeTo(0.9999998314958529887, 1e-12);
+
+
+    });
+  });
+
+  describe("#pn06()", function () {
+    it('Should perform precession-nutation, IAU 2006 model:  a multi-purpose function, supporting classical (equinox-based) use directly and CIO-baseduse indirectly.', function () {
+
+      var dpsi = -0.9632552291149335877e-5,
+          deps =  0.4063197106621141414e-4;
+
+      var ret = erfa.pn06(2400000.5, 53736.0, dpsi, deps);
+
+      (ret.epsa).should.be.closeTo(0.4090789763356509926, 1e-12);
+
+      (ret.rb[0][0]).should.be.closeTo(0.9999999999999942497, 1e-12);
+      (ret.rb[0][1]).should.be.closeTo(-0.7078368960971557145e-7, 1e-14);
+      (ret.rb[0][2]).should.be.closeTo(0.8056213977613185606e-7, 1e-14);
+
+      (ret.rb[1][0]).should.be.closeTo(0.7078368694637674333e-7, 1e-14);
+      (ret.rb[1][1]).should.be.closeTo(0.9999999999999969484, 1e-12);
+      (ret.rb[1][2]).should.be.closeTo(0.3305943742989134124e-7, 1e-14);
+
+      (ret.rb[2][0]).should.be.closeTo(-0.8056214211620056792e-7, 1e-14);
+      (ret.rb[2][1]).should.be.closeTo(-0.3305943172740586950e-7, 1e-14);
+      (ret.rb[2][2]).should.be.closeTo(0.9999999999999962084, 1e-12);
+
+      (ret.rp[0][0]).should.be.closeTo(0.9999989300536854831, 1e-12);
+      (ret.rp[0][1]).should.be.closeTo(-0.1341646886204443795e-2, 1e-14);
+      (ret.rp[0][2]).should.be.closeTo(-0.5829880933488627759e-3, 1e-14);
+
+      (ret.rp[1][0]).should.be.closeTo(0.1341646890569782183e-2, 1e-14);
+      (ret.rp[1][1]).should.be.closeTo(0.9999990999913319321, 1e-12);
+      (ret.rp[1][2]).should.be.closeTo(-0.3835944216374477457e-6, 1e-14);
+
+      (ret.rp[2][0]).should.be.closeTo(0.5829880833027867368e-3, 1e-14);
+      (ret.rp[2][1]).should.be.closeTo(-0.3985701514686976112e-6, 1e-14);
+      (ret.rp[2][2]).should.be.closeTo(0.9999998300623534950, 1e-12);
+
+      (ret.rbp[0][0]).should.be.closeTo(0.9999989300056797893, 1e-12);
+      (ret.rbp[0][1]).should.be.closeTo(-0.1341717650545059598e-2, 1e-14);
+      (ret.rbp[0][2]).should.be.closeTo(-0.5829075756493728856e-3, 1e-14);
+
+      (ret.rbp[1][0]).should.be.closeTo(0.1341717674223918101e-2, 1e-14);
+      (ret.rbp[1][1]).should.be.closeTo(0.9999990998963748448, 1e-12);
+      (ret.rbp[1][2]).should.be.closeTo(-0.3504269280170069029e-6, 1e-14);
+
+      (ret.rbp[2][0]).should.be.closeTo(0.5829075211461454599e-3, 1e-14);
+      (ret.rbp[2][1]).should.be.closeTo(-0.4316708436255949093e-6, 1e-14);
+      (ret.rbp[2][2]).should.be.closeTo(0.9999998301093032943, 1e-12);
+
+      (ret.rn[0][0]).should.be.closeTo(0.9999999999536069682, 1e-12);
+      (ret.rn[0][1]).should.be.closeTo(0.8837746921149881914e-5, 1e-14);
+      (ret.rn[0][2]).should.be.closeTo(0.3831487047682968703e-5, 1e-14);
+
+      (ret.rn[1][0]).should.be.closeTo(-0.8837591232983692340e-5, 1e-14);
+      (ret.rn[1][1]).should.be.closeTo(0.9999999991354692664, 1e-12);
+      (ret.rn[1][2]).should.be.closeTo(-0.4063198798558931215e-4, 1e-14);
+
+      (ret.rn[2][0]).should.be.closeTo(-0.3831846139597250235e-5, 1e-14);
+      (ret.rn[2][1]).should.be.closeTo(0.4063195412258792914e-4, 1e-14);
+      (ret.rn[2][2]).should.be.closeTo(0.9999999991671806293, 1e-12);
+
+      (ret.rbpn[0][0]).should.be.closeTo(0.9999989440504506688, 1e-12);
+      (ret.rbpn[0][1]).should.be.closeTo(-0.1332879913170492655e-2, 1e-14);
+      (ret.rbpn[0][2]).should.be.closeTo(-0.5790760923225655753e-3, 1e-14);
+
+      (ret.rbpn[1][0]).should.be.closeTo(0.1332856406595754748e-2, 1e-14);
+      (ret.rbpn[1][1]).should.be.closeTo(0.9999991109069366795, 1e-12);
+      (ret.rbpn[1][2]).should.be.closeTo(-0.4097725651142641812e-4, 1e-14);
+
+      (ret.rbpn[2][0]).should.be.closeTo(0.5791301952321296716e-3, 1e-14);
+      (ret.rbpn[2][1]).should.be.closeTo(0.4020538796195230577e-4, 1e-14);
+      (ret.rbpn[2][2]).should.be.closeTo(0.9999998314958576778, 1e-12);
+
+    });
+  });
+
+  describe("#prec76()", function () {
+    it('This function forms the three Euler angles which implement general precession between two dates, using the IAU 1976 model (as for the FK5 catalog).', function () {
+
+      var ep01 = 2400000.5,
+          ep02 = 33282.0,
+          ep11 = 2400000.5,
+          ep12 = 51544.0;
+
+      var ret = erfa.prec76(ep01, ep02, ep11, ep12);
+
+      (ret.zeta).should.be.closeTo(0.5588961642000161243e-2, 1e-12);
+      (ret.z).should.be.closeTo(0.5589922365870680624e-2, 1e-12);
+      (ret.theta).should.be.closeTo(0.4858945471687296760e-2, 1e-12);
+
+    });
+  });
 
 });
