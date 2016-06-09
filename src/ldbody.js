@@ -42,7 +42,6 @@
     return a;
   };
 
-
   module.exports = LDBODY;
 
 })();
