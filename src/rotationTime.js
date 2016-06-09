@@ -4,8 +4,7 @@
   var LIBERFA = require('../lib/liberfa'),
     SH = require('./struct-helper'),
     HH = require('./heap-helper'),
-    writeFloat64Buffer = HH.writeFloat64Buffer,
-    readFloat64Buffer = HH.readFloat64Buffer;
+    writeFloat64Buffer = HH.writeFloat64Buffer;
 
   module.exports = {
     //Rotation and Time
