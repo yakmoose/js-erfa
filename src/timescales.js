@@ -1,14 +1,7 @@
 (function () {
   "use strict";
 
-  var LIBERFA = require('../lib/liberfa'),
-    SH = require('./struct-helper'),
-    CONSTANTS = require('./constants'),
-    HH = require('./heap-helper'),
-    writeFloat64Buffer = HH.writeFloat64Buffer,
-    readFloat64Buffer = HH.readFloat64Buffer,
-    ASTROM = require('./astrom'),
-    LDBODY = require('./ldbody');
+  var LIBERFA = require('../lib/liberfa');
 
   var
     /**
