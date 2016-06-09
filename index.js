@@ -26,6 +26,7 @@
         timescales = require('./src/timescales'),
         angleOperations = require('./src/angle-operations'),
         buildRotations = require('./src/build-rotations'),
+        copyExtendExtract = require('./src/copy-extend-extract'),
         HH = require('./src/heap-helper'),
         ASTROM = require('./src/astrom'),
         LDBODY = require('./src/ldbody');
@@ -41,36 +42,6 @@
         CONSTANTS: CONSTANTS,
 
 
-
-
-
-
-        //CopyExtendExtract
-        /** void eraCp(double p[3], double c[3]); */
-        cp: function(p) {
-            return p.slice();
-        },
-        /** void eraCpv(double pv[2][3], double c[2][3]); */
-        cpv: function (pv) {
-            return this.cp(pv);
-        },
-        /** void eraCr(double r[3][3], double c[3][3]); */
-        cr: function (r) {
-            return this.cp(r);
-        },
-        /** void eraP2pv(double p[3], double pv[2][3]); */
-        p2pv : function (p)
-        {
-            return [
-                this.cp(p),
-                this.zp()
-
-            ]
-        },
-        /** void eraPv2p(double pv[2][3], double p[3]); */
-        pv2p: function (pv) {
-            return this.cp(pv[0]);
-        },
         
         //Initialization
         /** void eraIr(double r[3][3]); */
@@ -686,6 +657,7 @@
     module.exports = Object.assign(erfa,
       calendar, astrometry, ephemerides, fundamentalArguments,
       precessionNutation, rotationTime, spaceMotion, starCatalogs,
-      galacticCoordinates, geodeticGeocentric, timescales, angleOperations, buildRotations
+      galacticCoordinates, geodeticGeocentric, timescales, angleOperations, buildRotations,
+      copyExtendExtract
     );
 })();
