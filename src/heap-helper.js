@@ -12,7 +12,7 @@
     },
     /** helper that will read a buffer into an array */
     readFloat64Buffer: function (ptr, size) {
-      var ret = new Float64Array(size);
+      var ret = [];
       for(var i = 0, ofs = ptr >> 3; i < size; i++) {
         ret[i] = LIBERFA.HEAPF64[ofs + i];
       }

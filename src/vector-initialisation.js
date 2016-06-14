@@ -4,7 +4,7 @@
 
   var LIBERFA = require('../lib/liberfa'),
       HH = require('./heap-helper'),
-      SH = require('./struct-helper'),
+      _ = require('lodash'),
       writeFloat64Buffer = HH.writeFloat64Buffer,
       readFloat64Buffer = HH.readFloat64Buffer;
 
@@ -43,12 +43,12 @@
         bBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT),
         atbBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(aBuffer, SH.flattenVector(a));
-      writeFloat64Buffer(bBuffer, SH.flattenVector(b));
+      writeFloat64Buffer(aBuffer, _.flatten(a));
+      writeFloat64Buffer(bBuffer, _.flatten(b));
 
       LIBERFA._eraRxr(aBuffer, bBuffer, atbBuffer);
 
-      var atb = SH.chunkArray(Array.from(readFloat64Buffer(atbBuffer, 3*3)), 3);
+      var atb = _.chunk(readFloat64Buffer(atbBuffer, 9), 3);
 
       LIBERFA._free(aBuffer);
       LIBERFA._free(bBuffer);
@@ -62,10 +62,10 @@
       var rBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT),
         rtBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(rBuffer, SH.flattenVector(r));
+      writeFloat64Buffer(rBuffer, _.flatten(r));
       LIBERFA._eraTr(rBuffer, rtBuffer);
 
-      var rt = SH.chunkArray(Array.from(readFloat64Buffer(rtBuffer, 3 *3)), 3);
+      var rt = _.chunk(readFloat64Buffer(rtBuffer, 9), 3);
 
       LIBERFA._free(rBuffer);
       LIBERFA._free(rtBuffer);
@@ -80,7 +80,7 @@
         pBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
         rpBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(rBuffer, SH.flattenVector(r));
+      writeFloat64Buffer(rBuffer, _.flatten(r));
       writeFloat64Buffer(pBuffer, p);
 
       LIBERFA._eraRxp(rBuffer, pBuffer, rpBuffer);
@@ -101,12 +101,12 @@
         pvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
         rpvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(rBuffer, SH.flattenVector(r));
-      writeFloat64Buffer(pvBuffer, SH.flattenVector(pv));
+      writeFloat64Buffer(rBuffer, _.flatten(r));
+      writeFloat64Buffer(pvBuffer, _.flatten(pv));
 
       LIBERFA._eraRxpv(rBuffer, pvBuffer, rpvBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rpvBuffer, 6)), 3);
+      var ret = _.chunk(readFloat64Buffer(rpvBuffer, 6), 3);
 
       LIBERFA._free(rBuffer);
       LIBERFA._free(pvBuffer);
@@ -121,7 +121,7 @@
         pBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
         rpBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(rBuffer, SH.flattenVector(r));
+      writeFloat64Buffer(rBuffer, _.flatten(r));
       writeFloat64Buffer(pBuffer, p);
 
       LIBERFA._eraTrxp(rBuffer, pBuffer, rpBuffer);
@@ -140,12 +140,12 @@
         pvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
         rpvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(rBuffer, SH.flattenVector(r));
-      writeFloat64Buffer(pvBuffer, SH.flattenVector(pv));
+      writeFloat64Buffer(rBuffer, _.flatten(r));
+      writeFloat64Buffer(pvBuffer, _.flatten(pv));
 
       LIBERFA._eraTrxpv(rBuffer, pvBuffer, rpvBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rpvBuffer, 6)), 3);
+      var ret = _.chunk(readFloat64Buffer(rpvBuffer, 6), 3);
 
       LIBERFA._free(rBuffer);
       LIBERFA._free(pvBuffer);

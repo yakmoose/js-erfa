@@ -1,15 +1,15 @@
 (function () {
   "use strict";
 
-  var SH = require('./struct-helper');
+  var _ = require('lodash'),
+    SH = require('./struct-helper');
 
 /* wrapper for the struct eraASTROM defined in erfam.h */
 /** Star-independent astrometry parameters */
   var ASTROM = function (raw) {
 
     if (!raw) {
-      raw = new Float64Array(ASTROM.STRUCT_SIZE);
-      raw.fill(0);
+      raw = _.times(ASTROM.STRUCT_SIZE, _.constant(0));
     }
 
     /** PM time interval (SSB, Julian years) */
@@ -75,7 +75,7 @@
     /** refraction constant B (radians) */
     this.refb = raw[30];
   };
-  ASTROM.STRUCT_SIZE = 31;
+
 
   ASTROM.prototype.toArray = function () {
     var propsOrder = [
@@ -99,13 +99,21 @@
     ];
 
     var a = [];
-
     propsOrder.forEach(function (item) {
-      a = a.concat(SH.flattenVector(this[item]));
+      if (_.isArray(this[item])) {
+        a = a.concat(_.flatten(this[item]));
+      } else {
+        a.push(this[item]);
+      }
     }.bind(this));
+
+
 
     return a;
   };
+
+  ASTROM.STRUCT_SIZE = 31;
+
 
   module.exports = ASTROM;
 

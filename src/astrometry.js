@@ -7,7 +7,7 @@
       readFloat64Buffer = HH.readFloat64Buffer,
       ASTROM = require('./astrom'),
       LDBODY = require('./ldbody'),
-      SH = require('./struct-helper');
+      _ = require('lodash');
 
 
   var astrometry = {
@@ -43,7 +43,7 @@
         ebpvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
         ehpBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
+      writeFloat64Buffer(ebpvBuffer, _.flatten(ebpv));
       writeFloat64Buffer(ehpBuffer, ehp);
 
       LIBERFA._eraApcg(date1, date2, ebpvBuffer, ehpBuffer, astromBuffer);
@@ -75,7 +75,7 @@
         ehpBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
         astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
+      writeFloat64Buffer(ebpvBuffer, _.flatten(ebpv));
       writeFloat64Buffer(ehpBuffer, ehp);
 
       LIBERFA._eraApci(date1, date2, ebpvBuffer, ehpBuffer, x, y, s, astromBuffer);
@@ -113,7 +113,7 @@
         ehpBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
         astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
+      writeFloat64Buffer(ebpvBuffer, _.flatten(ebpv));
       writeFloat64Buffer(ehpBuffer, ehp);
 
       LIBERFA._eraApco(date1, date2, ebpvBuffer, ehpBuffer, x, y, s, theta, elong, phi, hm, xp, yp, sp, refa, refb, astromBuffer);
@@ -154,8 +154,8 @@
         ebpvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
         ehpBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(pvBuffer, SH.flattenVector(pv));
-      writeFloat64Buffer(ebpvBuffer, SH.flattenVector(ebpv));
+      writeFloat64Buffer(pvBuffer, _.flatten(pv));
+      writeFloat64Buffer(ebpvBuffer, _.flatten(ebpv));
       writeFloat64Buffer(ehpBuffer, ehp);
 
       LIBERFA._eraApcs(date1, date2, pvBuffer, ebpvBuffer, ehpBuffer, astromBuffer);
@@ -174,7 +174,7 @@
       var astromBuffer = LIBERFA._malloc(ASTROM.STRUCT_SIZE * Float64Array.BYTES_PER_ELEMENT),
         pvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(pvBuffer, SH.flattenVector(pv));
+      writeFloat64Buffer(pvBuffer, _.flatten(pv));
 
       LIBERFA._eraApcs13(date1, date2, pvBuffer, astromBuffer);
 
@@ -300,7 +300,7 @@
       writeFloat64Buffer(astromBuffer, astrom.toArray());
 
 
-      writeFloat64Buffer(bBuffer, SH.flattenVector(b.map(function (item) {
+      writeFloat64Buffer(bBuffer, _.flatten(b.map(function (item) {
         return item.toArray();
       })));
 
@@ -431,9 +431,7 @@
         bBuffer = LIBERFA._malloc(bSize);
 
       writeFloat64Buffer(astromBuffer, astrom.toArray());
-      writeFloat64Buffer(bBuffer, SH.flattenVector(b.map(function (item) {
-        return item.toArray();
-      })));
+       writeFloat64Buffer(bBuffer, _.flatten(_.map(b, function (item) { return item.toArray();})));
 
       LIBERFA._eraAticqn(ri, di, astromBuffer, b.length, bBuffer, rcBuffer, dcBuffer);
 
@@ -614,9 +612,7 @@
 
       writeFloat64Buffer(obBuffer, ob);
       writeFloat64Buffer(scBuffer, sc);
-      writeFloat64Buffer(bBuffer, SH.flattenVector(b.map(function (item) {
-        return item.toArray();
-      })));
+      writeFloat64Buffer(bBuffer, _.flatten(_.map(b, function (item){ return item.toArray();})));
 
       LIBERFA._eraLdn(b.length, bBuffer, obBuffer, scBuffer, snBuffer);
 
@@ -708,7 +704,7 @@
       var pvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
       LIBERFA._eraPvtob(elong, phi, height, xp, yp, sp, theta, pvBuffer);
 
-      var pv = SH.chunkArray(Array.from(readFloat64Buffer(pvBuffer, 6)), 3);
+      var pv = _.chunk(readFloat64Buffer(pvBuffer, 6), 3);
 
       LIBERFA._free(pvBuffer);
 

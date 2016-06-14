@@ -2,7 +2,7 @@
   "use strict";
 
   var LIBERFA = require('../lib/liberfa'),
-    SH = require('./struct-helper'),
+    _ = require('lodash'),
     CONSTANTS = require('./constants'),
     HH = require('./heap-helper'),
     writeFloat64Buffer = HH.writeFloat64Buffer,
@@ -31,9 +31,9 @@
       LIBERFA._eraBp00(date1, date2, rbBuffer, rpBuffer, rbpBuffer);
 
       var ret = {
-        rb: SH.chunkArray(Array.from(readFloat64Buffer(rbBuffer, 9)),3),
-        rp: SH.chunkArray(Array.from(readFloat64Buffer(rpBuffer, 9)),3),
-        rbp: SH.chunkArray(Array.from(readFloat64Buffer(rbpBuffer, 9)),3)
+        rb: _.chunk(readFloat64Buffer(rbBuffer, 9),3),
+        rp: _.chunk(readFloat64Buffer(rpBuffer, 9),3),
+        rbp: _.chunk(readFloat64Buffer(rbpBuffer, 9),3)
       };
 
 
@@ -54,9 +54,9 @@
       LIBERFA._eraBp06(date1, date2, rbBuffer, rpBuffer, rbpBuffer);
 
       var ret = {
-        rb: SH.chunkArray(Array.from(readFloat64Buffer(rbBuffer, 9)),3),
-        rp: SH.chunkArray(Array.from(readFloat64Buffer(rpBuffer, 9)),3),
-        rbp: SH.chunkArray(Array.from(readFloat64Buffer(rbpBuffer, 9)),3)
+        rb: _.chunk(readFloat64Buffer(rbBuffer, 9),3),
+        rp: _.chunk(readFloat64Buffer(rpBuffer, 9),3),
+        rbp: _.chunk(readFloat64Buffer(rbpBuffer, 9),3)
       };
 
       LIBERFA._free(rbBuffer);
@@ -78,7 +78,7 @@
 
       LIBERFA._eraC2i00a(date1, date2, rc2iBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2iBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2iBuffer, 9),3);
 
       LIBERFA._free(rc2iBuffer);
 
@@ -90,7 +90,7 @@
 
       LIBERFA._eraC2i00b(date1, date2, rc2iBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2iBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2iBuffer, 9),3);
 
       LIBERFA._free(rc2iBuffer);
 
@@ -102,7 +102,7 @@
 
       LIBERFA._eraC2i06a(date1, date2, rc2iBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2iBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2iBuffer, 9),3);
 
       LIBERFA._free(rc2iBuffer);
 
@@ -111,7 +111,7 @@
     /** void eraC2ibpn(double date1, double date2, double rbpn[3][3], double rc2i[3][3]); */
     c2ibpn: function (date1, date2, rpbn) {
 
-      rpbn = SH.flattenVector(rpbn);
+      rpbn = _.flatten(rpbn);
 
       var rpbnBuffer = LIBERFA._malloc( rpbn.length * Float64Array.BYTES_PER_ELEMENT),
         rc2iBuffer = LIBERFA._malloc( 9 * Float64Array.BYTES_PER_ELEMENT);
@@ -120,7 +120,7 @@
 
       LIBERFA._eraC2ibpn(date1, date2, rpbnBuffer, rc2iBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2iBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2iBuffer, 9),3);
 
       LIBERFA._free(rc2iBuffer);
       LIBERFA._free(rpbnBuffer);
@@ -134,7 +134,7 @@
 
       LIBERFA._eraC2ixy(date1, date2, x, y, rc2iBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2iBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2iBuffer, 9),3);
 
       LIBERFA._free(rc2iBuffer);
 
@@ -147,7 +147,7 @@
 
       LIBERFA._eraC2ixy(x, y, s, rc2iBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2iBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2iBuffer, 9),3);
 
       LIBERFA._free(rc2iBuffer);
 
@@ -159,7 +159,7 @@
 
       LIBERFA._eraC2t00a(tta, ttb, uta, utb, xp, yp, rc2tBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2tBuffer, 9),3);
 
       LIBERFA._free(rc2tBuffer);
 
@@ -171,7 +171,7 @@
 
       LIBERFA._eraC2t00b(tta, ttb, uta, utb, xp, yp, rc2tBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2tBuffer, 9),3);
 
       LIBERFA._free(rc2tBuffer);
 
@@ -183,7 +183,7 @@
 
       LIBERFA._eraC2t06a(tta, ttb, uta, utb, xp, yp, rc2tBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2tBuffer, 9),3);
 
       LIBERFA._free(rc2tBuffer);
 
@@ -193,8 +193,8 @@
     /** void eraC2tcio(double rc2i[3][3], double era, double rpom[3][3], double rc2t[3][3]); */
     c2tcio: function (rc2i, era, rpom) {
 
-      rc2i = SH.flattenVector(rc2i);
-      rpom = SH.flattenVector(rpom);
+      rc2i = _.flatten(rc2i);
+      rpom = _.flatten(rpom);
 
       var rc2iBuffer = LIBERFA._malloc( rc2i.length * Float64Array.BYTES_PER_ELEMENT),
         rpomBuffer = LIBERFA._malloc( rpom.length * Float64Array.BYTES_PER_ELEMENT),
@@ -205,7 +205,7 @@
 
       LIBERFA._eraC2tcio(rc2iBuffer, era, rpomBuffer, rc2tBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2tBuffer, 9),3);
 
       LIBERFA._free(rc2iBuffer);
       LIBERFA._free(rpomBuffer);
@@ -217,8 +217,8 @@
     /** void eraC2teqx(double rbpn[3][3], double gst, double rpom[3][3], double rc2t[3][3]); */
     c2teqx: function (rbpn, gst, rpom) {
 
-      rbpn = SH.flattenVector(rbpn);
-      rpom = SH.flattenVector(rpom);
+      rbpn = _.flatten(rbpn);
+      rpom = _.flatten(rpom);
 
       var rbpnBuffer = LIBERFA._malloc( rbpn.length * Float64Array.BYTES_PER_ELEMENT),
         rpomBuffer = LIBERFA._malloc( rpom.length * Float64Array.BYTES_PER_ELEMENT),
@@ -229,7 +229,7 @@
 
       LIBERFA._eraC2teqx(rbpnBuffer, gst, rpomBuffer, rc2tBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2tBuffer, 9),3);
 
       LIBERFA._free(rbpnBuffer);
       LIBERFA._free(rpomBuffer);
@@ -244,7 +244,7 @@
 
       LIBERFA._eraC2tpe(tta, ttb, uta, utb, dpsi, deps, xp, yp, rc2tBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2tBuffer, 9),3);
 
       LIBERFA._free(rc2tBuffer);
 
@@ -258,7 +258,7 @@
 
       LIBERFA._eraC2txy(tta, ttb, uta, utb, x, y, xp, yp, rc2tBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rc2tBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rc2tBuffer, 9),3);
 
       LIBERFA._free(rc2tBuffer);
 
@@ -269,7 +269,7 @@
     /** double eraEors(double rnpb[3][3], double s); */
     eors: function (rnpb, s) {
 
-      rnpb = SH.flattenVector(rnpb);
+      rnpb = _.flatten(rnpb);
 
       var rnpbBuffer = LIBERFA._malloc( rnpb.length * Float64Array.BYTES_PER_ELEMENT);
 
@@ -287,7 +287,7 @@
 
       LIBERFA._eraFw2m(gamb, phib, psi, eps, rBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rBuffer, 9),3);
 
       LIBERFA._free(rBuffer);
 
@@ -320,7 +320,7 @@
 
       LIBERFA._eraNum00a(date1, date2, rmatnBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rmatnBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rmatnBuffer, 9),3);
 
       LIBERFA._free(rmatnBuffer);
 
@@ -333,7 +333,7 @@
 
       LIBERFA._eraNum00b(date1, date2, rmatnBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rmatnBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rmatnBuffer, 9),3);
 
       LIBERFA._free(rmatnBuffer);
 
@@ -345,7 +345,7 @@
 
       LIBERFA._eraNum06a(date1, date2, rmatnBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rmatnBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rmatnBuffer, 9),3);
 
       LIBERFA._free(rmatnBuffer);
 
@@ -357,7 +357,7 @@
 
       LIBERFA._eraNumat(epsa, dpsi, deps, rmatnBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rmatnBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rmatnBuffer, 9),3);
 
       LIBERFA._free(rmatnBuffer);
 
@@ -444,7 +444,7 @@
 
       LIBERFA._eraNutm80(date1, date2, rmatnBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rmatnBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rmatnBuffer, 9),3);
 
       LIBERFA._free(rmatnBuffer);
 
@@ -651,7 +651,7 @@
 
       LIBERFA._eraPmat00(date1, date2, rbpBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rbpBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rbpBuffer, 9),3);
 
       LIBERFA._free(rbpBuffer);
 
@@ -663,7 +663,7 @@
 
       LIBERFA._eraPmat06(date1, date2, rbpBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rbpBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rbpBuffer, 9),3);
 
       LIBERFA._free(rbpBuffer);
 
@@ -675,7 +675,7 @@
 
       LIBERFA._eraPmat76(date1, date2, rmatpBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rmatpBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rmatpBuffer, 9),3);
 
       LIBERFA._free(rmatpBuffer);
 
@@ -696,11 +696,11 @@
 
       var ret = {
         epsa: LIBERFA.HEAPF64[epsaBuffer >> 3],
-        rb: SH.chunkArray(Array.from(readFloat64Buffer(rbBuffer, 9)),3),
-        rp: SH.chunkArray(Array.from(readFloat64Buffer(rpBuffer, 9)),3),
-        rbp: SH.chunkArray(Array.from(readFloat64Buffer(rbpBuffer, 9)),3),
-        rn: SH.chunkArray(Array.from(readFloat64Buffer(rnBuffer, 9)),3),
-        rbpn: SH.chunkArray(Array.from(readFloat64Buffer(rbpnBuffer, 9)),3),
+        rb: _.chunk(readFloat64Buffer(rbBuffer, 9),3),
+        rp: _.chunk(readFloat64Buffer(rpBuffer, 9),3),
+        rbp: _.chunk(readFloat64Buffer(rbpBuffer, 9),3),
+        rn: _.chunk(readFloat64Buffer(rnBuffer, 9),3),
+        rbpn: _.chunk(readFloat64Buffer(rbpnBuffer, 9),3),
       };
 
       LIBERFA._free(epsaBuffer);
@@ -732,11 +732,11 @@
         dpsi: LIBERFA.HEAPF64[dpsiBuffer >> 3],
         deps: LIBERFA.HEAPF64[depsBuffer >> 3],
         epsa: LIBERFA.HEAPF64[epsaBuffer >> 3],
-        rb: SH.chunkArray(Array.from(readFloat64Buffer(rbBuffer, 9)),3),
-        rp: SH.chunkArray(Array.from(readFloat64Buffer(rpBuffer, 9)),3),
-        rbp: SH.chunkArray(Array.from(readFloat64Buffer(rbpBuffer, 9)),3),
-        rn: SH.chunkArray(Array.from(readFloat64Buffer(rnBuffer, 9)),3),
-        rbpn: SH.chunkArray(Array.from(readFloat64Buffer(rbpnBuffer, 9)),3),
+        rb: _.chunk(readFloat64Buffer(rbBuffer, 9),3),
+        rp: _.chunk(readFloat64Buffer(rpBuffer, 9),3),
+        rbp: _.chunk(readFloat64Buffer(rbpBuffer, 9),3),
+        rn: _.chunk(readFloat64Buffer(rnBuffer, 9),3),
+        rbpn: _.chunk(readFloat64Buffer(rbpnBuffer, 9),3),
       };
 
       LIBERFA._free(dpsiBuffer);
@@ -770,11 +770,11 @@
         dpsi: LIBERFA.HEAPF64[dpsiBuffer >> 3],
         deps: LIBERFA.HEAPF64[depsBuffer >> 3],
         epsa: LIBERFA.HEAPF64[epsaBuffer >> 3],
-        rb: SH.chunkArray(Array.from(readFloat64Buffer(rbBuffer, 9)),3),
-        rp: SH.chunkArray(Array.from(readFloat64Buffer(rpBuffer, 9)),3),
-        rbp: SH.chunkArray(Array.from(readFloat64Buffer(rbpBuffer, 9)),3),
-        rn: SH.chunkArray(Array.from(readFloat64Buffer(rnBuffer, 9)),3),
-        rbpn: SH.chunkArray(Array.from(readFloat64Buffer(rbpnBuffer, 9)),3),
+        rb: _.chunk(readFloat64Buffer(rbBuffer, 9),3),
+        rp: _.chunk(readFloat64Buffer(rpBuffer, 9),3),
+        rbp: _.chunk(readFloat64Buffer(rbpBuffer, 9),3),
+        rn: _.chunk(readFloat64Buffer(rnBuffer, 9),3),
+        rbpn: _.chunk(readFloat64Buffer(rbpnBuffer, 9),3),
       };
 
       LIBERFA._free(dpsiBuffer);
@@ -807,11 +807,11 @@
         dpsi: LIBERFA.HEAPF64[dpsiBuffer >> 3],
         deps: LIBERFA.HEAPF64[depsBuffer >> 3],
         epsa: LIBERFA.HEAPF64[epsaBuffer >> 3],
-        rb: SH.chunkArray(Array.from(readFloat64Buffer(rbBuffer, 9)),3),
-        rp: SH.chunkArray(Array.from(readFloat64Buffer(rpBuffer, 9)),3),
-        rbp: SH.chunkArray(Array.from(readFloat64Buffer(rbpBuffer, 9)),3),
-        rn: SH.chunkArray(Array.from(readFloat64Buffer(rnBuffer, 9)),3),
-        rbpn: SH.chunkArray(Array.from(readFloat64Buffer(rbpnBuffer, 9)),3),
+        rb: _.chunk(readFloat64Buffer(rbBuffer, 9),3),
+        rp: _.chunk(readFloat64Buffer(rpBuffer, 9),3),
+        rbp: _.chunk(readFloat64Buffer(rbpBuffer, 9),3),
+        rn: _.chunk(readFloat64Buffer(rnBuffer, 9),3),
+        rbpn: _.chunk(readFloat64Buffer(rbpnBuffer, 9),3),
       };
 
       LIBERFA._free(dpsiBuffer);
@@ -844,11 +844,11 @@
         dpsi: LIBERFA.HEAPF64[dpsiBuffer >> 3],
         deps: LIBERFA.HEAPF64[depsBuffer >> 3],
         epsa: LIBERFA.HEAPF64[epsaBuffer >> 3],
-        rb: SH.chunkArray(Array.from(readFloat64Buffer(rbBuffer, 9)),3),
-        rp: SH.chunkArray(Array.from(readFloat64Buffer(rpBuffer, 9)),3),
-        rbp: SH.chunkArray(Array.from(readFloat64Buffer(rbpBuffer, 9)),3),
-        rn: SH.chunkArray(Array.from(readFloat64Buffer(rnBuffer, 9)),3),
-        rbpn: SH.chunkArray(Array.from(readFloat64Buffer(rbpnBuffer, 9)),3),
+        rb: _.chunk(readFloat64Buffer(rbBuffer, 9),3),
+        rp: _.chunk(readFloat64Buffer(rpBuffer, 9),3),
+        rbp: _.chunk(readFloat64Buffer(rbpBuffer, 9),3),
+        rn: _.chunk(readFloat64Buffer(rnBuffer, 9),3),
+        rbpn: _.chunk(readFloat64Buffer(rbpnBuffer, 9),3),
       };
 
       LIBERFA._free(dpsiBuffer);
@@ -868,7 +868,7 @@
 
       LIBERFA._eraPnm00a(date1, date2, rbpnBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rbpnBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rbpnBuffer, 9),3);
 
       LIBERFA._free(rbpnBuffer);
 
@@ -880,7 +880,7 @@
 
       LIBERFA._eraPnm00b(date1, date2, rbpnBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rbpnBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rbpnBuffer, 9),3);
 
       LIBERFA._free(rbpnBuffer);
 
@@ -892,7 +892,7 @@
 
       LIBERFA._eraPnm06a(date1, date2, rbpnBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rbpnBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rbpnBuffer, 9),3);
 
       LIBERFA._free(rbpnBuffer);
 
@@ -904,7 +904,7 @@
 
       LIBERFA._eraPnm80(date1, date2, rmatpnBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rmatpnBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rmatpnBuffer, 9),3);
 
       LIBERFA._free(rmatpnBuffer);
 
@@ -916,7 +916,7 @@
 
       LIBERFA._eraPom00(xp, yp, sp, rpomBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(rpomBuffer, 9)),3);
+      var ret = _.chunk(readFloat64Buffer(rpomBuffer, 9),3);
 
       LIBERFA._free(rpomBuffer);
 

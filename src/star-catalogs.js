@@ -1,7 +1,8 @@
 (function () {
   "use strict";
 
-  var LIBERFA = require('../lib/liberfa');
+  var LIBERFA = require('../lib/liberfa'),
+    _ = require('lodash');
 
   module.exports ={
     //StarCatalogs
@@ -47,7 +48,7 @@
       var r5h = LIBERFA.HEAPF64.subarray((r5hBuffer>>3),(r5hBuffer>>3) + 9),
         s5h = LIBERFA.HEAPF64.subarray((s5hBuffer>>3),(s5hBuffer>>3) + 3),
         ret = {
-          r5h: Array.prototype.slice.call(r5h).chunk(3),
+          r5h: _.chunk(r5h, 3),
           s5h: Array.prototype.slice.call(s5h)
         };
 
