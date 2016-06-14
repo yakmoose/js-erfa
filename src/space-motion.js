@@ -2,9 +2,7 @@
   "use strict";
 
   var LIBERFA = require('../lib/liberfa'),
-      ASTROM = require('./astrom'),
-      LDBODY = require('./ldbody'),
-      SH = require('./struct-helper'),
+      _ = require('lodash'),
       HH = require('./heap-helper'),
       writeFloat64Buffer = HH.writeFloat64Buffer;
 
@@ -13,7 +11,7 @@
     //SpaceMotion
     /** int eraPvstar(double pv[2][3], double *ra, double *dec, double *pmr, double *pmd, double *px, double *rv); */
     pvstar: function (pv) {
-      var data = SH.flattenVector(pv),
+      var data = _.flatten(pv),
         pvBuffer = LIBERFA._malloc( data.length * Float64Array.BYTES_PER_ELEMENT),
         raBuffer = LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
         decBuffer = LIBERFA._malloc( 1 * Float64Array.BYTES_PER_ELEMENT),
