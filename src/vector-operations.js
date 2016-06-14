@@ -3,7 +3,6 @@
 
   var LIBERFA = require('../lib/liberfa'),
     HH = require('./heap-helper'),
-    SH = require('./struct-helper'),
     writeFloat64Buffer = HH.writeFloat64Buffer,
     readFloat64Buffer = HH.readFloat64Buffer,
     _ = require('lodash');

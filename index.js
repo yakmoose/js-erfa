@@ -1,15 +1,6 @@
 (function () {
     "use strict";
 
-    if (!Object.assign || !Map || !Float64Array.prototype.fill) {
-        var s = require("es6-shim");
-
-        // yeah, this is not shimmed in... and we kinda need it...
-        if (!Float64Array.prototype.fill) {
-            Float64Array.prototype.fill = s.Array.prototype.fill;
-        }
-    }
-
     var LIBERFA = require('./lib/liberfa'),
         CONSTANTS = require('./src/constants'),
         calendar = require('./src/calendars'),

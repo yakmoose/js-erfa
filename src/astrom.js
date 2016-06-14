@@ -1,8 +1,7 @@
 (function () {
   "use strict";
 
-  var _ = require('lodash'),
-    SH = require('./struct-helper');
+  var _ = require('lodash');
 
 /* wrapper for the struct eraASTROM defined in erfam.h */
 /** Star-independent astrometry parameters */

@@ -6,8 +6,7 @@
       HH = require('./heap-helper'),
       _ = require('lodash'),
       writeFloat64Buffer = HH.writeFloat64Buffer,
-      readFloat64Buffer = HH.readFloat64Buffer,
-      SH = require('./struct-helper');
+      readFloat64Buffer = HH.readFloat64Buffer;
 
   module.exports = {
     //RotationVectors
