@@ -22,20 +22,23 @@
         sphericalCartesian = require('./src/spherical-cartesian'),
         vectorOperations = require('./src/vector-operations'),
         ASTROM = require('./src/astrom'),
-        LDBODY = require('./src/ldbody');
+        LDBODY = require('./src/ldbody'),
+        _ = require('lodash');
 
 
     var erfa = {
         _Module : LIBERFA,
         ASTROM : ASTROM,
         LDBODY: LDBODY,
-        CONSTANTS: CONSTANTS,
+        CONSTANTS: CONSTANTS
     };
 
-    module.exports = Object.assign(erfa,
+    module.exports = _.assign(erfa,
       calendar, astrometry, ephemerides, fundamentalArguments,
       precessionNutation, rotationTime, spaceMotion, starCatalogs,
       galacticCoordinates, geodeticGeocentric, timescales, angleOperations, vectorBuildRotations,
       vectorCopyExtendExtract, vectorInitialisation, vectorRotation, sphericalCartesian, vectorOperations
     );
+
+
 })();
