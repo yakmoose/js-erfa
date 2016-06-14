@@ -1,16 +1,16 @@
 (function () {
   "use strict";
 
-  var SH = require('./struct-helper');
+  var _ = require('lodash');
 
   /* wrapper for the struct eraLDBODY defined in erfam.h */
   /** Body parameters for light deflection */
   var LDBODY = function(raw) {
 
     if (!raw) {
-      raw = new Float64Array(LDBODY.STRUCT_SIZE);
-      raw.fill(0);
+      raw = _.times(LDBODY.STRUCT_SIZE, _.constant(0));
     }
+
 
     /** mass of the body (solar masses) */
     this.bm = raw[0];
@@ -36,7 +36,11 @@
       propsOrder = ['bm', 'dl', 'pv'];
 
     propsOrder.forEach(function (item) {
-      a = a.concat(SH.flattenVector(this[item]));
+      if (_.isArray(this[item])) {
+        a = a.concat(_.flatten(this[item]));
+      } else {
+        a.push(this[item]);
+      }
     }.bind(this));
 
     return a;
