@@ -2,7 +2,7 @@
   "use strict";
 
   var LIBERFA = require('../lib/liberfa'),
-    SH = require('./struct-helper'),
+    _ = require('lodash'),
     HH = require('./heap-helper'),
     writeFloat64Buffer = HH.writeFloat64Buffer;
 
@@ -19,7 +19,7 @@
     /** double eraGst06(double uta, double utb, double tta, double ttb, double rnpb[3][3]); */
     gst06: function (uta, utb, tta, ttb, rnpb) {
 
-      var data = SH.flattenVector(rnpb),
+      var data = _.flatten(rnpb),
         buffer = LIBERFA._malloc( data.length * Float64Array.BYTES_PER_ELEMENT),
         result;
 
