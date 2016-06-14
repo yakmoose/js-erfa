@@ -6,7 +6,7 @@
     SH = require('./struct-helper'),
     writeFloat64Buffer = HH.writeFloat64Buffer,
     readFloat64Buffer = HH.readFloat64Buffer,
-    SH = require('./struct-helper');
+    _ = require('lodash');
 
   module.exports = {
     //VectorOps
@@ -86,8 +86,8 @@
     /** void eraPvdpv(double a[2][3], double b[2][3], double adb[2]); */
     pvdpv: function (a, b) {
 
-      a = SH.flattenVector(a);
-      b = SH.flattenVector(b);
+      a = _.flatten(a);
+      b = _.flatten(b);
 
       var aBuffer = LIBERFA._malloc(a.length * Float64Array.BYTES_PER_ELEMENT),
         bBuffer = LIBERFA._malloc(b.length * Float64Array.BYTES_PER_ELEMENT),
@@ -110,7 +110,7 @@
     /** void eraPvm(double pv[2][3], double *r, double *s); */
     pvm: function (pv) {
 
-      pv = SH.flattenVector(pv);
+      pv = _.flatten(pv);
 
       var pvBuffer = LIBERFA._malloc(pv.length * Float64Array.BYTES_PER_ELEMENT),
         rBuffer = LIBERFA._malloc(Float64Array.BYTES_PER_ELEMENT),
@@ -135,8 +135,8 @@
     /** void eraPvmpv(double a[2][3], double b[2][3], double amb[2][3]); */
     pvmpv: function(a, b) {
 
-      a = SH.flattenVector(a);
-      b = SH.flattenVector(b);
+      a = _.flatten(a);
+      b = _.flatten(b);
 
       var aBuffer = LIBERFA._malloc(a.length * Float64Array.BYTES_PER_ELEMENT),
         bBuffer = LIBERFA._malloc(b.length * Float64Array.BYTES_PER_ELEMENT),
@@ -147,7 +147,7 @@
 
       LIBERFA._eraPvmpv(aBuffer, bBuffer, ambBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(ambBuffer, 6)), 3);
+      var ret = _.chunk(readFloat64Buffer(ambBuffer, 6),3);
 
       LIBERFA._free(aBuffer);
       LIBERFA._free(bBuffer);
@@ -158,8 +158,8 @@
     /** void eraPvppv(double a[2][3], double b[2][3], double apb[2][3]); */
     pvppv: function (a, b) {
 
-      a = SH.flattenVector(a);
-      b = SH.flattenVector(b);
+      a = _.flatten(a);
+      b = _.flatten(b);
 
       var aBuffer = LIBERFA._malloc(a.length * Float64Array.BYTES_PER_ELEMENT),
         bBuffer = LIBERFA._malloc(b.length * Float64Array.BYTES_PER_ELEMENT),
@@ -170,7 +170,7 @@
 
       LIBERFA._eraPvppv(aBuffer, bBuffer, apbBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(apbBuffer, 6)), 3);
+      var ret = _.chunk(readFloat64Buffer(apbBuffer, 6), 3);
 
       LIBERFA._free(aBuffer);
       LIBERFA._free(bBuffer);
@@ -180,7 +180,7 @@
     },
     /** void eraPvu(double dt, double pv[2][3], double upv[2][3]); */
     pvu: function (dt, pv, upv) {
-      pv = SH.flattenVector(pv);
+      pv = _.flatten(pv);
 
       var pvBuffer = LIBERFA._malloc(pv.length * Float64Array.BYTES_PER_ELEMENT),
         upvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
@@ -189,7 +189,7 @@
 
       LIBERFA._eraPvu(dt, pvBuffer, upvBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(upvBuffer, 6)), 3);
+      var ret = _.chunk(readFloat64Buffer(upvBuffer, 6), 3);
 
       LIBERFA._free(pvBuffer);
       LIBERFA._free(upvBuffer);
@@ -209,8 +209,8 @@
     /** void eraPvxpv(double a[2][3], double b[2][3], double axb[2][3]); */
     pvxpv: function (a, b) {
 
-      a = SH.flattenVector(a);
-      b = SH.flattenVector(b);
+      a = _.flatten(a);
+      b = _.flatten(b);
 
       var aBuffer = LIBERFA._malloc(a.length * Float64Array.BYTES_PER_ELEMENT),
         bBuffer = LIBERFA._malloc(b.length * Float64Array.BYTES_PER_ELEMENT),
@@ -221,7 +221,7 @@
 
       LIBERFA._eraPvxpv(aBuffer, bBuffer, axbBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(axbBuffer, 6)), 3);
+      var ret = _.chunk(readFloat64Buffer(axbBuffer, 6), 3);
 
       LIBERFA._free(aBuffer);
       LIBERFA._free(bBuffer);
@@ -253,7 +253,7 @@
     /** void eraS2xpv(double s1, double s2, double pv[2][3], double spv[2][3]); */
     s2xpv: function (s1, s2, pv) {
 
-      pv = SH.flattenVector(pv);
+      pv = _.flatten(pv);
 
       var pvBuffer = LIBERFA._malloc(pv.length * Float64Array.BYTES_PER_ELEMENT),
         spvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT);
@@ -262,7 +262,7 @@
 
       LIBERFA._eraS2xpv(s1, s2, pvBuffer, spvBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(spvBuffer, 6)), 3);
+      var ret = _.chunk(readFloat64Buffer(spvBuffer, 6), 3);
 
 
       LIBERFA._free(pvBuffer);
