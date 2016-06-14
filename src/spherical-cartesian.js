@@ -4,10 +4,9 @@
 
   var LIBERFA = require('../lib/liberfa'),
     HH = require('./heap-helper'),
-    SH = require('./struct-helper'),
+    _ = require('lodash'),
     writeFloat64Buffer = HH.writeFloat64Buffer,
-    readFloat64Buffer = HH.readFloat64Buffer,
-    SH = require('./struct-helper');
+    readFloat64Buffer = HH.readFloat64Buffer;
 
   module.exports = {
     //SphericalCartesian
@@ -17,7 +16,7 @@
         thetaBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
         phiBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(pBuffer, SH.flattenVector(p));
+      writeFloat64Buffer(pBuffer, _.flatten(p));
 
       LIBERFA._eraC2s(pBuffer, thetaBuffer, phiBuffer);
 
@@ -40,7 +39,7 @@
         phiBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
         rBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(pBuffer, SH.flattenVector(p));
+      writeFloat64Buffer(pBuffer, _.flatten(p));
 
       LIBERFA._eraP2s(pBuffer, thetaBuffer, phiBuffer, rBuffer);
 
@@ -58,8 +57,8 @@
       return ret;
     },
     /** void eraPv2s(double pv[2][3], double *theta, double *phi, double *r, double *td, double *pd, double *rd); */
-    pv2s: function (p) {
-      var pvBuffer = LIBERFA._malloc(3 * Float64Array.BYTES_PER_ELEMENT),
+    pv2s: function (pv) {
+      var pvBuffer = LIBERFA._malloc(6 * Float64Array.BYTES_PER_ELEMENT),
         thetaBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
         phiBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
         rBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
@@ -67,7 +66,8 @@
         pdBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT),
         rdBuffer = LIBERFA._malloc(1 * Float64Array.BYTES_PER_ELEMENT);
 
-      writeFloat64Buffer(pvBuffer, SH.flattenVector(p));
+      pv = _.flatten(pv);
+      writeFloat64Buffer(pvBuffer, pv);
 
       LIBERFA._eraPv2s(pvBuffer, thetaBuffer, phiBuffer, rBuffer, tdBuffer, pdBuffer, rdBuffer);
 
@@ -124,7 +124,7 @@
 
       LIBERFA._eraS2pv(theta, phi, r, td, pd, rd, pvBuffer);
 
-      var ret = SH.chunkArray(Array.from(readFloat64Buffer(pvBuffer, 6)), 3);
+      var ret = _.chunk(readFloat64Buffer(pvBuffer, 6), 3);
 
       LIBERFA._free(pvBuffer);
 
