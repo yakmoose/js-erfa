@@ -48,7 +48,7 @@
 
       LIBERFA._eraRxr(aBuffer, bBuffer, atbBuffer);
 
-      var atb = SH.chunkArray(Array.from(readFloat64Buffer(atbBuffer, 3*3)), 3);
+      var atb = _.chunk(readFloat64Buffer(atbBuffer, 9), 3);
 
       LIBERFA._free(aBuffer);
       LIBERFA._free(bBuffer);
@@ -65,7 +65,7 @@
       writeFloat64Buffer(rBuffer, _.flatten(r));
       LIBERFA._eraTr(rBuffer, rtBuffer);
 
-      var rt = SH.chunkArray(Array.from(readFloat64Buffer(rtBuffer, 3 *3)), 3);
+      var rt = _.chunk(readFloat64Buffer(rtBuffer, 9), 3);
 
       LIBERFA._free(rBuffer);
       LIBERFA._free(rtBuffer);

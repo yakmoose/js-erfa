@@ -3,7 +3,7 @@
 
   var LIBERFA = require('../lib/liberfa'),
       HH = require('./heap-helper'),
-      SH = require('./struct-helper'),
+      _ = require('lodash'),
       writeFloat64Buffer = HH.writeFloat64Buffer,
       readFloat64Buffer = HH.readFloat64Buffer;
 
@@ -11,7 +11,7 @@
       rxyz = function (angle, axis, matrix) {
     var matrixBuffer = LIBERFA._malloc(3 * 3 * Float64Array.BYTES_PER_ELEMENT);
 
-    writeFloat64Buffer(matrixBuffer, SH.flattenVector(matrix));
+    writeFloat64Buffer(matrixBuffer, _.flatten(matrix));
 
     LIBERFA['_eraR' + axis](angle,  matrixBuffer);
 
@@ -19,7 +19,7 @@
 
     LIBERFA._free(matrixBuffer);
 
-    return SH.chunkArray(Array.from(retMatrix), 3);
+    return _.chunk(retMatrix, 3);
   };
 
   module.exports = {
